@@ -36,11 +36,6 @@ header{background:var(--side);color:var(--side-text);padding:8px 16px;display:fl
 .bt b{font-size:20px;font-weight:700;letter-spacing:.04em}
 .bt small{color:var(--side-muted);font-size:12px}
 header #shopname{display:none;color:var(--side-muted)}
-nav{background:var(--side);display:flex;gap:4px;padding:4px 8px;overflow-x:auto;position:sticky;top:0;z-index:20;box-shadow:0 2px 6px var(--shadow);border-bottom:1px solid var(--side-line)}
-nav button{background:none;border:0;border-radius:8px;color:var(--side-text);padding:10px 14px;font-size:15px;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent}
-nav button.on{background:var(--sel);color:var(--text);border-bottom-color:var(--accent);font-weight:600}
-nav button:hover{background:var(--side-hover)}
-nav button.on:hover{background:var(--sel)}
 main{padding:14px;max-width:1500px;margin:0 auto}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-the);padding:14px;margin-bottom:14px;box-shadow:0 1px 3px var(--shadow)}
 .card h2{margin:0 0 10px;font-size:18px;font-weight:600;color:var(--text)}
@@ -69,17 +64,17 @@ small{font-weight:400;color:var(--muted)}
 .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .wbox{background:var(--sel);border:1px dashed var(--accent);border-radius:var(--r-nut);padding:10px;margin:6px 0 10px}
 .wbox .row{display:grid;grid-template-columns:1fr;gap:10px}
-input,select,textarea{min-height:46px}.btn{min-height:44px}.btn-s{min-height:36px}nav button{min-height:46px}
+input,select,textarea{min-height:46px}.btn{min-height:44px}.btn-s{min-height:36px}
 input[type=checkbox]{min-height:0;width:22px;height:22px;accent-color:var(--accent)}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
 .chip{background:var(--chip);border:1px solid var(--line);border-radius:20px;padding:3px 12px;font-size:15px;color:var(--text)}
 .chip b{color:var(--text)}
 .sumbox{display:flex;gap:18px;flex-wrap:wrap;background:var(--sel);border:1px solid var(--line);border-radius:var(--r-nut);padding:8px 12px;margin:6px 0 10px;font-size:17px}
 .sumbox b{color:var(--text)}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:14px}
 .kpi{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--accent);border-radius:var(--r-the);padding:12px;box-shadow:0 1px 3px var(--shadow)}
 .kpi .t{font-size:13px;color:var(--muted);font-weight:500}
-.kpi .v{font-size:23px;font-weight:700;color:var(--text);margin-top:2px}
+.kpi .v{font-size:clamp(17px,1.5vw,22px);font-weight:700;color:var(--text);margin-top:2px;overflow-wrap:anywhere}
 .kpi.red{border-left-color:var(--bad)}.kpi.green{border-left-color:var(--ok)}
 .kpi ul{margin:4px 0 0;padding:0;list-style:none;font-size:15px}
 .kpi li{display:flex;justify-content:space-between;gap:8px}
@@ -183,12 +178,75 @@ body.po{overflow:hidden}
 .pdoc .lg{width:44px;height:44px;object-fit:contain}
 @media(max-width:600px){.pdoc{margin:8px;padding:12px}}
 @media print{body>*:not(#printOv){display:none!important}#printOv{position:static;inset:auto;overflow:visible;background:#fff}.pbar{display:none!important}.pdoc{margin:0;padding:0;max-width:none;box-shadow:none}body.po{overflow:visible}@page{size:A5;margin:8mm}}
+
+/* ---- Desktop shell kiểu console HOAVU + biểu đồ ---- */
+:root,:root[data-theme="light"]{--side-active:#ffffff;--c1:#1f6fd1;--c2:#d97500;--c3:#7a4fd1;--c4:#0f8a8a;--c5:#6b6862;--c6:#b0408a}
+:root[data-theme="dark"]{--side-active:#7a5a3c;--c1:#4aa3ff;--c2:#ffa51f;--c3:#c39bff;--c4:#3ccfcf;--c5:#9a9791;--c6:#ff7eb8}
+.brand{background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:2px 6px 2px 2px;border-radius:var(--r-nut)}
+.brand:hover{background:var(--side-hover)}
+.shell{display:block}
+#nav{display:flex;gap:4px;padding:4px 8px;overflow-x:auto;position:sticky;top:0;z-index:20;background:var(--side);box-shadow:0 2px 6px var(--shadow);border-bottom:1px solid var(--side-line)}
+#nav .nv-top,#nav .nv-gh{display:none}
+#nav .nv-grp,#nav .nv-items{display:contents}
+#nav .nv-it{display:flex;align-items:center;flex:none;white-space:nowrap;background:none;border:0;border-bottom:3px solid transparent;border-radius:8px;color:var(--side-text);padding:10px 14px;font-size:15px;cursor:pointer;min-height:46px}
+#nav .nv-it svg{display:none}
+#nav .nv-it:hover{background:var(--side-hover)}
+#nav .nv-it.on{background:var(--sel);color:var(--text);border-bottom-color:var(--accent);font-weight:600}
+.pghead{display:none}
+.pgsec{display:flex;align-items:center;gap:10px;text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--muted);margin:2px 0 12px;font-weight:500}
+.pgsec::after{content:"";flex:1;border-top:1px solid var(--line)}
+body.easy .pgsec{display:none}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}.card-h h2{margin:0}
+.chgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(590px,100%),1fr));gap:14px}
+.chbox{min-width:0;border:1px solid var(--line);border-radius:var(--r-nut);padding:10px;background:var(--panel)}
+.chh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.chs{overflow-x:auto;max-width:100%}.chs svg{display:block}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:2px 0 4px}.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.chnote{font-size:12px;color:var(--muted);margin-top:4px}
+.chdet{margin-top:10px}
+.ct{fill:var(--muted);font-size:12px;font-family:var(--font)}.cv{fill:var(--text);font-size:12px;font-weight:600;font-family:var(--font)}.cg{stroke:var(--line);stroke-width:1}
+.bar-sel{fill:none;stroke:var(--accent);stroke-width:2}
+.segm{display:flex;gap:4px;flex-wrap:wrap}.segm button{padding:4px 10px;font-size:13px;border-radius:var(--r-nut);border:1px solid var(--btn-line);background:var(--btn);color:var(--text);cursor:pointer;min-height:34px;font-family:var(--font)}.segm button:hover{background:var(--btn-h)}.segm button.on{background:var(--sel);border-color:var(--accent);box-shadow:inset 0 -2px 0 var(--accent);font-weight:600}
+@media(min-width:900px){
+ body:not(.easy) header{position:sticky;top:0;z-index:40;height:52px;padding:0 20px;flex-wrap:nowrap;background:color-mix(in srgb,var(--side) 86%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:var(--side-shadow)}
+ body:not(.easy) .bt small{display:none}
+ body:not(.easy) .bt b{font-size:17px}
+ body:not(.easy) .logo img{width:34px;height:34px}
+ body:not(.easy) .pill2,body:not(.easy) .mbtn,body:not(.easy) .theme-btn{min-height:38px;height:38px;padding-top:0;padding-bottom:0}
+ body:not(.easy) .theme-btn{width:38px;padding:0}
+ body:not(.easy) .shell{display:flex;align-items:flex-start}
+ body:not(.easy) main{flex:1;min-width:0;max-width:1500px;margin:0;padding:20px 26px 60px}
+ body:not(.easy) #nav{display:block;width:240px;flex:none;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;overflow-x:hidden;padding:10px 8px;border-bottom:0;border-right:1px solid var(--side-line);box-shadow:var(--side-shadow)}
+ body:not(.easy) #nav .nv-top{display:block;margin-bottom:4px}
+ body:not(.easy) #nav .nv-collapse{background:none;border:0;color:var(--side-muted);font-size:14px;cursor:pointer;padding:6px 8px;border-radius:8px;min-height:36px;font-family:var(--font)}
+ body:not(.easy) #nav .nv-collapse:hover{background:var(--side-hover);color:var(--side-text)}
+ body:not(.easy) #nav .nv-grp{display:block}
+ body:not(.easy) #nav .nv-items{display:block}
+ body:not(.easy) #nav .nv-gh{display:flex;justify-content:space-between;width:100%;background:none;border:0;color:var(--side-muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:12px 10px 4px;cursor:pointer;font-weight:600;font-family:var(--font)}
+ body:not(.easy) #nav .nv-gh span{transition:transform .15s}
+ body:not(.easy) #nav .nv-grp.closed .nv-items{display:none}
+ body:not(.easy) #nav .nv-grp.closed .nv-gh span{transform:rotate(-90deg)}
+ body:not(.easy) #nav .nv-it{display:flex;width:100%;border-bottom:0;border-left:3px solid transparent;padding:9px 10px;min-height:42px;text-align:left;gap:10px}
+ body:not(.easy) #nav .nv-it svg{display:block;width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+ body:not(.easy) #nav .nv-it.on{background:var(--side-active);color:var(--side-text);border-left-color:var(--accent)}
+ body.nv-min:not(.easy) #nav{width:56px;padding:10px 6px}
+ body.nv-min:not(.easy) #nav .lb,body.nv-min:not(.easy) #nav .nv-gh span{display:none}
+ body.nv-min:not(.easy) #nav .nv-gh{font-size:0;padding:0;margin:8px 0 4px;border-top:1px solid var(--side-line);height:0}
+ body.nv-min:not(.easy) #nav .nv-grp.closed .nv-items{display:block}
+ body.nv-min:not(.easy) #nav .nv-it{justify-content:center;padding:9px 0;border-left-width:3px}
+ body:not(.easy) .pghead{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+ .pghead .logo.big{background:var(--logo-bg);border:1px solid var(--line);border-radius:16px;padding:4px;display:grid;place-items:center}
+ .pghead .logo.big img{width:72px;height:72px}
+ .pghead h1{margin:0;font-size:34px;line-height:1.1;letter-spacing:.03em}
+ .pgsub{color:var(--muted);font-size:15px}
+ .pgr{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}
+}
 </style>
 </head>
 <body>
-<header><div class="brand"><span class="logo"><img src="logo-128.png" alt="HOAVU"></span><div class="bt"><b>HOAVU</b><small id="subtitle">Lý Thuỷ · Sổ cà phê</small></div></div><small id="shopname"></small><button id="syncPill" class="pill2 none" data-act="syncNow">💾 Chỉ lưu trên máy</button><button id="modeBtn" class="mbtn" data-act="toggleMode">Chế độ đầy đủ</button><button id="themeBtn" class="theme-btn" data-act="toggleTheme" aria-label="Đổi giao diện sáng/tối" title="Đổi giao diện sáng/tối">🌙</button><label class="who">Người nhập: <input id="userName" placeholder="Tên của bạn" autocomplete="off"></label></header>
-<nav id="nav"></nav>
-<main id="view"></main>
+<header><button type="button" class="brand" data-act="brandGo" title="Về trang chính"><span class="logo"><img src="logo-128.png" alt="HOAVU"></span><div class="bt"><b>HOAVU</b><small id="subtitle">Lý Thuỷ · Sổ cà phê</small></div></button><small id="shopname"></small><button id="syncPill" class="pill2 none" data-act="syncNow">💾 Chỉ lưu trên máy</button><button id="modeBtn" class="mbtn" data-act="toggleMode">Chế độ đầy đủ</button><button id="themeBtn" class="theme-btn" data-act="toggleTheme" aria-label="Đổi giao diện sáng/tối" title="Đổi giao diện sáng/tối">🌙</button><label class="who">Người nhập: <input id="userName" placeholder="Tên của bạn" autocomplete="off"></label></header>
+<div class="shell"><nav id="nav"></nav>
+<main id="view"></main></div>
 <datalist id="dlCust"></datalist>
 <div id="toast"></div>
 <dialog id="dlg"></dialog>
@@ -367,11 +425,11 @@ function render(){
  chrome();if(ui.mode==='easy'){eRender(false);return;}
  $('#shopname').textContent=DB.settings.shopName||'';
  refreshCustList();
- $('#nav').innerHTML=TABS.map(t=>'<button data-act="tab" data-t="'+t[0]+'" class="'+(ui.tab===t[0]?'on':'')+'">'+t[1]+'</button>').join('');
- $('#view').innerHTML=VIEWS[ui.tab]();
+ $('#nav').innerHTML=navHTML();
+ $('#view').innerHTML=pgHead()+VIEWS[ui.tab]();
  if(AFTER[ui.tab])AFTER[ui.tab]();
 }
-function refreshList(k){const e=document.getElementById('list-'+k);if(e)e.innerHTML=renderSpec(SPEC[k]());const s=document.getElementById('sum-'+k);if(s&&SUM[k])s.innerHTML=SUM[k]();}
+function refreshList(k){const e=document.getElementById('list-'+k);if(e)e.innerHTML=renderSpec(SPEC[k]());if(k==='bc'&&typeof drawCharts==='function'){const h=document.querySelector('#ch-a-bc');if(h){const c=h.closest('.card');const hh=c&&c.querySelector('h2');if(hh)hh.textContent='Thu mua theo ngày – tháng '+(ui.f.bc.month||'').slice(5)+'/'+(ui.f.bc.month||'').slice(0,4);}drawCharts();}const s=document.getElementById('sum-'+k);if(s&&SUM[k])s.innerHTML=SUM[k]();}
 const SUM={};
 function go(tab,sub){ui.tab=tab;if(sub)ui.sub[tab]=sub;render();window.scrollTo(0,0);}
 ACT.tab=b=>{ui.edit={};go(b.dataset.t);};
@@ -635,7 +693,7 @@ VIEWS.tq=()=>{const S=stats(),td=today();const hasData=DB.purchases.length+DB.ex
  +'<div class="kpi"><div class="t">Bán ra</div><div class="v">'+fkg(sm(sl,r=>r.kg))+'</div><div class="t">'+money(sm(sl,r=>r.amount))+'</div></div>'
  +'<div class="kpi green"><div class="t">Thu tiền</div><div class="v">'+money(sm(ca.filter(e=>e.dir==='thu'),e=>e.amount))+'</div></div>'
  +'<div class="kpi red"><div class="t">Chi tiền</div><div class="v">'+money(sm(ca.filter(e=>e.dir==='chi'),e=>e.amount))+'</div></div></div></div>';
- return warn+kpi+tdy+'<div class="card"><h2>10 giao dịch gần nhất</h2>'+renderTable(recentSpec())+'</div>';};
+ return warn+kpi+chartsHTML()+tdy+'<div class="card"><h2>10 giao dịch gần nhất</h2>'+renderTable(recentSpec())+'</div>';};
 function recentSpec(){const a=[];
  DB.purchases.forEach(r=>a.push({date:r.date,ts:r.ts,kind:'Thu mua',code:r.code,who:r.customerId,desc:typeName(r.typeId)+' '+fkg(r.kg)+' × '+fnum(r.price),val:M(-r.amount)}));
  DB.exchanges.forEach(r=>a.push({date:r.date,ts:r.ts,kind:'Đổi cà',code:r.code,who:r.customerId,desc:fkg(r.kgFresh)+' tươi → '+fkg(r.kgBean)+' nhân',val:K(r.kgBean)}));
@@ -692,7 +750,7 @@ DEL.khach=id=>{DB.customers=DB.customers.filter(c=>c.id!==id);};
 /* ===== BÁO CÁO ===== */
 VIEWS.bc=()=>{const sub=ui.sub.bc,f=ui.f.bc;const seg='<div class="seg">'+[['ngay','Tổng hợp theo ngày'],['khoang','Thu chi / lãi lỗ theo khoảng ngày'],['khach','Theo khách hàng']].map(s=>'<button data-act="sub" data-t="bc" data-s="'+s[0]+'" class="'+(sub===s[0]?'on':'')+'">'+s[1]+'</button>').join('')+'</div>';
  const flt=sub==='ngay'?'<div class="filters"><label>Chọn tháng<input type="month" data-flt="bc.month" value="'+esc(f.month)+'"></label><button class="btn" data-act="export" data-k="bc">Xuất Excel</button></div>':dateRange('bc','<button class="btn" data-act="export" data-k="bc">Xuất Excel</button>');
- return seg+'<div class="card">'+flt+'<div id="list-bc">'+renderSpec(SPEC.bc())+'</div></div>';};
+ return seg+(sub==='ngay'?chartBcHTML():'')+'<div class="card">'+flt+'<div id="list-bc">'+renderSpec(SPEC.bc())+'</div></div>';};
 SPEC.bc=()=>SPEC['bc_'+ui.sub.bc]();
 SPEC.bc_ngay=()=>{const m=ui.f.bc.month||today().slice(0,7);const[y,mo]=m.split('-').map(Number);const nd=new Date(y,mo,0).getDate();const days=[];for(let d=1;d<=nd;d++)days.push(m+'-'+pad(d));
  let cum=0;const mua=days.map(d=>{const ps=DB.purchases.filter(r=>r.date===d);const kg=ps.reduce((s,r)=>s+r.kg,0),amt=ps.reduce((s,r)=>s+r.amount,0),paid=ps.reduce((s,r)=>s+r.paid,0);cum+=kg;
@@ -815,7 +873,7 @@ ACT.printAgain=()=>{try{window.print();}catch(e){toast('Không mở được h�
 Object.assign(Store,{getTheme(){try{return localStorage.getItem('soCaPhe-theme')==='dark'?'dark':'light';}catch(e){return'light';}},setTheme(t){try{localStorage.setItem('soCaPhe-theme',t);}catch(e){}}});
 function applyTheme(t){document.documentElement.setAttribute('data-theme',t);const b=document.getElementById('themeBtn');if(b){b.textContent=t==='dark'?'☀':'🌙';b.title=t==='dark'?'Chuyển sang giao diện sáng':'Chuyển sang giao diện tối';}const m=document.querySelector('meta[name=theme-color]');if(m)m.content=t==='dark'?'#2c2b29':'#d8d6d2';}
 ACT.toggleTheme=()=>{const t=Store.getTheme()==='dark'?'light':'dark';Store.setTheme(t);applyTheme(t);};
-function chrome(){applyTheme(Store.getTheme());{const st=document.getElementById('subtitle');if(st)st.textContent=((DB.settings.shopName||'').trim()||'Sổ sách')+' · Sổ cà phê';}document.body.classList.toggle('easy',ui.mode==='easy');$('#modeBtn').textContent=ui.mode==='easy'?'Chế độ đầy đủ':'Chế độ dễ dùng';$('#nav').style.display=ui.mode==='easy'?'none':'';
+function chrome(){applyTheme(Store.getTheme());document.body.classList.toggle('nv-min',!!Store.getPref('navMin'));{const st=document.getElementById('subtitle');if(st)st.textContent=((DB.settings.shopName||'').trim()||'Sổ sách')+' · Sổ cà phê';}document.body.classList.toggle('easy',ui.mode==='easy');$('#modeBtn').textContent=ui.mode==='easy'?'Chế độ đầy đủ':'Chế độ dễ dùng';$('#nav').style.display=ui.mode==='easy'?'none':'';
  document.documentElement.style.setProperty('--hh',$('header').offsetHeight+'px');Store.pill();}
 ACT.syncNow=()=>Store.syncNow(true);
 ACT.toggleMode=()=>{ui.mode=ui.mode==='easy'?'full':'easy';Store.setPref('mode',ui.mode);ui.edit={};EZ.ev=Store.getUser()?'home':'welcome';EZ.w=null;EZ.sub=null;render();window.scrollTo(0,0);};
@@ -1073,6 +1131,115 @@ function eCd(){const st=Store.status();return'<div class="ecard"><label>Người
 
 /* ===== INIT ===== */
 (function(){ui.mode=Store.getPref('mode')||'easy';EZ.ev=Store.getUser()?'home':'welcome';})();
+
+/* ===== DESKTOP SHELL (sidebar + page header) & CHARTS ===== */
+const NAV_ICON={
+ tq:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+ mua:'<path d="M5 8h14l-1.2 11H6.2L5 8z"/><path d="M9 8a3 3 0 016 0"/>',
+ doi:'<path d="M5 8h13l-3-3M19 16H6l3 3"/>',
+ ban:'<path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.6"/><circle cx="17" cy="17.5" r="1.6"/>',
+ quy:'<rect x="3.5" y="6" width="17" height="13" rx="2"/><path d="M3.5 10h17M16 14.5h2"/>',
+ cn:'<path d="M6 4h11a2 2 0 012 2v14H8a2 2 0 01-2-2V4z"/><path d="M10 9h6M10 13h6"/>',
+ khach:'<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/>',
+ bc:'<path d="M5 20V11M12 20V4M19 20v-6"/>',
+ cd:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9M13 4.5v5M7 14.5v5"/>'};
+const NAV_GROUPS=[['so','Sổ sách',['tq','mua','doi','ban','quy']],['theo','Theo dõi',['cn','khach','bc']],['ht','Hệ thống',['cd']]];
+function navHTML(){const names=Object.fromEntries(TABS);const closed=Store.getPref('navGrp')||{};const min=!!Store.getPref('navMin');
+ return'<div class="nv-top"><button class="nv-collapse" data-act="navCollapse" title="'+(min?'Mở rộng menu':'Thu gọn menu')+'">'+(min?'»':'« Thu gọn')+'</button></div>'
+ +NAV_GROUPS.map(g=>'<div class="nv-grp'+(closed[g[0]]?' closed':'')+'"><button class="nv-gh" data-act="navGrp" data-g="'+g[0]+'">'+g[1]+'<span>▾</span></button><div class="nv-items">'
+  +g[2].map(k=>'<button class="nv-it'+(ui.tab===k?' on':'')+'" data-act="tab" data-t="'+k+'" title="'+esc(names[k])+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+NAV_ICON[k]+'</svg><span class="lb">'+esc(names[k])+'</span></button>').join('')+'</div></div>').join('');}
+ACT.navCollapse=()=>{Store.setPref('navMin',!Store.getPref('navMin'));render();};
+ACT.navGrp=b=>{const c=Object.assign({},Store.getPref('navGrp')||{});c[b.dataset.g]=!c[b.dataset.g];Store.setPref('navGrp',c);$('#nav').innerHTML=navHTML();};
+ACT.brandGo=()=>{if(ui.mode==='easy')ACT.eHome();else{ui.edit={};go('tq');}};
+let lastView=new Date();
+function pgHead(){lastView=new Date();const nm=Object.fromEntries(TABS)[ui.tab]||'';const shop=(DB.settings.shopName||'').trim();
+ return'<div class="pghead"><span class="logo big"><img src="logo-128.png" alt="HOAVU"></span><div class="pgt"><h1>HOAVU</h1><div class="pgsub">'+esc(shop?shop+' · Sổ cà phê':'Sổ cà phê')+'</div></div><div class="pgr"><span>Số liệu lúc '+pad(lastView.getHours())+':'+pad(lastView.getMinutes())+'</span><button class="btn btn-s" data-act="pgReload">Tải lại</button></div></div><div class="pgsec"><span>'+esc(nm)+'</span></div>';}
+ACT.pgReload=()=>{Store.syncNow(false);render();};
+
+/* ----- charts ----- */
+ui.chart={p:'30d',unit:'kg',c:'money',selTq:null,selBc:null};
+const addDay=(iso,n)=>{const x=new Date(iso+'T00:00:00');x.setDate(x.getDate()+n);return x.getFullYear()+'-'+pad(x.getMonth()+1)+'-'+pad(x.getDate());};
+function chDays(p){const t=today(),d=[];
+ if(p==='7d'||p==='30d'){const n=p==='7d'?7:30;for(let i=n-1;i>=0;i--)d.push(addDay(t,-i));return d;}
+ const first=t.slice(0,8)+'01';let m,last;if(p==='prev'){const pl=addDay(first,-1);m=pl.slice(0,7);last=Number(pl.slice(8));}else{m=t.slice(0,7);last=Number(t.slice(8));}
+ for(let i=1;i<=last;i++)d.push(m+'-'+pad(i));return d;}
+function bcDays(){const m=ui.f.bc.month||today().slice(0,7);const[y,mo]=m.split('-').map(Number);const n=new Date(y,mo,0).getDate();const d=[];for(let i=1;i<=n;i++)d.push(m+'-'+pad(i));return d;}
+function niceScale(v){if(!(v>0))return{step:1,max:4};const raw=v/4,p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p;const s=m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10;return{step:s*p,max:s*p*4};}
+const nf1=new Intl.NumberFormat('vi-VN',{maximumFractionDigits:1});
+function abbr(n){const a=Math.abs(n);if(a>=1e9)return nf1.format(n/1e9)+' tỷ';if(a>=1e6)return nf1.format(n/1e6)+' tr';if(a>=1e3)return nf1.format(n/1e3)+' N';return nf1.format(n);}
+const fAx=(v,u)=>u==='money'?abbr(v):nfK.format(v);
+const chCol=i=>'var(--c'+((i%6)+1)+')';
+const shortD=iso=>iso.slice(8)+'/'+iso.slice(5,7);
+const segBtns=(act,key,opts,cur)=>'<div class="segm">'+opts.map(o=>'<button class="'+(cur===o[0]?'on':'')+'" data-act="'+act+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('')+'</div>';
+function chEmpty(W,H,padL,padR,padT,padB,ih,unit,max,step){let s='';for(let i=0;i<=4;i++){const y=padT+ih-ih*i/4;s+='<line class="cg" x1="'+padL+'" x2="'+(W-padR)+'" y1="'+y+'" y2="'+y+'"/><text class="ct" x="'+(padL-6)+'" y="'+(y+4)+'" text-anchor="end">'+fAx(step*i,unit)+'</text>';}
+ return s+'<text class="ct" x="'+((padL+W-padR)/2)+'" y="'+(padT+ih/2)+'" text-anchor="middle">Chưa có dữ liệu trong khoảng này</text>';}
+function xLabels(days,padL,slot,y){const k=Math.max(1,Math.ceil(40/slot));let s='';days.forEach((d,i)=>{if(i%k===0||i===days.length-1&&(days.length-1)%k>=k/2)s+='<text class="ct" x="'+(padL+slot*i+slot/2)+'" y="'+y+'" text-anchor="middle">'+shortD(d)+'</text>';});return s;}
+function drawA(el,days,wid){const unit=ui.chart.unit,sel=ui.chart[wid==='bc'?'selBc':'selTq'];const types=DB.types;const set=new Set(days);const by={};
+ DB.purchases.forEach(p=>{if(!set.has(p.date))return;const o=by[p.date]||(by[p.date]={});o[p.typeId]=(o[p.typeId]||0)+(unit==='money'?p.amount:p.kg);});
+ const tot=days.map(d=>Object.values(by[d]||{}).reduce((a,b)=>a+b,0));const sc=niceScale(Math.max(0,...tot));
+ const cw=Math.max(el.clientWidth||320,280),padL=unit==='money'?54:46,padR=10,padT=22,padB=28,H=290,W=Math.max(cw,padL+padR+days.length*8),iw=W-padL-padR,ih=H-padT-padB,slot=iw/days.length,bw=Math.min(slot*.72,42);
+ let s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Thu mua theo ngày">';
+ if(!(Math.max(0,...tot)>0))s+=chEmpty(W,H,padL,padR,padT,padB,ih,unit,sc.max,sc.step);
+ else{for(let i=0;i<=4;i++){const y=padT+ih-ih*i/4;s+='<line class="cg" x1="'+padL+'" x2="'+(W-padR)+'" y1="'+y+'" y2="'+y+'"/><text class="ct" x="'+(padL-6)+'" y="'+(y+4)+'" text-anchor="end">'+fAx(sc.step*i,unit)+'</text>';}
+  const lbl=v=>unit==='money'?abbr(v):nfK.format(r2(v));const ev=Math.max(1,Math.ceil((Math.max(...tot.map(v=>lbl(v).length))*7+6)/slot));
+  days.forEach((d,i)=>{const x=padL+slot*i+(slot-bw)/2;let y=padT+ih;const o=by[d]||{};
+   s+='<g data-act="chDay" data-w="'+wid+'" data-d="'+d+'" style="cursor:pointer"><title>'+shortD(d)+': '+(unit==='money'?money(tot[i]):fkg(tot[i]))+'</title><rect x="'+(padL+slot*i)+'" y="'+padT+'" width="'+slot+'" height="'+ih+'" fill="transparent"/>';
+   types.forEach((t,ti)=>{const v=o[t.id]||0;if(v<=0)return;const h=ih*v/sc.max;y-=h;s+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+Math.max(h,1)+'" rx="2" style="fill:'+chCol(ti)+'"><title>'+esc(t.name)+': '+(unit==='money'?money(v):fkg(v))+'</title></rect>';});
+   if(tot[i]>0&&(i%ev===0||sel===d))s+='<text class="cv" x="'+(padL+slot*i+slot/2)+'" y="'+(y-4)+'" text-anchor="middle">'+lbl(tot[i])+'</text>';
+   if(sel===d)s+='<rect class="bar-sel" x="'+(padL+slot*i+1)+'" y="'+padT+'" width="'+(slot-2)+'" height="'+ih+'" rx="3"/>';
+   s+='</g>';});}
+ s+=xLabels(days,padL,slot,H-8)+'</svg>';
+ const total=tot.reduce((a,b)=>a+b,0);
+ let h='<div class="legend">'+types.map((t,i)=>'<span><i style="background:'+chCol(i)+'"></i>'+esc(t.name)+'</span>').join('')+'<span style="margin-left:auto">Tổng: <b style="color:var(--text)">'+(unit==='money'?money(total):fkg(total))+'</b></span></div><div class="chs">'+s+'</div><div class="chnote">Mỗi cột là '+(unit==='money'?'tiền thu mua':'khối lượng thu mua (kg)')+' trong ngày, xếp chồng theo loại cà. Bấm vào cột để xem các phiếu của ngày đó.</div>';
+ if(sel&&set.has(sel)){const rows=DB.purchases.filter(p=>p.date===sel).sort(cmpDate);
+  h+='<div class="chdet"><div class="card-h"><b>Phiếu mua ngày '+fmtDate(sel)+' ('+rows.length+')</b><button class="link" data-act="chOpen" data-d="'+sel+'">Xem chi tiết ›</button></div>'+(rows.length?renderTable({rows,cols:[{h:'Số phiếu',f:r=>r.code},{h:'Khách',f:r=>custName(r.customerId)},{h:'Loại',f:r=>typeName(r.typeId)},{h:'KL (kg)',num:1,f:r=>K(r.kg)},{h:'Thành tiền (đ)',num:1,f:r=>M(r.amount)}]}):'<p class="empty">Không có phiếu mua trong ngày này.</p>')+'</div>';}
+ el.innerHTML=h;}
+function drawB(el,days){const set=new Set(days);const all=DB.cash.slice().sort(cmpDate);let bal=Number(DB.settings.openingCash)||0;
+ all.forEach(e=>{if(e.date<days[0])bal+=e.dir==='thu'?e.amount:-e.amount;});
+ const thu={},chi={};all.forEach(e=>{if(!set.has(e.date))return;(e.dir==='thu'?thu:chi)[e.date]=((e.dir==='thu'?thu:chi)[e.date]||0)+e.amount;});
+ const end=days.map(d=>{bal+=(thu[d]||0)-(chi[d]||0);return bal;});
+ const mx=Math.max(0,...days.map(d=>Math.max(thu[d]||0,chi[d]||0)));const sc=niceScale(mx);
+ const bmin=Math.min(0,...end),bmax=Math.max(0,...end);let rs=niceScale(Math.max(1,bmax-bmin)).step;const lo=Math.floor(bmin/rs)*rs;const nI=Math.max(4,Math.ceil((bmax-lo)/rs-1e-9));
+ const cw=Math.max(el.clientWidth||320,280),padL=50,padR=54,padT=22,padB=28,H=290,W=Math.max(cw,padL+padR+days.length*11),iw=W-padL-padR,ih=H-padT-padB,slot=iw/days.length,bw=Math.min(slot*.36,20);
+ const hasAny=mx>0||end.some(v=>v!==0);
+ let s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Thu chi và tồn quỹ">';
+ if(!hasAny)s+=chEmpty(W,H,padL,padR,padT,padB,ih,'money',sc.max,sc.step);
+ else{for(let i=0;i<=4;i++){const y=padT+ih-ih*i/4;s+='<line class="cg" x1="'+padL+'" x2="'+(W-padR)+'" y1="'+y+'" y2="'+y+'"/><text class="ct" x="'+(padL-6)+'" y="'+(y+4)+'" text-anchor="end">'+abbr(sc.step*i)+'</text>';}
+  for(let i=0;i<=nI;i++){const y=padT+ih-ih*i/nI;s+='<text class="ct" x="'+(W-padR+6)+'" y="'+(y+4)+'">'+abbr(lo+rs*i)+'</text>';}
+  const lab=slot>=80;
+  days.forEach((d,i)=>{const cx=padL+slot*i+slot/2;const t=thu[d]||0,c=chi[d]||0;
+   s+='<g><title>'+shortD(d)+' — Thu: '+money(t)+' · Chi: '+money(c)+' · Tồn quỹ: '+money(end[i])+'</title><rect x="'+(padL+slot*i)+'" y="'+padT+'" width="'+slot+'" height="'+ih+'" fill="transparent"/>';
+   if(t>0){const h=ih*t/sc.max;s+='<rect x="'+(cx-bw-1)+'" y="'+(padT+ih-h)+'" width="'+bw+'" height="'+Math.max(h,1)+'" rx="2" style="fill:var(--ok)"/>';if(lab)s+='<text class="cv" x="'+(cx-bw/2-1)+'" y="'+(padT+ih-h-4)+'" text-anchor="middle">'+abbr(t)+'</text>';}
+   if(c>0){const h=ih*c/sc.max;s+='<rect x="'+(cx+1)+'" y="'+(padT+ih-h)+'" width="'+bw+'" height="'+Math.max(h,1)+'" rx="2" style="fill:var(--bad)"/>';if(lab)s+='<text class="cv" x="'+(cx+bw/2+1)+'" y="'+(padT+ih-h-4)+'" text-anchor="middle">'+abbr(c)+'</text>';}
+   s+='</g>';});
+  const ry=v=>padT+ih-ih*(v-lo)/(rs*nI);const pts=end.map((v,i)=>(padL+slot*i+slot/2)+','+ry(v)).join(' ');
+  s+='<polyline points="'+pts+'" fill="none" style="stroke:var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>'+end.map((v,i)=>'<circle cx="'+(padL+slot*i+slot/2)+'" cy="'+ry(v)+'" r="3" style="fill:var(--accent)"/>').join('');
+  if(lo<0)s+='<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+ry(0)+'" y2="'+ry(0)+'" style="stroke:var(--muted)" stroke-dasharray="4 3"/>';}
+ s+=xLabels(days,padL,slot,H-8)+'</svg>';
+ el.innerHTML='<div class="legend"><span><i style="background:var(--ok)"></i>Thu</span><span><i style="background:var(--bad)"></i>Chi</span><span><i style="background:var(--accent)"></i>Tồn quỹ cuối ngày (trục phải)</span></div><div class="chs">'+s+'</div><div class="chnote">Cột xanh là tiền thu, cột đỏ là tiền chi trong ngày; đường vàng là tồn quỹ cuối ngày. Rê chuột (hoặc chạm giữ) vào cột để xem số liệu.</div>';}
+function drawC(el){const money_=ui.chart.c==='money';const rows=DB.customers.map(c=>({c,v:money_?cs(c.id).debtBuy:cs(c.id).beanLeft})).filter(o=>money_?o.v>0:o.v>0.004).sort((a,b)=>b.v-a.v).slice(0,8);
+ const cw=Math.max(el.clientWidth||320,280),rowH=32,lw=Math.min(150,cw*.34),padR=96,H=Math.max(rows.length,1)*rowH+8;const mx=Math.max(1,...rows.map(o=>o.v));const bwMax=cw-lw-padR;
+ let s='<svg width="'+cw+'" height="'+H+'" viewBox="0 0 '+cw+' '+H+'" role="img" aria-label="Công nợ lớn nhất">';
+ if(!rows.length)s+='<text class="ct" x="'+(cw/2)+'" y="30" text-anchor="middle">Chưa có dữ liệu trong khoảng này</text>';
+ rows.forEach((o,i)=>{const y=4+i*rowH,w=Math.max(3,bwMax*o.v/mx);const nm=o.c.name.length>18?o.c.name.slice(0,17)+'…':o.c.name;
+  s+='<g data-act="chCust" data-id="'+esc(o.c.id)+'" style="cursor:pointer"><title>'+esc(o.c.name)+': '+(money_?money(o.v):fkg(o.v))+'</title><rect x="0" y="'+y+'" width="'+cw+'" height="'+(rowH-2)+'" fill="transparent"/><text class="ct" style="fill:var(--text)" x="'+(lw-8)+'" y="'+(y+rowH/2+3)+'" text-anchor="end">'+esc(nm)+'</text><rect x="'+lw+'" y="'+(y+5)+'" width="'+w+'" height="'+(rowH-12)+'" rx="3" style="fill:'+(money_?'var(--c1)':'var(--c2)')+'"/><text class="cv" x="'+(lw+w+6)+'" y="'+(y+rowH/2+3)+'">'+(money_?abbr(o.v):nfK.format(r2(o.v))+' kg')+'</text></g>';});
+ s+='</svg>';
+ el.innerHTML='<div class="legend"><span><i style="background:'+(money_?'var(--c1)':'var(--c2)')+'"></i>'+(money_?'Tiền ta còn nợ người bán':'Nhân (kg) còn phải trả khách đổi')+'</span></div><div class="chs">'+s+'</div><div class="chnote">Tối đa 8 khách còn nợ nhiều nhất. Bấm vào thanh để mở sổ chi tiết của khách.</div>';}
+function drawCharts(){const a=document.getElementById('ch-a-tq');if(a)drawA(a,chDays(ui.chart.p),'tq');const b=document.getElementById('ch-b');if(b)drawB(b,chDays(ui.chart.p));const c=document.getElementById('ch-c');if(c)drawC(c);const bc=document.getElementById('ch-a-bc');if(bc)drawA(bc,bcDays(),'bc');}
+const CHIPS=[['7d','7 ngày'],['30d','30 ngày'],['month','Tháng này'],['prev','Tháng trước']];
+function chartsHTML(){return'<div class="card"><div class="card-h"><h2>Biểu đồ</h2>'+segBtns('chPeriod','p',CHIPS,ui.chart.p)+'</div><div class="chgrid"><div class="chbox"><div class="chh"><b>Thu mua theo ngày</b>'+segBtns('chUnit','u',[['kg','kg'],['money','tiền (đ)']],ui.chart.unit)+'</div><div id="ch-a-tq"></div></div><div class="chbox"><div class="chh"><b>Thu – Chi và tồn quỹ</b></div><div id="ch-b"></div></div></div></div>'
+ +'<div class="card"><div class="card-h"><h2>Công nợ lớn nhất</h2>'+segBtns('chDebt','c',[['money','Tiền ta nợ'],['bean','Nhân còn nợ']],ui.chart.c)+'</div><div id="ch-c"></div></div>';}
+function chartBcHTML(){return'<div class="card"><div class="card-h"><h2>Thu mua theo ngày – tháng '+esc((ui.f.bc.month||'').slice(5)+'/'+(ui.f.bc.month||'').slice(0,4))+'</h2>'+segBtns('chUnit','u',[['kg','kg'],['money','tiền (đ)']],ui.chart.unit)+'</div><div id="ch-a-bc"></div></div>';}
+ACT.chPeriod=b=>{ui.chart.p=b.dataset.v;ui.chart.selTq=null;render();};
+ACT.chUnit=b=>{ui.chart.unit=b.dataset.v;render();};
+ACT.chDebt=b=>{ui.chart.c=b.dataset.v;render();};
+ACT.chDay=b=>{const k=b.dataset.w==='bc'?'selBc':'selTq';ui.chart[k]=ui.chart[k]===b.dataset.d?null:b.dataset.d;drawCharts();};
+ACT.chOpen=b=>{ui.f.mua.from=ui.f.mua.to=b.dataset.d;ui.f.mua.type='';ui.f.mua.q='';ui.edit={};go('mua');};
+ACT.chCust=b=>ACT.detail({dataset:{id:b.dataset.id}});
+AFTER.tq=drawCharts;AFTER.bc=drawCharts;
+let rzT=null,lastW=0;const redrawCharts=()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(ui.mode==='full'&&(ui.tab==='tq'||ui.tab==='bc')&&document.querySelector('#view .chs, #ch-a-tq, #ch-a-bc'))drawCharts();},120);};
+window.addEventListener('resize',redrawCharts);
+if(window.ResizeObserver)new ResizeObserver(es=>{const w=Math.round(es[0].contentRect.width);if(w!==lastW){lastW=w;redrawCharts();}}).observe(document.getElementById('view'));
 
 /* ===== INIT ===== */
 load();
