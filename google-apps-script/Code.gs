@@ -50,6 +50,18 @@ var DEF = {
 };
 var ORDER = ['settings', 'types', 'customers', 'purchases', 'exchanges', 'beanPayments', 'sales', 'adjustments', 'cash'];
 
+// Đọc ô thời gian an toàn: nếu Google lỡ đổi chữ thành kiểu ngày thì đổi lại về chuỗi ISO
+function s_(v) { return v instanceof Date ? v.toISOString() : String(v); }
+// Các cột phải giữ dạng chữ (id, thời gian, ngày, JSON) - áp dụng cho đúng vùng sắp ghi
+function textCols_(coll, ncol) {
+  var c = [1, 2, ncol - 1, ncol];
+  DEF[coll].cols.forEach(function (d, i) { if (d[2]) c.push(PREFIX.length + 1 + i); });
+  return c;
+}
+function setText_(sh, coll, ncol, row, nrows) {
+  textCols_(coll, ncol).forEach(function (c) { sh.getRange(row, c, nrows, 1).setNumberFormat('@'); });
+}
+
 function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 
 function doGet() {
@@ -117,12 +129,12 @@ function doPost(e) {
       var n = PREFIX.length + DEF[coll].cols.length + 2;
       var vals = sh.getRange(2, 1, last - 1, n).getValues();
       vals.forEach(function (r) {
-        var srv = String(r[n - 2]);
+        var srv = s_(r[n - 2]);
         if (!r[0] || srv <= since) return;
         var rec = null;
         try { rec = JSON.parse(r[n - 1]); } catch (x) { return; }
-        if (r[2] === 'ĐÃ XÓA') changes.push({ coll: coll, id: r[0], deleted: true, at: String(r[1]) });
-        else changes.push({ coll: coll, id: r[0], deleted: false, updatedAt: String(r[1]), rec: rec });
+        if (r[2] === 'ĐÃ XÓA') changes.push({ coll: coll, id: String(r[0]), deleted: true, at: s_(r[1]) });
+        else changes.push({ coll: coll, id: String(r[0]), deleted: false, updatedAt: rec.updatedAt || s_(r[1]), rec: rec });
       });
     });
     return json_({ ok: true, serverTime: serverTime, changes: changes });
@@ -140,7 +152,7 @@ function upsert_(coll, items, serverTime, N) {
   var rowOf = {}, tsOf = {};
   if (last >= 2) {
     var idv = sh.getRange(2, 1, last - 1, 2).getValues();
-    idv.forEach(function (r, i) { rowOf[r[0]] = i + 2; tsOf[r[0]] = String(r[1]); });
+    idv.forEach(function (r, i) { rowOf[r[0]] = i + 2; tsOf[r[0]] = s_(r[1]); });
   }
   var appendRows = [], appendIdx = {};
   items.forEach(function (it) {
@@ -158,10 +170,15 @@ function upsert_(coll, items, serverTime, N) {
       def.cols.forEach(function (c) { var v; try { v = c[1](r, N); } catch (x) { v = ''; } row.push(v === undefined || v === null ? '' : v); });
       row.push(serverTime, JSON.stringify(r));
     }
-    if (rowOf[id] > 0) sh.getRange(rowOf[id], 1, 1, ncol).setValues([row]);
+    if (rowOf[id] > 0) { setText_(sh, coll, ncol, rowOf[id], 1); sh.getRange(rowOf[id], 1, 1, ncol).setValues([row]); }
     else if (appendIdx[id] !== undefined) appendRows[appendIdx[id]] = row;
     else { appendIdx[id] = appendRows.length; appendRows.push(row); }
     tsOf[id] = ts;
   });
-  if (appendRows.length) sh.getRange(sh.getLastRow() + 1, 1, appendRows.length, ncol).setValues(appendRows);
+  if (appendRows.length) {
+    var start = sh.getLastRow() + 1;
+    if (start + appendRows.length - 1 > sh.getMaxRows()) sh.insertRowsAfter(sh.getMaxRows(), start + appendRows.length - 1 - sh.getMaxRows() + 100);
+    setText_(sh, coll, ncol, start, appendRows.length);
+    sh.getRange(start, 1, appendRows.length, ncol).setValues(appendRows);
+  }
 }
