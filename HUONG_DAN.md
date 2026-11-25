@@ -41,3 +41,9 @@ Cần đặt thư mục app lên một địa chỉ web https (ví dụ GitHub P
 - **Android (Chrome)**: mở địa chỉ app → bấm dấu ba chấm ⋮ → **Thêm vào màn hình chính** (hoặc **Cài đặt ứng dụng**) → **Thêm**.
 - **iPhone (Safari)**: mở địa chỉ app bằng Safari → bấm nút **Chia sẻ** (hình vuông có mũi tên lên) → kéo xuống chọn **Thêm vào Màn hình chính** → **Thêm**.
 Sau khi cài, app mở được cả khi không có mạng. Mỗi thiết bị lưu dữ liệu riêng và được đồng bộ qua Google Sheets.
+
+Ứng dụng nay dùng thương hiệu **HOAVU** và có nút chuyển giao diện sáng/tối (☀/🌙) ở phần đầu trang.
+
+
+## Giấy phép phông chữ
+Ứng dụng dùng phông chữ **Be Vietnam Pro** (thư mục `fonts/`), phát hành theo giấy phép SIL Open Font License 1.1.

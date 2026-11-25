@@ -11,3 +11,10 @@
 !google-apps-script/
 !google-apps-script/Code.gs
 !google-apps-script/HUONG_DAN_CAI_DAT.md
+!logo-128.png
+!logo-512.png
+!favicon-32.png
+!icon-maskable-512.png
+!fonts/
+!fonts/*.woff2
+!fonts/fonts.css

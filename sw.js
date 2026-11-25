@@ -1,6 +1,7 @@
 /* Service worker: cho phép mở app khi không có mạng. Đổi số phiên bản khi cập nhật index.html. */
-const CACHE = 'so-ca-phe-v2';
-const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const CACHE = 'so-ca-phe-v3';
+const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png',
+  './logo-128.png', './logo-512.png', './favicon-32.png', './icon-maskable-512.png', './fonts/fonts.css', './fonts/bevietnampro-400-latin.woff2', './fonts/bevietnampro-400-vietnamese.woff2', './fonts/bevietnampro-500-latin.woff2', './fonts/bevietnampro-500-vietnamese.woff2', './fonts/bevietnampro-600-latin.woff2', './fonts/bevietnampro-600-vietnamese.woff2', './fonts/bevietnampro-700-latin.woff2', './fonts/bevietnampro-700-vietnamese.woff2'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
