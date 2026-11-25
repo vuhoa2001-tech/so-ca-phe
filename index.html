@@ -238,6 +238,8 @@ function toast(msg,err){const t=document.createElement('div');t.className='toast
 const fail=m=>{toast(m,true);return false;};
 
 /* ===== weighing & calc (pure) ===== */
+const tareTotalOf=r=>r.tareTotal!=null?r.tareTotal:r2((r.tare||0)*((r.bags||[]).length));
+const grossOf=r=>r.gross!=null?r.gross:r2((r.kg||0)+tareTotalOf(r));
 function weigh(bags,tare){const n=bags.length;const tot=r2(bags.reduce((a,b)=>a+b,0));const tb=r2(n*(tare||0));return{n,tot,tb,net:r2(tot-tb)};}
 function parseBags(text){const bags=[],bad=[];String(text||'').split(/[\s;]+/).forEach(t=>{if(!t)return;const v=pNum(t);if(isFinite(v)&&v>0)bags.push(v);else bad.push(t);});return{bags,bad};}
 function calcBean(fresh,ratio){return ratio>0?r2(fresh/ratio):0;}
@@ -307,7 +309,7 @@ function printDoc(title,body){const w=window.open('','_blank');if(!w){toast('Tr�
  w.document.open();w.document.write('<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><title>'+esc(title)+'</title><link rel="stylesheet" href="'+esc(new URL('fonts/fonts.css',location.href).href)+'"><style>'+PRINT_CSS+'</style></head><body>'+body+'<div class="noprint"><button onclick="window.print()" style="font-size:16px;padding:8px 20px">In</button></div><scr'+'ipt>setTimeout(function(){window.print()},400)<\/script></body></html>');w.document.close();}
 function printHead(s){return'<div class="hd"><img class="lg" src="'+esc(new URL('logo-128.png',location.href).href)+'" alt=""><div><h1>'+esc(s.shopName)+'</h1><div class="sub">'+esc(s.address)+(s.phone?' – ĐT: '+esc(s.phone):'')+'</div></div></div>';}
 function receipt(o){const s=DB.settings;const kv=o.rows.map(r=>'<tr><td>'+esc(r[0])+'</td><td class="num"><b>'+esc(r[1])+'</b></td></tr>').join('');
- const bags=o.bags&&o.bags.length?'<div class="bags"><b>Cân từng bao ('+o.bags.length+' bao, bì '+nfK.format(o.tare)+' kg/bao):</b><br>'+o.bags.map((b,i)=>(i+1)+'. '+nfK.format(b)).join(' &nbsp; ')+'</div>':'';
+ const bags=o.bags&&o.bags.length?'<div class="bags"><b>Cân từng bao ('+o.bags.length+' bao'+(o.tare!=null?', bì '+nfK.format(o.tare)+' kg/bao':'')+'):</b><br>'+o.bags.map((b,i)=>(i+1)+'. '+nfK.format(b)).join(' &nbsp; ')+'</div>':'';
  return'<div class="rc">'+printHead(s)+'<h2>'+esc(o.title)+'</h2><div class="cd">Số: <b>'+esc(o.code)+'</b> &nbsp; Ngày: <b>'+fmtDate(o.date)+'</b></div>'
  +'<div>'+esc(o.partyLabel)+': <b>'+esc(o.party)+'</b></div>'+bags+'<table class="kv">'+kv+'</table>'+(o.note?'<div>Ghi chú: '+esc(o.note)+'</div>':'')
  +'<div class="sg"><div><b>Người giao</b><br><i>(ký, ghi rõ họ tên)</i></div><div><b>Người nhận</b><br><i>(ký, ghi rõ họ tên)</i></div></div></div>';}
@@ -356,7 +358,7 @@ document.addEventListener('focusout',e=>{const t=e.target;if(t.classList&&t.clas
 
 /* ===== weighing block ===== */
 function weighHTML(p,label){return'<div class="wbox"><b>'+(label||'Cân hàng')+'</b> <small>– cân từng bao rồi gõ số, hoặc bỏ trống và nhập thẳng KL tịnh</small>'
- +'<div class="row"><label>Bì (kg/bao)<input id="'+p+'-tare" inputmode="decimal"></label>'
+ +'<div class="row">'+(p==='mua'?'<label>Trừ bì (kg) – tổng cho cả phiếu<input id="'+p+'-tare" inputmode="decimal" placeholder="0"></label>':'<label>Bì (kg/bao)<input id="'+p+'-tare" inputmode="decimal"></label>')
  +'<div><label>Gõ số cân từng bao rồi bấm Enter / "Thêm bao"<div class="inl"><input id="'+p+'-one" inputmode="decimal" enterkeyhint="done" placeholder="Số cân 1 bao"><button type="button" class="btn btn-p" data-act="addBag" data-p="'+p+'">+ Thêm bao</button><button type="button" class="btn" data-act="popBag" data-p="'+p+'">Xóa bao cuối</button></div></label>'
  +'<label style="margin-top:8px">Danh sách số cân (kg) – có thể gõ trực tiếp, cách nhau bằng dấu cách hoặc xuống dòng<textarea id="'+p+'-bags" inputmode="decimal" rows="3" placeholder="Ví dụ: 68 68 67,5 66 72"></textarea></label></div></div>'
  +'<div class="chips" id="'+p+'-sum"></div>'
@@ -367,18 +369,21 @@ ACT.addBag=b=>{const p=b.dataset.p,one=$('#'+p+'-one');const v=pNum(one.value);i
 ACT.popBag=b=>{const p=b.dataset.p,ta=$('#'+p+'-bags');const t=ta.value.trim().split(/[\s;]+/).filter(Boolean);t.pop();ta.value=t.join(' ');bagsChanged(p);};
 document.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Enter'&&t.id&&/-one$/.test(t.id)){e.preventDefault();ACT.addBag({dataset:{p:t.id.slice(0,-4)}});}});
 function readW(p){const ts=getV(p+'-tare').trim();const tare=ts===''?0:pNum(ts);const pb=parseBags(getV(p+'-bags'));const man=pNum(getV(p+'-kg'));let w;
+ if(p==='mua'){const has=pb.bags.length>0;const gross=r2(pb.bags.reduce((a,b)=>a+b,0));const tt=has&&isFinite(tare)?r2(tare):0;
+  w=has?{n:pb.bags.length,tot:gross,tb:tt,net:r2(gross-tt)}:{n:0,tot:0,tb:0,net:isFinite(man)?r2(man):0};
+  return Object.assign(w,{tare:has?tare:0,tareTotal:tt,gross:has?gross:w.net,bags:pb.bags,bad:pb.bad,manualBad:getV(p+'-kg').trim()!==''&&!isFinite(man)});}
  if(pb.bags.length)w=weigh(pb.bags,tare);else w={n:0,tot:0,tb:0,net:isFinite(man)?r2(man):0};
  return Object.assign(w,{tare:tare,bags:pb.bags,bad:pb.bad,manualBad:getV(p+'-kg').trim()!==''&&!isFinite(man)});}
 function updW(p){const w=readW(p);const kg=document.getElementById(p+'-kg');kg.disabled=w.bags.length>0;if(w.bags.length)kg.value='';
  $('#'+p+'-sum').innerHTML=(w.bags.length?'<span class="chip">Số bao: <b>'+w.n+'</b></span><span class="chip">Tổng cả bì: <b>'+fkg(w.tot)+'</b></span><span class="chip">Trừ bì: <b>'+fkg(w.tb)+'</b></span>':'')
   +'<span class="chip">KL tịnh: <b>'+fkg(w.net)+'</b></span>'+(w.bad.length?'<span class="chip" style="border-color:var(--bad);color:var(--bad)">Số không hợp lệ: '+esc(w.bad.join(', '))+'</span>':'');
  return w;}
-function resetW(p){setV(p+'-tare',nfK.format(DB.settings.defaultTare));setV(p+'-bags','');setV(p+'-kg','');}
-function fillW(p,r){setV(p+'-tare',nfK.format(r.tare==null?DB.settings.defaultTare:r.tare));setV(p+'-bags',(r.bags||[]).join(' '));setV(p+'-kg',(r.bags&&r.bags.length)?'':r.kg);}
+function resetW(p){setV(p+'-tare',p==='mua'?'':nfK.format(DB.settings.defaultTare));setV(p+'-bags','');setV(p+'-kg','');}
+function fillW(p,r){if(p==='mua'){const tt=(r.bags&&r.bags.length)?tareTotalOf(r):0;setV(p+'-tare',tt?nfK.format(tt):'');}else setV(p+'-tare',nfK.format(r.tare==null?DB.settings.defaultTare:r.tare));setV(p+'-bags',(r.bags||[]).join(' '));setV(p+'-kg',(r.bags&&r.bags.length)?'':r.kg);}
 function checkW(w,what){if(w.bad.length)return fail('Có số cân không hợp lệ: '+w.bad.join(', ')+'. Chỉ nhập số lớn hơn 0.');
  if(w.manualBad)return fail('KL tịnh nhập tay không hợp lệ.');
  if(!isFinite(w.tare)||w.tare<0)return fail('Bì phải là số không âm.');
- if(w.bags.length&&w.net<=0)return fail('Tổng cân nhỏ hơn hoặc bằng phần bì, kiểm tra lại số cân và bì.');
+ if(w.bags.length&&w.net<=0)return fail('Tổng cân nhỏ hơn hoặc bằng phần bì, kiểm tra lại số cân và phần trừ bì.');
  if(!(w.net>0))return fail('Vui lòng nhập số cân từng bao hoặc KL tịnh ('+what+') lớn hơn 0.');return true;}
 function custHint(inputId,hintId){const c=findCust(getV(inputId));const h=document.getElementById(hintId);if(!h)return;if(!c){h.textContent=trim(getV(inputId))?'Khách mới – sẽ được tạo khi lưu.':'';return;}
  const s=cs(c.id);const p=[];if(s.debtBuy>0)p.push('ta nợ khách '+money(s.debtBuy));if(s.debtSale>0)p.push('khách nợ ta '+money(s.debtSale));if(s.beanLeft>0)p.push('nhân còn phải trả '+fkg(s.beanLeft));h.textContent=p.length?'Hiện: '+p.join(' · '):'Không có công nợ.';}
@@ -436,14 +441,16 @@ function saveTrade(k,print){const c=T[k];const date=getV(k+'-date');if(!date)ret
  const typeId=getV(k+'-type');if(!typeId)return fail('Vui lòng chọn loại cà phê.');
  const cust=ensureCust(name,c.grp);const eid=ui.edit[k];let r=eid&&findRec(c.arr,eid);
  if(!r){r={id:uid(),code:nextCode(c.pre),ts:nextTs()};DB[c.arr].push(r);}
- Object.assign(r,{date,customerId:cust.id,typeId,tare:w.tare,bags:w.bags,kg:w.net,price,amount,paid,note:trim(getV(k+'-note'))});
+ Object.assign(r,{date,customerId:cust.id,typeId,bags:w.bags,kg:w.net,price,amount,paid,note:trim(getV(k+'-note'))});
+ if(k==='mua'){r.tareTotal=w.tareTotal;r.gross=w.gross;if(r.tare===undefined)r.tare=0;}else r.tare=w.tare;
  syncTrade(k,r);if(!save())return false;ui.edit={};ui.lastDate=date;toast('Đã lưu '+r.code+'.');render();if(print)printTrade(k,r.id);return true;}
 SUBMIT['f-mua']=()=>saveTrade('mua',false);SUBMIT['f-ban']=()=>saveTrade('ban',false);
 ACT.saveprint=b=>{if(b.dataset.k==='doi')saveEx(true);else saveTrade(b.dataset.k,true);};
 function printTrade(k,id){const r=findRec(T[k].arr,id);if(!r)return;const c=T[k];const rows=[['Loại cà phê',typeName(r.typeId)]];
- if(r.bags.length)rows.push(['Số bao',String(r.bags.length)],['Tổng KL cả bì',fkg(weigh(r.bags,r.tare).tot)],['Trừ bì',fkg(weigh(r.bags,r.tare).tb)]);
+ if(k==='mua'){const tt=tareTotalOf(r),gr=grossOf(r);if(r.bags.length||tt>0){if(r.bags.length)rows.push(['Số bao',String(r.bags.length)]);rows.push(['Tổng cả bì',fkg(gr)],['Trừ bì',fkg(tt)]);}}
+ else if(r.bags.length)rows.push(['Số bao',String(r.bags.length)],['Tổng KL cả bì',fkg(weigh(r.bags,r.tare).tot)],['Trừ bì',fkg(weigh(r.bags,r.tare).tb)]);
  rows.push(['KL tịnh',fkg(r.kg)],['Đơn giá',money(r.price)+'/kg'],['Thành tiền',money(r.amount)],[k==='mua'?'Đã trả':'Đã thu',money(r.paid)],[k==='mua'?'Còn nợ':'Khách còn nợ',money(r.amount-r.paid)]);
- printDoc(r.code,receipt({title:c.doc,code:r.code,date:r.date,partyLabel:c.who,party:custName(r.customerId),bags:r.bags,tare:r.tare,rows,note:r.note}));}
+ printDoc(r.code,receipt({title:c.doc,code:r.code,date:r.date,partyLabel:c.who,party:custName(r.customerId),bags:r.bags,tare:k==='mua'?null:r.tare,rows,note:r.note}));}
 ACT.print=b=>{const k=b.dataset.k;if(k==='mua'||k==='ban')printTrade(k,b.dataset.id);else if(k==='doi')printEx(b.dataset.id);else if(k==='tra')printTra(b.dataset.id);};
 DEL.mua=id=>{removeLinked(id);DB.purchases=DB.purchases.filter(r=>r.id!==id);};
 DEL.ban=id=>{removeLinked(id);DB.sales=DB.sales.filter(r=>r.id!==id);};
@@ -685,7 +692,7 @@ SPEC.bc_khach=()=>{const f=ui.f.bc;const rows=DB.customers.map(c=>{const ps=DB.p
 /* ===== CÀI ĐẶT ===== */
 VIEWS.cd=()=>{const s=DB.settings;const lb=s.lastBackup;
  return'<div class="card"><h2>Cài đặt</h2><form id="f-cd" autocomplete="off"><div class="grid"><label>Tên cơ sở (in trên phiếu)<input id="cd-name" value="'+esc(s.shopName)+'"></label><label>Địa chỉ<input id="cd-addr" value="'+esc(s.address)+'"></label><label>Số điện thoại<input id="cd-phone" value="'+esc(s.phone)+'"></label>'
- +'<label>Bì mặc định (kg/bao)<input id="cd-tare" value="'+esc(nfK.format(s.defaultTare))+'" inputmode="decimal"></label><label>Tỷ lệ đổi mặc định (kg tươi / 1 kg nhân)<input id="cd-ratio" value="'+esc(nfP.format(s.defaultRatio))+'" inputmode="decimal"></label><label>Quỹ tiền mặt đầu kỳ (đ)<input id="cd-cash" class="money" inputmode="numeric" value="'+esc(fnum(s.openingCash))+'"></label></div>'
+ +'<label>Bì mặc định (kg/bao) – cho Đổi cà, Bán ra<input id="cd-tare" value="'+esc(nfK.format(s.defaultTare))+'" inputmode="decimal"></label><label>Tỷ lệ đổi mặc định (kg tươi / 1 kg nhân)<input id="cd-ratio" value="'+esc(nfP.format(s.defaultRatio))+'" inputmode="decimal"></label><label>Quỹ tiền mặt đầu kỳ (đ)<input id="cd-cash" class="money" inputmode="numeric" value="'+esc(fnum(s.openingCash))+'"></label></div>'
  +'<h3>Danh mục loại cà phê và tồn kho đầu kỳ</h3><div class="tw" style="max-height:none"><table id="cd-types"><thead><tr><th>Tên loại</th><th>Ghi chú</th><th class="num">Tồn kho đầu (kg)</th><th></th></tr></thead><tbody>'+DB.types.map(typeRow).join('')+'</tbody></table></div>'
  +'<div class="btns"><button type="button" class="btn" data-act="addType">+ Thêm loại cà phê</button></div>'
  +'<div class="btns"><button class="btn btn-p" type="submit">Lưu cài đặt</button></div></form></div>'
@@ -819,18 +826,20 @@ ACT.eStart=b=>{const k=b.dataset.k;EZ.sub=null;if(k==='mua'||k==='doi'||k==='tra
 
 /* ----- wizard engine ----- */
 const needCust=c=>c===CAT_NO||c===CAT_THUNO;
-function steps(){const w=EZ.w,d=w.d;switch(w.kind){case'mua':return['cust','type','bags','price','pay','ok'];case'doi':return['cust','bags','ratio','now','ok'];case'tra':return['cust','kg','mode','ok'];default:return['dir','cat'].concat(needCust(d.cat)?['cust']:[]).concat(['amt','note','ok']);}}
+function steps(){const w=EZ.w,d=w.d;switch(w.kind){case'mua':return['cust','type','bags'].concat(d.total!=null?[]:['tare']).concat(['price','pay','ok']);case'doi':return['cust','bags','ratio','now','ok'];case'tra':return['cust','kg','mode','ok'];default:return['dir','cat'].concat(needCust(d.cat)?['cust']:[]).concat(['amt','note','ok']);}}
 function eNew(kind,pre,startStep){const d=Object.assign({date:ui.lastDate||today(),custId:'',tare:DB.settings.defaultTare,bags:[],total:null,note:''},pre||{});
  if(kind==='doi'&&!d.ratio){d.ratio=DB.settings.defaultRatio;d.ratioOwn=null;d.paidNow=null;}
  EZ.w={kind,d,step:0,eid:null,saving:false};EZ.ev='wiz';EZ.sub=null;EZ.done=null;
  if(startStep){const i=steps().indexOf(startStep);if(i>0)EZ.w.step=i;}eEnter();eRender(true);}
-const INIT={bags(){KP.mode='kg';KP.s='';KP.fresh=false;EZ.editIdx=null;},price(){KP.mode='money';KP.s=String(EZ.w.d.price||'');KP.fresh=!!KP.s;},kg(){KP.mode='kg';KP.s=EZ.w.d.kg?kgStr(EZ.w.d.kg):'';KP.fresh=!!KP.s;},amt(){KP.mode='money';KP.s=EZ.w.d.amount?String(EZ.w.d.amount):'';KP.fresh=!!KP.s;}};
+const INIT={bags(){KP.mode='kg';KP.s='';KP.fresh=false;EZ.editIdx=null;},tare(){const d=EZ.w.d;KP.mode='kg';KP.s=d.tareSet?kgStr(d.tareTotal||0):'';KP.fresh=!!KP.s;},price(){KP.mode='money';KP.s=String(EZ.w.d.price||'');KP.fresh=!!KP.s;},kg(){KP.mode='kg';KP.s=EZ.w.d.kg?kgStr(EZ.w.d.kg):'';KP.fresh=!!KP.s;},amt(){KP.mode='money';KP.s=EZ.w.d.amount?String(EZ.w.d.amount):'';KP.fresh=!!KP.s;}};
 function eEnter(){const id=steps()[EZ.w.step];if(INIT[id])INIT[id]();}
-function eNet(d){return d.total!=null?d.total:weigh(d.bags,d.tare).net;}
+function eNet(d){if(d.total!=null)return d.total;if(EZ.w&&EZ.w.kind==='mua')return r2(d.bags.reduce((a,b)=>a+b,0)-(d.tareTotal||0));return weigh(d.bags,d.tare).net;}
+const eGross=d=>d.total!=null?d.total:r2(d.bags.reduce((a,b)=>a+b,0));
 const COMMIT={
  cust(){if(!EZ.w.d.custId)return fail('Hãy chọn khách.');return true;},
  type(){if(!EZ.w.d.typeId)return fail('Hãy chọn loại cà.');return true;},
- bags(){if(KP.s!=='')return fail('Bạn còn số chưa thêm. Bấm "✓ Thêm bao" trước.');if(!(eNet(EZ.w.d)>0))return fail('Chưa có số cân. Hãy thêm bao.');return true;},
+ bags(){if(KP.s!=='')return fail('Bạn còn số chưa thêm. Bấm "✓ Thêm bao" trước.');if(!((EZ.w.kind==='mua'?eGross(EZ.w.d):eNet(EZ.w.d))>0))return fail('Chưa có số cân. Hãy thêm bao.');return true;},
+ tare(){const d=EZ.w.d,g=eGross(d);if(KP.s===''&&!d.tareSet)return fail('Hãy gõ số kg trừ bì, hoặc bấm "Không trừ (0 kg)".');const v=KP.s===''?(d.tareTotal||0):kpVal();if(!(v>=0))return fail('Số kg trừ bì không hợp lệ.');if(!(v<g))return fail('Trừ bì phải nhỏ hơn tổng cả bì ('+fkg(g)+'). Hãy nhập lại.');d.tareTotal=r2(v);d.tareSet=true;return true;},
  price(){const v=kpVal();if(!(v>0))return fail('Hãy nhập đơn giá.');EZ.w.d.price=v;return true;},
  pay(){if(!EZ.w.d.paidMode)return fail('Hãy chọn cách trả tiền.');return true;},
  ratio(){return true;},now(){if(EZ.w.d.paidNow==null)return fail('Hãy chọn có trả nhân ngay hay không.');return true;},
@@ -843,7 +852,7 @@ function eLeft(){const d=EZ.w.d;let l=cs(d.custId).beanLeft;if(EZ.w.eid){const o
 ACT.eNext=()=>{const w=EZ.w,id=steps()[w.step];if(COMMIT[id]&&!COMMIT[id]())return;w.step++;eEnter();eRender(true);};
 ACT.ePrev=()=>{const w=EZ.w;if(w.step===0){ACT.eHome();return;}w.step--;eEnter();eRender(true);};
 function advance(){EZ.w.step++;eEnter();eRender(true);}
-const STEPQ={cust:()=>({mua:'Mua của ai?',doi:'Khách nào đổi cà?',tra:'Trả nhân cho ai?',quy:'Thu / chi với khách nào?'})[EZ.w.kind],type:()=>'Loại cà nào?',bags:()=>EZ.w.kind==='doi'?'Cân cà tươi':'Cân cà',price:()=>'Giá bao nhiêu 1 kg?',pay:()=>'Trả tiền thế nào?',ratio:()=>'Tỷ lệ đổi',now:()=>'Trả nhân ngay không?',kg:()=>'Trả bao nhiêu kg nhân?',mode:()=>'Trả bằng gì?',dir:()=>'Thu hay Chi?',cat:()=>'Khoản gì?',amt:()=>'Số tiền bao nhiêu?',note:()=>'Ghi chú (không bắt buộc)',ok:()=>'Kiểm tra lại rồi lưu'};
+const STEPQ={cust:()=>({mua:'Mua của ai?',doi:'Khách nào đổi cà?',tra:'Trả nhân cho ai?',quy:'Thu / chi với khách nào?'})[EZ.w.kind],type:()=>'Loại cà nào?',tare:()=>'Trừ bì bao nhiêu kg?',bags:()=>EZ.w.kind==='doi'?'Cân cà tươi':'Cân cà',price:()=>'Giá bao nhiêu 1 kg?',pay:()=>'Trả tiền thế nào?',ratio:()=>'Tỷ lệ đổi',now:()=>'Trả nhân ngay không?',kg:()=>'Trả bao nhiêu kg nhân?',mode:()=>'Trả bằng gì?',dir:()=>'Thu hay Chi?',cat:()=>'Khoản gì?',amt:()=>'Số tiền bao nhiêu?',note:()=>'Ghi chú (không bắt buộc)',ok:()=>'Kiểm tra lại rồi lưu'};
 function eWiz(){const w=EZ.w,st=steps(),id=st[w.step];const b=EBODY[id]();const n=st.length;
  return'<div class="eprog"><b>Bước '+(w.step+1)+'/'+n+'</b><div class="bar"><i style="width:'+((w.step+1)/n*100)+'%"></i></div></div><h2 class="eq">'+STEPQ[id]()+'</h2>'+b.html+(w.eid&&id!=='ok'?'':'')+'<div class="enav">'+EB('ghost','ePrev','‹ Quay lại')+(id==='ok'?EB('ok','eSave','✓ Lưu','data-x="1"'+(w.saving?' disabled':'')):b.nonext?'':EB('go','eNext',b.label||'Tiếp ›',b.disabled?'disabled':''))+'</div>';}
 const rl=(a,b)=>'<div class="rl"><span>'+a+'</span><b>'+b+'</b></div>';
@@ -877,14 +886,15 @@ EBODY.type=()=>({html:DB.types.map(t=>EB('cust'+(EZ.w.d.typeId===t.id?' sel':'')
 ACT.ePickType=b=>{const d=EZ.w.d;d.typeId=b.dataset.id;const lp=lastPrice('mua',d.typeId);if(lp)d.price=lp;advance();};
 
 /* bags */
-function totalsCard(d){const w=d.total!=null?{n:0,tot:d.total,tb:0,net:d.total}:weigh(d.bags,d.tare);
+function totalsCard(d){if(EZ.w.kind==='mua'&&d.total==null){return'<div class="ecard" style="padding:8px 12px"><div class="mini" style="grid-template-columns:1fr"><span>Số bao<b>'+d.bags.length+'</b></span></div><div style="text-align:center">TỔNG CẢ BÌ <span class="huge big">'+fkg(eGross(d))+'</span></div></div>';}
+ const w=d.total!=null?{n:0,tot:d.total,tb:0,net:d.total}:weigh(d.bags,d.tare);
  return'<div class="ecard" style="padding:8px 12px">'+(d.total==null?'<div class="mini"><span>Số bao<b>'+w.n+'</b></span><span>Tổng cả bì<b>'+fkg(w.tot)+'</b></span><span>Trừ bì<b>'+fkg(w.tb)+'</b></span></div>':'')+'<div style="text-align:center">KL TỊNH <span class="huge big">'+fkg(w.net)+'</span></div></div>';}
 EBODY.bags=()=>{const d=EZ.w.d;let h='';
  if(d.total!=null)h+=totalsCard(d)+EB('alt','eBagsAgain','Cân từng bao');
  else{h+='<div class="chips">'+(d.bags.map((b,i)=>'<button class="chipb'+(EZ.editIdx===i?' on':'')+'" data-act="eBagTap" data-i="'+i+'">'+(i+1)+': '+nfK.format(b)+'</button>').join('')||'<span class="mut">Chưa có bao nào</span>')+'</div>'
   +totalsCard(d)+'<div class="kpd">'+(EZ.editIdx!=null?'Gõ số mới cho bao '+(EZ.editIdx+1)+' (đang là '+nfK.format(d.bags[EZ.editIdx])+')':'Bao số '+(d.bags.length+1))+': <b id="kpDisp">'+kpFmt()+'</b></div>'+kpHTML()+EB('ok','eAddBag','✓ Thêm bao')
-  +'<div class="row2">'+EB('alt','eTare','Bì: '+nfK.format(d.tare)+' kg/bao<small>bấm để đổi</small>')+EB('alt','eTotal','Nhập tổng KL luôn<small>không cân từng bao</small>')+'</div>';}
- return{html:h,disabled:!(eNet(d)>0)};};
+  +(EZ.w.kind==='mua'?EB('alt','eTotal','Nhập tổng KL luôn<small>không cân từng bao</small>'):'<div class="row2">'+EB('alt','eTare','Bì: '+nfK.format(d.tare)+' kg/bao<small>bấm để đổi</small>')+EB('alt','eTotal','Nhập tổng KL luôn<small>không cân từng bao</small>')+'</div>');}
+ return{html:h,disabled:!((EZ.w.kind==='mua'?eGross(d):eNet(d))>0)};};
 ACT.eAddBag=()=>{const d=EZ.w.d,v=kpVal();if(!(v>0))return fail('Hãy gõ số cân của bao.');if(EZ.editIdx!=null){d.bags[EZ.editIdx]=r2(v);EZ.editIdx=null;}else d.bags.push(r2(v));KP.s='';eRender(false);};
 ACT.eBagTap=b=>{const i=Number(b.dataset.i);openDlg('<h2>Bao số '+(i+1)+': '+fkg(EZ.w.d.bags[i])+'</h2>'+EB('go','eBagEdit','✎ Sửa số này','data-i="'+i+'"')+EB('bad','eBagDel','🗑 Xóa bao này','data-i="'+i+'"')+EB('ghost','closeDlg','Đóng'));};
 ACT.eBagEdit=b=>{closeDlg();EZ.editIdx=Number(b.dataset.i);KP.s='';eRender(false);};
@@ -892,6 +902,13 @@ ACT.eBagDel=b=>{closeDlg();EZ.w.d.bags.splice(Number(b.dataset.i),1);EZ.editIdx=
 ACT.eTare=()=>openNum('Bì bao bao nhiêu kg?','kg',EZ.w.d.tare,v=>{if(!(v>=0&&v<20))return fail('Bì không hợp lệ.');EZ.w.d.tare=r2(v);});
 ACT.eTotal=()=>openNum('Tổng khối lượng (kg)','kg',0,v=>{if(!(v>0))return fail('Hãy nhập số kg.');EZ.w.d.total=r2(v);});
 ACT.eBagsAgain=()=>{EZ.w.d.total=null;KP.mode='kg';KP.s='';eRender(false);};
+
+/* trừ bì (chỉ Thu mua) */
+function tareReadback(g,v){const bad=v>=g;return'<div class="mut" style="font-size:18px;text-align:center">Tổng cả bì <b>'+fkg(g)+'</b> − Trừ bì <b>'+fkg(v)+'</b> =</div><div style="text-align:center">KL TỊNH <span class="huge big"'+(bad?' style="color:var(--bad)"':'')+'>'+(bad?'—':fkg(r2(g-v)))+'</span></div>'+(bad?'<div style="color:var(--bad);text-align:center">Trừ bì phải nhỏ hơn tổng cả bì.</div>':'');}
+EBODY.tare=()=>{const d=EZ.w.d,g=eGross(d);
+ EZ.live=()=>{const e=$('#eLive');if(e)e.innerHTML=tareReadback(g,kpVal());const nb=document.querySelector('.enav [data-act=eNext]');if(nb)nb.disabled=(KP.s===''&&!d.tareSet);};
+ return{html:'<div class="ecard" style="padding:6px 12px">'+rl('Số bao',d.bags.length)+rl('Tổng cả bì','<span class="big">'+fkg(g)+'</span>')+'</div><div class="kpd">Trừ bì: <b id="kpDisp">'+kpFmt()+'</b></div><div class="ecard" id="eLive" style="padding:6px 12px">'+tareReadback(g,kpVal())+'</div>'+kpHTML()+EB('alt','eNoTare','Không trừ (0 kg)'),disabled:KP.s===''&&!d.tareSet};};
+ACT.eNoTare=()=>{const d=EZ.w.d;d.tareTotal=0;d.tareSet=true;advance();};
 
 /* price */
 function muaCalc(d){const net=eNet(d),amount=calcAmount(net,d.price||0);const paid=d.paidMode==='full'?amount:d.paidMode==='none'?0:Math.min(d.paid||0,amount);return{net,amount,paid,debt:amount-paid};}
@@ -933,7 +950,7 @@ EBODY.note=()=>({html:'<input id="eNote" class="einput" placeholder="Ví dụ: t
 
 /* confirm */
 EBODY.ok=()=>{const w=EZ.w,d=w.d;let h='<div class="ecard">';
- if(w.kind==='mua'){const c=muaCalc(d);h+=rl('Người bán',esc(custName(d.custId)))+rl('Loại cà',esc(typeName(d.typeId)))+(d.total==null?rl('Số bao',d.bags.length):'')+rl('KL tịnh',fkg(c.net))+rl('Đơn giá',money(d.price))+rl('Thành tiền','<span class="big">'+money(c.amount)+'</span>')+rl('Đã trả',money(c.paid))+rl('Còn nợ','<span class="big">'+money(c.debt)+'</span>');}
+ if(w.kind==='mua'){const c=muaCalc(d);h+=rl('Người bán',esc(custName(d.custId)))+rl('Loại cà',esc(typeName(d.typeId)))+(d.total==null?rl('Số bao',d.bags.length)+rl('Tổng cả bì',fkg(eGross(d)))+rl('Trừ bì',fkg(d.tareTotal||0)):'')+rl('KL tịnh',fkg(c.net))+rl('Đơn giá',money(d.price))+rl('Thành tiền','<span class="big">'+money(c.amount)+'</span>')+rl('Đã trả',money(c.paid))+rl('Còn nợ','<span class="big">'+money(c.debt)+'</span>');}
  else if(w.kind==='doi'){const net=eNet(d),bean=calcBean(net,d.ratio);h+=rl('Khách',esc(custName(d.custId)))+(d.total==null?rl('Số bao',d.bags.length):'')+rl('Cà tươi nhận',fkg(net))+rl('Tỷ lệ',nfP.format(d.ratio))+rl('Phải trả nhân','<span class="big">'+fkg(bean)+'</span>')+rl('Trả ngay',fkg(d.paidNow||0))+rl('Còn phải trả','<span class="big">'+fkg(bean-(d.paidNow||0))+'</span>');}
  else if(w.kind==='tra'){h+=rl('Khách',esc(custName(d.custId)))+rl('Trả nhân','<span class="big">'+fkg(d.kg)+'</span>')+rl('Hình thức',d.mode==='cash'?'Quy ra tiền':'Trả bằng nhân')+(d.mode==='cash'?rl('Thành tiền',money(calcAmount(d.kg,d.price))):'')+rl('Còn nợ sau khi trả',fkg(r2(eLeft()-d.kg)));}
  else h+=rl(d.dir==='thu'?'THU':'CHI','<span class="big">'+money(d.amount)+'</span>')+rl('Danh mục',esc(d.cat))+(d.custId?rl('Khách',esc(custName(d.custId))):'')+(d.note?rl('Ghi chú',esc(d.note)):'');
@@ -943,8 +960,8 @@ ACT.eSave=()=>eSave(false);ACT.eSavePrint=()=>eSave(true);
 const WRITE={
  mua(w){const d=w.d,c=muaCalc(d);if(!d.custId||!d.typeId||!(c.net>0)||!(d.price>0))throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');
   let r=w.eid&&findRec('purchases',w.eid);if(!r){r={id:uid(),code:nextCode('PM'),ts:nextTs()};DB.purchases.push(r);}
-  Object.assign(r,{date:d.date,customerId:d.custId,typeId:d.typeId,tare:d.tare,bags:d.total!=null?[]:d.bags.slice(),kg:c.net,price:d.price,amount:c.amount,paid:c.paid,note:d.note||''});
-  syncTrade('mua',r);return save()?r:null;},
+  Object.assign(r,{date:d.date,customerId:d.custId,typeId:d.typeId,bags:d.total!=null?[]:d.bags.slice(),kg:c.net,tareTotal:d.total!=null?0:r2(d.tareTotal||0),gross:eGross(d),price:d.price,amount:c.amount,paid:c.paid,note:d.note||''});
+  if(r.tare===undefined)r.tare=0;syncTrade('mua',r);return save()?r:null;},
  doi(w){const d=w.d,net=eNet(d);if(!d.custId||!(net>0)||!(d.ratio>0))throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');const bean=calcBean(net,d.ratio);
   let r=w.eid&&findRec('exchanges',w.eid);if(!r){r={id:uid(),code:nextCode('PD'),ts:nextTs()};DB.exchanges.push(r);}
   Object.assign(r,{date:d.date,customerId:d.custId,tare:d.tare,bags:d.total!=null?[]:d.bags.slice(),kgFresh:net,ratioOwn:d.ratioOwn||null,ratio:d.ratio,kgBean:bean,paidNow:r2(d.paidNow||0),note:d.note||''});
@@ -967,7 +984,7 @@ ACT.eAgain=()=>{const x=EZ.done,k=x.kind;if(k==='quy')return eNew('quy');if(x.ed
 
 /* edit existing */
 ACT.eEdit=b=>{const k=b.dataset.k,id=b.dataset.id;let r,d;
- if(k==='mua'){r=findRec('purchases',id);if(!r)return;d={date:r.date,custId:r.customerId,typeId:r.typeId,tare:r.tare==null?DB.settings.defaultTare:r.tare,bags:r.bags.slice(),total:r.bags.length?null:r.kg,price:r.price,paidMode:r.paid>=r.amount&&r.amount>0?'full':r.paid>0?'part':'none',paid:r.paid,note:r.note};}
+ if(k==='mua'){r=findRec('purchases',id);if(!r)return;d={date:r.date,custId:r.customerId,typeId:r.typeId,tare:r.tare==null?0:r.tare,bags:r.bags.slice(),total:r.bags.length?null:r.kg,tareTotal:tareTotalOf(r),tareSet:true,price:r.price,paidMode:r.paid>=r.amount&&r.amount>0?'full':r.paid>0?'part':'none',paid:r.paid,note:r.note};}
  else if(k==='doi'){r=findRec('exchanges',id);if(!r)return;d={date:r.date,custId:r.customerId,tare:r.tare==null?DB.settings.defaultTare:r.tare,bags:r.bags.slice(),total:r.bags.length?null:r.kgFresh,ratio:r.ratio,ratioOwn:r.ratioOwn,paidNow:r.paidNow,note:r.note};}
  else if(k==='tra'){r=findRec('beanPayments',id);if(!r)return;d={date:r.date,custId:r.customerId,kg:r.kg,mode:r.mode,price:r.price,note:r.note,tare:0,bags:[],total:null};}
  else if(k==='quy'){r=findRec('cash',id);if(!r)return;d={date:r.date,dir:r.dir,cat:r.cat,custId:r.customerId,amount:r.amount,note:r.note,tare:0,bags:[],total:null};}
