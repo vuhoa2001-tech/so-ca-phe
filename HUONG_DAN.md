@@ -83,5 +83,15 @@ Sau khi cài, app mở được cả khi không có mạng. Mỗi thiết bị l
 Ứng dụng nay dùng thương hiệu **HOAVU** và có nút chuyển giao diện sáng/tối (☀/🌙) ở phần đầu trang.
 
 
+## Tính năng mới: PIN chủ, Chốt quỹ, Ứng tiền, Ký gửi, Gửi Zalo, Sao kê, Số dư đầu kỳ
+- **Số dư đầu kỳ** (chủ, có PIN): chọn ngày bắt đầu, nhập tiền mặt quỹ, nợ từng người bán, nhân còn nợ khách đổi, khách mua còn nợ, nông dân nợ tiền ứng, cà khách đang ký gửi, tồn nhân xô và tồn cà tươi, kèm tổng tiền vốn. Không dùng nút **Khôi phục** để nhập dữ liệu cũ.
+- **Mã PIN chủ**: đặt trong **Cài đặt**. Cần PIN để xóa phiếu, sửa phiếu ngày cũ, xem sổ quỹ, kiểm kê, báo cáo lãi, cài đặt và chế độ đầy đủ. Nhập sai 5 lần thì khóa 1 phút. Máy của chủ có thể chọn **không hỏi lại trên máy này**. Mọi lần sửa/xóa được ghi vào **Lịch sử sửa/xóa** (ai, lúc nào, sửa gì).
+- **Chốt quỹ** (💵): cuối ngày đếm tiền mặt rồi nhập số đếm được. App báo **Khớp**, **Thiếu** hoặc **Thừa**. Chủ bấm **Ghi nhận chênh lệch** để đưa khoản chênh vào sổ.
+- **Ứng tiền** (💳): ứng tiền mặt hoặc ứng hàng (phân, thuốc) cho nông dân. Khi mua cà của người đó, chọn **Trừ tiền ứng**. Hoặc nông dân trả lại bằng tiền (mục Thu, chọn **Thu hồi tiền ứng**). Không tính lãi.
+- **Ký gửi** (🏷️): **Nhận ký gửi** (cân như mua cà). Khi nông dân muốn bán thì bấm **Chốt giá (mua)** theo giá ngày chốt, hoặc **Trả lại cà** nếu họ lấy lại. Cà ký gửi được theo dõi riêng, không tính là cà của đại lý cho tới khi chốt giá.
+- **Gửi Zalo** (📤): sau khi lưu phiếu hoặc trong màn hình in, bấm **Gửi Zalo** để gửi ảnh phiếu cho khách.
+- **Sao kê**: trong **Xem nợ** / **Công nợ**, chọn khách rồi bấm **Sao kê** để in hoặc gửi Zalo bảng đối chiếu công nợ.
+- **Sao lưu tự động hằng ngày lên Google Drive**: xem hướng dẫn trong `google-apps-script\HUONG_DAN_CAI_DAT.md`.
+
 ## Giấy phép phông chữ
 Ứng dụng dùng phông chữ **Be Vietnam Pro** (thư mục `fonts/`), phát hành theo giấy phép SIL Open Font License 1.1.

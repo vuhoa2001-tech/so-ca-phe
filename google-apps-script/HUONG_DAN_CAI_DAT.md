@@ -49,3 +49,24 @@ Bạn cần một tài khoản Google (Gmail).
 - Khi sửa mã `Code.gs` sau này: **Triển khai → Quản lý bản triển khai → biểu tượng bút chì → Phiên bản: Phiên bản mới → Triển khai** (URL giữ nguyên).
 - Đổi mã đồng bộ: sửa trong Code.gs, triển khai lại như trên, rồi nhập mã mới vào app.
 - Khôi phục từ file sao lưu trên một máy sẽ không xóa dữ liệu cũ đã có trên bảng tính; nên khôi phục trước khi bật đồng bộ.
+
+## Bật sao lưu tự động hằng ngày (Google Drive)
+Phần này giúp Sổ tự động lưu một bản sao vào Google Drive mỗi đêm, để lỡ có sự cố vẫn còn bản dự phòng.
+
+1. Mở lại Apps Script của bảng tính (Tiện ích mở rộng → Apps Script).
+2. Dán toàn bộ file `Code.gs` mới vào, thay thế nội dung cũ.
+3. **Quan trọng:** dòng số 9 (`var MA_DONG_BO = ...`) đang là chữ mẫu. Hãy gõ lại mã đồng bộ của bạn vào giữa hai dấu nháy ' ' (đúng như mã đã nhập trong app).
+4. Bấm **Lưu** (Ctrl+S).
+5. Trên thanh công cụ, ở ô chọn hàm (ngay cạnh nút **Gỡ lỗi** / **Chạy**), chọn hàm **caiDatSaoLuuTuDong**, rồi bấm **Chạy**.
+6. Lần đầu, Google sẽ hỏi quyền truy cập Google Drive:
+   - Bấm **Xem xét quyền** → chọn tài khoản Gmail của bạn.
+   - Nếu hiện cảnh báo "Google chưa xác minh ứng dụng này": bấm **Nâng cao** → **Chuyển đến Sổ Cà Phê (không an toàn)** → **Cho phép**.
+7. Chờ đến khi dưới cùng hiện **Đã hoàn tất thực thi**.
+8. Mở **Google Drive** (drive.google.com), tìm thư mục **Sao lưu Sổ Cà Phê**. Trong đó sẽ có bản sao đầu tiên, tên dạng `Sổ Cà Phê – sao lưu 2026-11-25 1530`.
+
+Từ đó, **mỗi đêm khoảng 23 giờ** máy tự tạo thêm một bản sao. Thư mục chỉ giữ **30 bản mới nhất**; bản cũ hơn sẽ được chuyển vào **Thùng rác** của Drive (không mất hẳn, có thể lấy lại trong thời hạn của Thùng rác).
+
+- **Tắt** sao lưu tự động: chọn hàm **tatSaoLuuTuDong** ở ô chọn hàm rồi bấm **Chạy**.
+- **Lấy lại dữ liệu** từ một bản sao: mở bản sao trong thư mục Drive để xem số liệu. Nếu cần khôi phục toàn bộ Sổ, hãy nhờ người kỹ thuật hỗ trợ.
+
+**Nhớ:** mỗi khi sửa `Code.gs`, phải triển khai phiên bản mới để app và sao lưu chạy đúng mã mới: **Triển khai → Quản lý bản triển khai → biểu tượng bút chì → Phiên bản: Phiên bản mới → Triển khai** (URL giữ nguyên).

@@ -57,9 +57,32 @@ var DEF = {
     ['Loại', function (r) { return r.kind === 'close' ? 'Chốt kho (sân trống)' : 'Kiểm kê cuối tháng'; }],
     ['Cà tươi còn lại (kg)', function (r) { return r.freshKg; }],
     ['Nhân đếm thực tế (kg)', function (r) { return (r.beanCountKg === null || r.beanCountKg === undefined) ? '' : r.beanCountKg; }],
-    ['Ghi chú', function (r) { return r.note; }]] }
+    ['Ghi chú', function (r) { return r.note; }]] },
+  openings: { tab: 'Số dư đầu kỳ', cols: [
+    ['Ngày', function (r) { return d_(r.date); }, true],
+    ['Loại', function (r) { return ({ cash: 'Tiền mặt quỹ', supplierDebt: 'Ta nợ người bán', customerDebt: 'Khách mua nợ ta', beanOwed: 'Nhân còn nợ khách đổi', advance: 'Nông dân nợ tiền ứng', deposit: 'Cà khách ký gửi', beanStock: 'Tồn nhân xô', freshStock: 'Tồn cà tươi' })[r.kind] || r.kind; }],
+    ['Khách hàng', function (r, n) { return r.customerId ? n.cust(r.customerId) : ''; }],
+    ['Số tiền (đ)', function (r) { return r.amount; }], ['KL (kg)', function (r) { return r.kg; }], ['Giá trị vốn (đ)', function (r) { return r.value; }],
+    ['Ghi chú', function (r) { return r.note; }]] },
+  advances: { tab: 'Ứng tiền', cols: [
+    ['Số phiếu', function (r) { return r.code; }], ['Ngày', function (r) { return d_(r.date); }, true], ['Khách hàng', function (r, n) { return n.cust(r.customerId); }],
+    ['Hình thức', function (r) { return r.kind === 'goods' ? 'Ứng hàng' : 'Ứng tiền mặt'; }], ['Hàng ứng', function (r) { return r.item; }],
+    ['Số tiền (đ)', function (r) { return r.amount; }], ['Ghi chú', function (r) { return r.note; }]] },
+  deposits: { tab: 'Ký gửi', cols: [
+    ['Số phiếu', function (r) { return r.code; }], ['Ngày', function (r) { return d_(r.date); }, true], ['Khách hàng', function (r, n) { return n.cust(r.customerId); }],
+    ['Loại phiếu', function (r) { return r.kind === 'out' ? 'Trả lại cà' : 'Nhận ký gửi'; }], ['Loại cà', function (r, n) { return n.type(r.typeId); }],
+    ['Số bao', function (r) { return (r.bags || []).length; }], ['Tổng cả bì (kg)', function (r) { return r.gross; }], ['Trừ bì (kg)', function (r) { return r.tareTotal; }],
+    ['KL tịnh (kg)', function (r) { return r.kg; }], ['Ghi chú', function (r) { return r.note; }]] },
+  cashCounts: { tab: 'Chốt quỹ', cols: [
+    ['Ngày', function (r) { return d_(r.date); }, true], ['Sổ sách (đ)', function (r) { return r.book; }], ['Đếm được (đ)', function (r) { return r.counted; }],
+    ['Chênh lệch (đ)', function (r) { return r.diff; }], ['Đã ghi nhận', function (r) { return r.posted ? 'Có' : 'Chưa'; }], ['Ghi chú', function (r) { return r.note; }]] },
+  auditLog: { tab: 'Lịch sử sửa xóa', cols: [
+    ['Thời điểm', function (r) { return r.at; }], ['Người', function (r) { return r.by; }],
+    ['Hành động', function (r) { return r.action === 'update' ? 'Sửa' : r.action === 'delete' ? 'Xóa' : r.action === 'pin' ? 'Đổi PIN' : r.action; }],
+    ['Loại dữ liệu', function (r) { return r.coll; }], ['Phiếu', function (r) { return r.label; }],
+    ['Thay đổi', function (r) { return (r.changes || []).map(function (c) { return c.field + ': ' + c.from + ' → ' + c.to; }).join('; '); }]] }
 };
-var ORDER = ['settings', 'types', 'customers', 'purchases', 'exchanges', 'beanPayments', 'sales', 'adjustments', 'cash', 'stockIns', 'stocktakes'];
+var ORDER = ['settings', 'types', 'customers', 'purchases', 'exchanges', 'beanPayments', 'sales', 'adjustments', 'cash', 'stockIns', 'stocktakes', 'openings', 'advances', 'deposits', 'cashCounts', 'auditLog'];
 
 // Đọc ô thời gian an toàn: nếu Google lỡ đổi chữ thành kiểu ngày thì đổi lại về chuỗi ISO
 function s_(v) { return v instanceof Date ? v.toISOString() : String(v); }
@@ -192,4 +215,50 @@ function upsert_(coll, items, serverTime, N) {
     setText_(sh, coll, ncol, start, appendRows.length);
     sh.getRange(start, 1, appendRows.length, ncol).setValues(appendRows);
   }
+}
+
+// ===== Sao lưu tự động hằng ngày lên Google Drive =====
+var THU_MUC_SAO_LUU = 'Sao lưu Sổ Cà Phê';
+var TIEN_TO_SAO_LUU = 'Sổ Cà Phê – sao lưu';
+var SO_BAN_SAO_GIU = 30;
+
+// Tạo một bản sao của Sổ hiện tại vào thư mục Drive, rồi chỉ giữ 30 bản mới nhất (bản cũ hơn vào Thùng rác).
+// Cách chạy thử bằng tay: chọn hàm "saoLuuHangNgay" ở ô cạnh nút "Chạy" → bấm "Chạy".
+function saoLuuHangNgay() {
+  var file = DriveApp.getFileById(SpreadsheetApp.getActiveSpreadsheet().getId());
+  var it = DriveApp.getFoldersByName(THU_MUC_SAO_LUU);
+  var folder = it.hasNext() ? it.next() : DriveApp.createFolder(THU_MUC_SAO_LUU);
+  var ten = TIEN_TO_SAO_LUU + ' ' + Utilities.formatDate(new Date(), 'Asia/Ho_Chi_Minh', 'yyyy-MM-dd HHmm');
+  file.makeCopy(ten, folder);
+  var ds = [], files = folder.getFiles();
+  while (files.hasNext()) {
+    var f = files.next();
+    if (f.getName().indexOf(TIEN_TO_SAO_LUU) === 0) ds.push(f);
+  }
+  ds.sort(function (a, b) { return b.getDateCreated() - a.getDateCreated(); });
+  ds.slice(SO_BAN_SAO_GIU).forEach(function (f) { f.setTrashed(true); });
+  return 'Đã sao lưu: ' + ten;
+}
+
+// Bật sao lưu tự động lúc 23h mỗi đêm và tạo ngay một bản đầu tiên.
+// Cách chạy: chọn hàm "caiDatSaoLuuTuDong" ở ô cạnh nút "Chạy" → bấm "Chạy" (Google sẽ hỏi cấp quyền Drive).
+function caiDatSaoLuuTuDong() {
+  tatSaoLuuTuDong();
+  ScriptApp.newTrigger('saoLuuHangNgay').timeBased().everyDays(1).atHour(23).inTimezone('Asia/Ho_Chi_Minh').create();
+  var kq = saoLuuHangNgay();
+  var msg = 'Đã bật sao lưu tự động lúc 23h hằng ngày. ' + kq + ' (thư mục Google Drive "' + THU_MUC_SAO_LUU + '").';
+  Logger.log(msg);
+  return msg;
+}
+
+// Tắt sao lưu tự động (xóa lịch chạy hằng đêm).
+// Cách chạy: chọn hàm "tatSaoLuuTuDong" ở ô cạnh nút "Chạy" → bấm "Chạy".
+function tatSaoLuuTuDong() {
+  var n = 0;
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'saoLuuHangNgay') { ScriptApp.deleteTrigger(t); n++; }
+  });
+  var msg = 'Đã tắt sao lưu tự động (xóa ' + n + ' lịch).';
+  Logger.log(msg);
+  return msg;
 }
