@@ -836,8 +836,8 @@ SPEC.bc_khach=()=>{const f=ui.f.bc;const rows=DB.customers.map(c=>{const ps=DB.p
  foot:['Tổng cộng',I(s(r=>r.pn)),K(s(r=>r.pkg)),M(s(r=>r.pamt)),M(s(r=>r.ppaid)),M(s(r=>r.pamt-r.ppaid)),I(s(r=>r.xn)),K(s(r=>r.fr)),K(s(r=>r.due)),K(s(r=>r.pd)),K(s(r=>r.due-r.pd))]};};
 
 /* ===== CÀI ĐẶT ===== */
-VIEWS.cd=()=>{const s=DB.settings;const lb=s.lastBackup;
- return'<div class="card"><h2>Cài đặt</h2><form id="f-cd" autocomplete="off"><div class="grid"><label>Tên cơ sở (in trên phiếu)<input id="cd-name" value="'+esc(s.shopName)+'"></label><label>Địa chỉ<input id="cd-addr" value="'+esc(s.address)+'"></label><label>Số điện thoại<input id="cd-phone" value="'+esc(s.phone)+'"></label>'
+VIEWS.cd=()=>{const s=DB.settings;const lb=s.lastBackup;const guideCard='<div class="card"><a class="btn btn-p" href="huong-dan.html" style="display:inline-block;text-decoration:none;font-size:18px;padding:12px 20px">📖 Hướng dẫn sử dụng</a> <span class="mut">Cách dùng app cho nhân viên nhập liệu.</span></div>';
+ return guideCard+'<div class="card"><h2>Cài đặt</h2><form id="f-cd" autocomplete="off"><div class="grid"><label>Tên cơ sở (in trên phiếu)<input id="cd-name" value="'+esc(s.shopName)+'"></label><label>Địa chỉ<input id="cd-addr" value="'+esc(s.address)+'"></label><label>Số điện thoại<input id="cd-phone" value="'+esc(s.phone)+'"></label>'
  +'<label>Tỷ lệ đổi mặc định (kg tươi / 1 kg nhân)<input id="cd-ratio" value="'+esc(nfP.format(s.defaultRatio))+'" inputmode="decimal"></label><label>Quỹ tiền mặt đầu kỳ (đ)<input id="cd-cash" class="money" inputmode="numeric" value="'+esc(fnum(s.openingCash))+'"></label></div>'
  +'<p class="mut">Chỉ có hai loại cà phê: Cà tươi và Nhân xô. Tồn nhân xô tính từ các phiếu Nhập kho; cà tươi ước lượng khi Kiểm kê.</p>'
  +'<div class="btns"><button class="btn btn-p" type="submit">Lưu cài đặt</button></div></form></div>'
@@ -1218,7 +1218,7 @@ const NAV_GROUPS=[['so','Sổ sách',['tq','mua','doi','nk','ban','ug','quy']],[
 function navHTML(){const names=Object.fromEntries(TABS);const closed=Store.getPref('navGrp')||{};const min=!!Store.getPref('navMin');
  return'<div class="nv-top"><button class="nv-collapse" data-act="navCollapse" title="'+(min?'Mở rộng menu':'Thu gọn menu')+'">'+(min?'»':'« Thu gọn')+'</button></div>'
  +NAV_GROUPS.map(g=>'<div class="nv-grp'+(closed[g[0]]?' closed':'')+'"><button class="nv-gh" data-act="navGrp" data-g="'+g[0]+'">'+g[1]+'<span>▾</span></button><div class="nv-items">'
-  +g[2].map(k=>'<button class="nv-it'+(ui.tab===k?' on':'')+'" data-act="tab" data-t="'+k+'" title="'+esc(names[k])+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+NAV_ICON[k]+'</svg><span class="lb">'+esc(names[k])+'</span></button>').join('')+'</div></div>').join('');}
+  +g[2].map(k=>'<button class="nv-it'+(ui.tab===k?' on':'')+'" data-act="tab" data-t="'+k+'" title="'+esc(names[k])+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+NAV_ICON[k]+'</svg><span class="lb">'+esc(names[k])+'</span></button>').join('')+(g[0]==='ht'?'<a class="nv-it" href="huong-dan.html" title="Hướng dẫn sử dụng" style="text-decoration:none"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3V4z"/><path d="M9 9h6M9 13h6"/></svg><span class="lb">Hướng dẫn</span></a>':'')+'</div></div>').join('');}
 ACT.navCollapse=()=>{Store.setPref('navMin',!Store.getPref('navMin'));render();};
 ACT.navGrp=b=>{const c=Object.assign({},Store.getPref('navGrp')||{});c[b.dataset.g]=!c[b.dataset.g];Store.setPref('navGrp',c);$('#nav').innerHTML=navHTML();};
 ACT.brandGo=()=>{if(ui.mode==='easy')ACT.eHome();else{ui.edit={};go('tq');}};
@@ -1880,7 +1880,7 @@ function recDate(k,id){const a=REC_ARR[k];const r=a&&findRec(a,id);return r?r.da
 ACT.eOpenings=()=>needOwner(()=>{ui.mode='full';Store.setPref('mode','full');ui.edit={};ui.od=null;go('od');});
 ACT.eAudit=()=>needOwner(()=>{ui.mode='full';Store.setPref('mode','full');ui.edit={};go('audit');});
 function eCd(){const st=Store.status();const open=isUnlocked();
- let h='<div class="ecard"><label>Người nhập<input id="eUser" class="einput" value="'+esc(Store.getUser())+'" autocomplete="off"></label></div><div class="ecard">Đồng bộ: <b>'+esc(st.t)+'</b></div>'+EB('go','syncNow','🔄 Đồng bộ ngay');
+ let h='<div class="ecard"><label>Người nhập<input id="eUser" class="einput" value="'+esc(Store.getUser())+'" autocomplete="off"></label></div><div class="ecard">Đồng bộ: <b>'+esc(st.t)+'</b></div>'+EB('go','syncNow','🔄 Đồng bộ ngay')+'<a class="eb alt" href="huong-dan.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none">📖 Hướng dẫn sử dụng</a>';
  if(!hasPin())h+='<div class="warn">⚠ Chưa đặt mã PIN của chủ: ai cũng xóa, sửa được sổ và xem được lãi.'+EB('go','pinSetup','🔐 Đặt mã PIN chủ')+'</div>';
  if(open)h+=EB('alt','backup','💾 Sao lưu ra file')+EB('alt','eOpenings','📘 Số dư đầu kỳ')+EB('alt','eAudit','🕘 Lịch sử sửa / xóa')+(hasPin()?EB('alt','pinSetup','🔐 Đổi / gỡ mã PIN')+(Store.getPref('ownerDevice')?EB('ghost','ownerDev','Bỏ "máy của chủ"'):''):'')+EB('ghost','toggleMode','Chế độ đầy đủ (cài đặt đầy đủ, dành cho chủ)');
  else h+=EB('alt','pinPrompt','🔒 Nhập PIN chủ để mở các cài đặt khác');

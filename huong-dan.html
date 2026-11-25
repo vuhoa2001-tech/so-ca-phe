@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hướng dẫn sử dụng – Sổ Cà Phê Lý Thuỷ</title>
+<meta name="theme-color" content="#8a6a1e">
+<link rel="icon" href="favicon-32.png">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{--bg:#f1f0ee;--card:#fff;--line:#cdcac4;--text:#25231f;--mut:#5b5851;--gold:#8a6a1e;--goldbg:#f6efdc;--ok:#1e7a48;--okbg:#e4f3ea;--bad:#b42318;--badbg:#fdebe9;--warn:#8a5a00;--warnbg:#fff3d6;--r:14px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:18px;line-height:1.6;overflow-x:hidden}
+img{max-width:100%}
+a{color:var(--gold)}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 40px}
+h1,h2,h3{line-height:1.25;margin:0}
+h2{font-size:26px;font-weight:700}
+h3{font-size:21px;font-weight:700}
+p{margin:.5em 0}
+.mut{color:var(--mut)}
+/* header */
+.top{background:var(--card);border-bottom:1px solid var(--line)}
+.top .wrap{padding-top:20px;padding-bottom:20px;text-align:center}
+.top img{width:72px;height:72px;border-radius:16px;border:1px solid var(--line)}
+.top h1{font-size:28px;margin-top:10px}
+.top p{margin:6px 0 0;color:var(--mut)}
+.btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:16px}
+.bt{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:56px;padding:10px 22px;border-radius:14px;border:2px solid var(--gold);background:var(--card);color:var(--gold);font-weight:700;font-size:19px;line-height:1.2;font-family:inherit;text-decoration:none;cursor:pointer}
+.bt.go{background:var(--gold);color:#fff}
+.bt.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+/* toc */
+.toc{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:8px 0}
+.toc .row{display:flex;gap:8px;overflow-x:auto;padding:2px 16px;max-width:1100px;margin:0 auto;scrollbar-width:thin}
+.toc a{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:48px;padding:6px 16px;border-radius:24px;border:2px solid var(--gold);background:var(--card);color:var(--text);font-weight:600;font-size:17px;text-decoration:none;white-space:nowrap}
+.toc a b{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--gold);color:#fff;font-size:15px}
+.toc a.on{background:var(--goldbg)}
+/* sections */
+section{margin-top:36px}
+.sh{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.sh .n{flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:var(--gold);color:#fff;font-weight:700;font-size:22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin:12px 0}
+.card.avoid,.step,.warnc,.faq details{break-inside:avoid}
+.cols{display:grid;gap:14px}
+@media(min-width:760px){.cols.c2{grid-template-columns:1fr 1fr}.cols.c3{grid-template-columns:repeat(3,1fr)}}
+.cols>.card{margin:0}
+ol.s,ul.s{margin:.4em 0;padding-left:1.3em}
+ol.s li,ul.s li{margin:.35em 0}
+.tip{background:var(--goldbg);border:1px solid #e1d3a8;border-radius:12px;padding:10px 14px;margin:12px 0}
+.tip.red{background:var(--badbg);border-color:#f0b9b3;color:#7a160d}
+b.k{background:var(--goldbg);border:1px solid #e1d3a8;border-radius:8px;padding:0 7px;white-space:nowrap}
+.link{display:block;font-weight:700;font-size:22px;word-break:break-all;text-align:center;background:var(--goldbg);border:2px dashed var(--gold);border-radius:12px;padding:14px;margin:10px 0;color:var(--text);text-decoration:none}
+.lock{display:inline-block;background:var(--bad);color:#fff;border-radius:10px;padding:0 8px;font-size:15px;font-weight:700;white-space:nowrap}
+.who{display:inline-block;border-radius:10px;padding:0 8px;font-size:15px;font-weight:700;background:var(--okbg);color:var(--ok);white-space:nowrap}
+/* steps */
+.steps{display:grid;gap:16px}
+@media(min-width:900px){.steps{grid-template-columns:1fr 1fr}}
+.step{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.step .hd{display:flex;align-items:center;gap:12px}
+.step .num{flex:none;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--gold);color:#fff;font-weight:700;font-size:24px}
+.step.final .num{background:var(--ok)}
+.step .hd h3{font-size:22px}
+.step .fig{display:flex;justify-content:center}
+.mini-sec{margin:22px 0 0}
+.mini-sec>.card{margin-top:0}
+.mini-sec .cols{align-items:start}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}
+.flow span{background:var(--goldbg);border:1px solid #e1d3a8;border-radius:20px;padding:2px 12px;font-weight:600;font-size:16px}
+.flow i{font-style:normal;color:var(--mut)}
+/* phone mockup */
+.phone{width:260px;flex:none;border:7px solid #2b2925;border-radius:30px;background:#f1f0ee;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.18);font-size:13px;line-height:1.35;color:#25231f;position:relative}
+.phone .notch{height:16px;background:#2b2925;position:relative}
+.phone .notch:after{content:"";position:absolute;left:50%;top:5px;width:46px;height:5px;border-radius:3px;background:#55524b;transform:translateX(-50%)}
+.scr{padding:8px 9px 10px}
+.pillrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:11px;font-weight:700}
+.prog{font-size:12px;font-weight:700}
+.bar{height:7px;background:#e3e0d9;border-radius:4px;margin:2px 0 6px}
+.bar i{display:block;height:100%;background:var(--gold);border-radius:4px}
+.q{font-size:17px;font-weight:700;margin:4px 0 6px}
+.mc{background:#fff;border:1px solid #cdcac4;border-radius:10px;padding:6px 9px;margin:5px 0}
+.rl{display:flex;justify-content:space-between;gap:6px;padding:1px 0}
+.rl b{text-align:right}
+.big{font-weight:700;color:var(--gold)}
+.huge{font-size:24px;font-weight:700;color:var(--gold);display:block;text-align:center;line-height:1.2}
+.ctr{text-align:center}
+.mb{display:flex;align-items:center;justify-content:center;text-align:center;min-height:34px;border-radius:9px;border:2px solid #cdcac4;background:#fff;font-weight:700;font-size:14px;margin:5px 0;padding:3px 6px}
+.mb small{display:block;font-size:10px;font-weight:400;color:#5b5851}
+.mb.go{background:var(--gold);border-color:var(--gold);color:#fff}
+.mb.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.mb.sel{background:#f6efdc;border-color:var(--gold);box-shadow:0 0 0 2px #e1d3a8}
+.mb.ghost{background:#fff;color:#5b5851}
+.mb.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+.mb.ok2{color:var(--gold);border-color:var(--gold)}
+.nav2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.nav2 .mb{margin:0}
+.nav2 .right{background:var(--ok);border-color:var(--ok);color:#fff;outline:3px solid #f6efdc;box-shadow:0 0 0 4px #f1d27a}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0}
+.chip{border:2px solid var(--gold);border-radius:16px;padding:1px 9px;font-weight:700;background:#fff;font-size:13px}
+.kpd{font-size:13px;margin:4px 0}
+.kpd b{font-size:19px}
+.mk{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:4px 0}
+.mk span{display:grid;place-items:center;min-height:28px;border-radius:7px;border:1px solid #cdcac4;background:#fff;font-weight:700;font-size:15px}
+.mk span.d{background:#f6efdc}
+.mini3{display:flex;justify-content:space-around;font-size:11px;text-align:center}
+.mini3 b{display:block;font-size:14px}
+.tag{position:absolute;right:6px;bottom:50px;background:#f1d27a;color:#25231f;font-weight:700;font-size:11px;padding:2px 8px;border-radius:10px}
+/* home mockup tiles */
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.tl{background:#fff;border:1px solid #cdcac4;border-radius:10px;padding:5px 2px;text-align:center;font-weight:700;font-size:11px;position:relative}
+.tl span{display:grid;place-items:center;width:30px;height:30px;margin:0 auto 2px;border-radius:50%;background:#f6efdc;border:1px solid var(--gold);font-size:16px}
+.tl em{position:absolute;top:-5px;right:-3px;font-style:normal;font-size:12px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px}
+.kpis .mc{margin:0;font-size:10px}
+.kpis .big{display:block;font-size:12px}
+.hero{display:flex;align-items:center;gap:6px;justify-content:center;font-weight:700;margin-bottom:5px}
+.hero img{width:22px;height:22px;border-radius:6px}
+/* tile captions */
+.tcap{display:grid;grid-template-columns:1fr;gap:8px;margin:0;padding:0;list-style:none}
+@media(min-width:600px){.tcap{grid-template-columns:1fr 1fr}}
+.tcap li{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;break-inside:avoid}
+.tcap .ic{flex:none;font-size:30px;line-height:1.2}
+.tcap b{display:block}
+.tcap small{display:block;font-size:16px;color:var(--mut);line-height:1.4}
+/* pills */
+.pill{display:inline-block;border-radius:24px;padding:8px 16px;font-weight:700;font-size:17px;color:#fff}
+.pill.ok{background:var(--ok)}.pill.wait{background:#f1b52a;color:#25231f}.pill.off{background:#6b6862}.pill.bad{background:var(--bad)}.pill.none{background:#6b6862}
+.pl{display:grid;gap:10px}
+.pl .card{display:grid;gap:8px;margin:0}
+@media(min-width:760px){.pl .card{grid-template-columns:300px 1fr;align-items:center}}
+/* warn */
+.warns{display:grid;gap:12px}
+@media(min-width:760px){.warns{grid-template-columns:1fr 1fr}}
+.warnc{display:flex;gap:12px;background:var(--card);border:2px solid var(--line);border-left:8px solid var(--gold);border-radius:var(--r);padding:12px 16px}
+.warnc.r{border-color:#f0b9b3;border-left-color:var(--bad);background:var(--badbg)}
+.warnc .ic{font-size:32px;line-height:1.2}
+.warnc b{display:block}
+/* faq */
+.faq details{background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin:10px 0;padding:0}
+.faq summary{cursor:pointer;font-weight:700;padding:14px 18px;min-height:56px;list-style:none;display:flex;align-items:center;gap:10px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary:before{content:"＋";color:var(--gold);font-size:22px}
+.faq details[open] summary:before{content:"－"}
+.faq details>div{padding:0 18px 14px}
+footer{margin-top:36px;text-align:center;font-weight:700;font-size:20px;background:var(--goldbg);border:1px solid #e1d3a8;border-radius:var(--r);padding:18px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#25231f;color:#fff;padding:10px 20px;border-radius:24px;font-weight:600;z-index:50}
+.toast[hidden]{display:none}
+@media(max-width:420px){body{font-size:18px}h2{font-size:24px}.top h1{font-size:25px}.bt{width:100%}}
+/* print */
+@page{size:A4;margin:12mm}
+@media print{
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ body{background:#fff;font-size:14px;line-height:1.45}
+ .no-print,.toc,.toast{display:none!important}
+ .wrap{max-width:none;padding:0}
+ .top{border:0}.top .wrap{padding:0 0 8px}
+ .top img{width:56px;height:56px}
+ h2{font-size:21px}h3{font-size:17px}
+ section{margin-top:18px}
+ section>.sh{break-after:avoid}
+ .card,.step,.warnc,.tcap li,.pl .card,.faq details{break-inside:avoid;page-break-inside:avoid}
+ .steps{grid-template-columns:1fr 1fr;gap:10px}
+ .cols.c2{grid-template-columns:1fr 1fr}.cols.c3{grid-template-columns:repeat(3,1fr)}
+ .tcap{grid-template-columns:1fr 1fr}
+ .warns{grid-template-columns:1fr 1fr}
+ .pl .card{grid-template-columns:230px 1fr}
+ .faq details>div{display:block}
+ .phone{box-shadow:none;transform-origin:top center}
+ .link{font-size:17px}
+ a{color:inherit;text-decoration:none}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <img src="logo-128.png" alt="Logo HOAVU" width="72" height="72">
+    <h1>Hướng dẫn sử dụng – Sổ Cà Phê Lý Thuỷ</h1>
+    <p>Dành cho nhân viên nhập liệu</p>
+    <div class="btns no-print">
+      <a class="bt go" href="./">⬅ Về ứng dụng</a>
+      <button class="bt" type="button" onclick="window.print()">🖨 In hướng dẫn</button>
+    </div>
+  </div>
+</header>
+
+<nav class="toc no-print" aria-label="Mục lục">
+  <div class="row">
+    <a href="#cai-app"><b>1</b> Cài app</a>
+    <a href="#lan-dau"><b>2</b> Lần đầu mở</a>
+    <a href="#man-hinh"><b>3</b> Màn hình chính</a>
+    <a href="#mua-ca"><b>4</b> Mua cà</a>
+    <a href="#khac"><b>5</b> Việc khác</a>
+    <a href="#nhan"><b>6</b> Nhãn góc trên</a>
+    <a href="#nho"><b>7</b> Cần nhớ</a>
+    <a href="#su-co"><b>8</b> Gặp sự cố</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- 1 -->
+<section id="cai-app">
+  <div class="sh"><span class="n">1</span><h2>Cài app lên điện thoại</h2></div>
+  <p>Cài một lần là xong. Sau đó bạn mở app từ màn hình điện thoại như mở Zalo.</p>
+  <div class="card avoid">
+    <b>Link của app:</b>
+    <a class="link" id="applink" href="https://vuhoa2001-tech.github.io/so-ca-phe/">https://vuhoa2001-tech.github.io/so-ca-phe/</a>
+    <div class="btns no-print" style="margin-top:8px"><button class="bt ok" type="button" id="copybtn">📋 Sao chép link</button></div>
+  </div>
+  <div class="cols c2">
+    <div class="card avoid">
+      <h3>🤖 Điện thoại Android</h3>
+      <p class="mut">Dùng trình duyệt <b>Chrome</b>.</p>
+      <ol class="s">
+        <li>Mở <b>Chrome</b>, mở link ở trên.</li>
+        <li>Bấm nút <b class="k">⋮</b> (3 chấm) ở góc trên bên phải.</li>
+        <li>Chọn <b class="k">Thêm vào màn hình chính</b> hoặc <b class="k">Cài đặt ứng dụng</b>.</li>
+        <li>Bấm <b class="k">Thêm</b> (hoặc <b class="k">Cài đặt</b>).</li>
+      </ol>
+    </div>
+    <div class="card avoid">
+      <h3>🍎 iPhone</h3>
+      <p class="mut">Chỉ dùng trình duyệt <b>Safari</b> (hình la bàn). Chrome trên iPhone không cài được.</p>
+      <ol class="s">
+        <li>Mở <b>Safari</b>, mở link ở trên.</li>
+        <li>Bấm nút <b class="k">Chia sẻ □↑</b> ở dưới màn hình.</li>
+        <li>Kéo lên, chọn <b class="k">Thêm vào MH chính</b>.</li>
+        <li>Bấm <b class="k">Thêm</b> ở góc trên bên phải.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="tip">💡 <b>Lần đầu phải mở khi có mạng.</b> Sau đó mất mạng vẫn mở và nhập được.</div>
+</section>
+
+<!-- 2 -->
+<section id="lan-dau">
+  <div class="sh"><span class="n">2</span><h2>Lần đầu mở app</h2></div>
+  <div class="cols c2" style="align-items:center">
+    <div class="card">
+      <ol class="s">
+        <li>Mở app từ biểu tượng trên màn hình điện thoại.</li>
+        <li>App hỏi <b>"Bạn tên là gì?"</b>. Gõ tên của bạn.</li>
+        <li>Bấm <b class="k">Tiếp tục ›</b>.</li>
+      </ol>
+      <p>Tên này được ghi trên <b>mỗi phiếu</b> bạn nhập. Vì vậy hãy gõ đúng tên mình.</p>
+      <div class="tip red">🔒 Phần kết nối <b>Google Sheets</b> do <b>chủ đại lý</b> cài. Bạn <b>không cần tự làm</b> và <b>không phải nhập mã đồng bộ</b>.</div>
+    </div>
+    <div class="fig" style="display:flex;justify-content:center">
+      <div class="phone" role="img" aria-label="Màn hình chào: Xin chào! Bạn tên là gì? Có ô gõ tên và nút Tiếp tục.">
+        <div class="notch"></div>
+        <div class="scr" aria-hidden="true">
+          <div class="mc ctr" style="padding:14px 8px"><div style="font-size:38px">👋</div><div class="q">Xin chào! Bạn tên là gì?</div><div>Tên này sẽ được ghi lại trên mỗi phiếu bạn nhập.</div>
+          <div class="mb" style="justify-content:flex-start;color:#5b5851;font-weight:400;margin-top:10px">Gõ tên của bạn</div>
+          <div class="mb go">Tiếp tục ›</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="man-hinh">
+  <div class="sh"><span class="n">3</span><h2>Màn hình chính</h2></div>
+  <p>Đây là màn hình bạn thấy mỗi lần mở app. Bấm vào ô nào thì làm việc đó. Ô có <span class="lock">🔒 PIN</span> là việc của <b>chủ</b>, cần mã PIN.</p>
+  <div class="cols c2" style="align-items:start">
+    <div class="fig" style="display:flex;justify-content:center">
+      <div class="phone" role="img" aria-label="Màn hình chính của app có 13 ô: Mua cà, Đổi cà, Trả nhân, Nhập kho, Ký gửi, Ứng tiền, Thu / Chi, Chốt quỹ, Xem nợ, Hôm nay, Kiểm kê, Báo cáo, Cài đặt. Mô tả từng ô ở danh sách bên cạnh.">
+        <div class="notch"></div>
+        <div class="scr" aria-hidden="true">
+          <div class="pillrow"><span>☰ HOAVU</span><span class="pill ok" style="padding:2px 8px;font-size:10px">✓ Đã lưu lên mạng</span></div>
+          <div class="hero"><img src="logo-128.png" alt="">HOAVU</div>
+          <div class="kpis"><div class="mc">Tiền mặt trong quỹ<span class="big">12.500.000 đ</span></div><div class="mc">Hôm nay đã mua<span class="big">135,2 kg</span></div></div>
+          <div class="tiles">
+            <div class="tl"><span>🛒</span>Mua cà</div>
+            <div class="tl"><span>🔄</span>Đổi cà</div>
+            <div class="tl"><span>🫘</span>Trả nhân</div>
+            <div class="tl"><span>📦</span>Nhập kho</div>
+            <div class="tl"><span>🏷️</span>Ký gửi</div>
+            <div class="tl"><span>💳</span>Ứng tiền</div>
+            <div class="tl"><span>💰</span>Thu / Chi</div>
+            <div class="tl"><span>💵</span>Chốt quỹ</div>
+            <div class="tl"><span>📒</span>Xem nợ</div>
+            <div class="tl"><span>📅</span>Hôm nay</div>
+            <div class="tl"><em>🔒</em><span>📋</span>Kiểm kê</div>
+            <div class="tl"><span>📊</span>Báo cáo</div>
+            <div class="tl"><span>⚙️</span>Cài đặt</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul class="tcap">
+      <li><span class="ic">🛒</span><div><b>Mua cà</b><small>Mua cà của nông dân. Dùng nhiều nhất. <span class="who">Nhân viên</span></small></div></li>
+      <li><span class="ic">🔄</span><div><b>Đổi cà</b><small>Khách đưa cà tươi, mình hẹn trả nhân. <span class="who">Nhân viên</span></small></div></li>
+      <li><span class="ic">🫘</span><div><b>Trả nhân</b><small>Trả nhân cho khách đã đổi cà. <span class="who">Nhân viên</span></small></div></li>
+      <li><span class="ic">📦</span><div><b>Nhập kho</b><small>Ghi nhân xô vào kho sau khi sấy / xay. <span class="who">Nhân viên</span></small></div></li>
+      <li><span class="ic">🏷️</span><div><b>Ký gửi</b><small>Khách gửi cà: nhận, chốt giá, trả lại. <span class="who">Nhân viên</span></small></div></li>
+      <li><span class="ic">💳</span><div><b>Ứng tiền</b><small>Cho nông dân ứng tiền hoặc hàng. <span class="who">Nhân viên</span></small></div></li>
+      <li><span class="ic">💰</span><div><b>Thu / Chi</b><small>Ghi tiền vào, tiền ra trong ngày. <span class="who">Nhân viên</span></small></div></li>
+      <li><span class="ic">💵</span><div><b>Chốt quỹ</b><small>Đếm tiền cuối ngày. <span class="who">Nhân viên</span></small></div></li>
+      <li><span class="ic">📒</span><div><b>Xem nợ</b><small>Xem ai còn nợ, in sao kê. <span class="who">Nhân viên</span></small></div></li>
+      <li><span class="ic">📅</span><div><b>Hôm nay</b><small>Xem lại phiếu trong ngày, sửa hoặc xóa. <span class="who">Nhân viên</span></small></div></li>
+      <li><span class="ic">📋</span><div><b>Kiểm kê</b><small>Đếm kho cuối tháng. Việc của chủ. <span class="lock">🔒 PIN</span></small></div></li>
+      <li><span class="ic">📊</span><div><b>Báo cáo</b><small>Xem số mua, đổi, tiền. Phần lãi chỉ chủ xem. <span class="lock">🔒 một phần</span></small></div></li>
+      <li><span class="ic">⚙️</span><div><b>Cài đặt</b><small>Gõ tên người nhập, nút <b>📖 Hướng dẫn</b> (trang này). Các cài đặt khác của chủ. <span class="lock">🔒 một phần</span></small></div></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="mua-ca">
+  <div class="sh"><span class="n">4</span><h2>Nhập một phiếu Mua cà</h2></div>
+  <p>Đây là việc bạn làm nhiều nhất. Mỗi lần mua, làm đủ <b>7 bước</b> như dưới đây. Bấm <b class="k">Tiếp ›</b> để sang bước sau, <b class="k">‹ Quay lại</b> để sửa bước trước.</p>
+  <div class="card">
+    <b>Ví dụ chúng ta làm cùng nhau:</b>
+    <ul class="s">
+      <li>Khách bán <b>2 bao</b>: <b>66 kg</b> và <b>70,5 kg</b>.</li>
+      <li>Trừ bì (bao đựng) <b>1,3 kg</b>. Giá <b>20.000 đ</b> / kg.</li>
+      <li>Kết quả: <b>135,2 kg</b> và <b>2.704.000 đ</b>.</li>
+    </ul>
+  </div>
+  <div class="tip">👉 Từ màn hình chính, bấm ô <b>🛒 Mua cà</b> để bắt đầu.</div>
+
+  <div class="steps">
+    <!-- step 1 -->
+    <article class="step">
+      <div class="hd"><span class="num">1</span><h3>Chọn khách</h3></div>
+      <p>Gõ tên để tìm, rồi bấm đúng tên khách. Khách mới thì bấm <b class="k">+ Khách mới</b>.</p>
+      <div class="fig"><div class="phone" role="img" aria-label="Bước 1 trên 7: Mua của ai? Có ô tìm tên và danh sách khách, ví dụ Chú Ba.">
+        <div class="notch"></div><div class="scr" aria-hidden="true">
+          <div class="prog">Bước 1/7</div><div class="bar"><i style="width:14%"></i></div>
+          <div class="q">Mua của ai?</div>
+          <div class="mb" style="justify-content:flex-start;font-weight:400;color:#5b5851">🔍 Gõ tên để tìm</div>
+          <div class="mb sel" style="justify-content:flex-start">Chú Ba</div>
+          <div class="mb" style="justify-content:flex-start">Cô Tư</div>
+          <div class="mb" style="justify-content:flex-start">Anh Năm</div>
+          <div class="mb">+ Khách mới</div>
+        </div></div></div>
+    </article>
+    <!-- step 2 -->
+    <article class="step">
+      <div class="hd"><span class="num">2</span><h3>Chọn loại cà</h3></div>
+      <p>Bấm loại cà khách bán. Bấm xong app tự sang bước sau.</p>
+      <div class="fig"><div class="phone" role="img" aria-label="Bước 2 trên 7: Loại cà nào? Hai nút: Cà tươi và Nhân xô.">
+        <div class="notch"></div><div class="scr" aria-hidden="true">
+          <div class="prog">Bước 2/7</div><div class="bar"><i style="width:28.5%"></i></div>
+          <div class="q">Loại cà nào?</div>
+          <div class="mb sel" style="min-height:44px;font-size:17px;justify-content:flex-start">Cà tươi</div>
+          <div class="mb" style="min-height:44px;font-size:17px;justify-content:flex-start">Nhân xô</div>
+          <div class="nav2"><div class="mb ghost">‹ Quay lại</div><div class="mb go" style="opacity:.4">Tiếp ›</div></div>
+        </div></div></div>
+    </article>
+    <!-- step 3 -->
+    <article class="step">
+      <div class="hd"><span class="num">3</span><h3>Cân từng bao</h3></div>
+      <ol class="s">
+        <li>Gõ số cân của <b>một bao</b> trên bàn phím to.</li>
+        <li>Bấm <b class="k">✓ Thêm bao</b>. Bao hiện thành một viên tròn phía trên.</li>
+        <li>Làm lại cho bao tiếp theo.</li>
+      </ol>
+      <p class="mut">Gõ nhầm? Bấm vào viên tròn của bao đó để sửa hoặc xóa. Không cân từng bao thì bấm <b>Nhập tổng KL luôn</b>.</p>
+      <div class="fig"><div class="phone" role="img" aria-label="Bước 3 trên 7: Cân cà. Hai bao đã thêm: 66 và 70,5. TỔNG CẢ BÌ 136,5 kg. Bàn phím số lớn, nút xanh Thêm bao, nút Nhập tổng KL luôn.">
+        <div class="notch"></div><div class="scr" aria-hidden="true">
+          <div class="prog">Bước 3/7</div><div class="bar"><i style="width:42.8%"></i></div>
+          <div class="q">Cân cà</div>
+          <div class="chips"><span class="chip">1: 66</span><span class="chip">2: 70,5</span></div>
+          <div class="mc ctr"><div class="mini3" style="justify-content:center">Số bao <b style="margin-left:6px">2</b></div>TỔNG CẢ BÌ <span class="huge">136,5 kg</span></div>
+          <div class="kpd">Bao số 3: <b>0</b></div>
+          <div class="mk"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>,</span><span>0</span><span class="d">⌫</span></div>
+          <div class="mb ok">✓ Thêm bao</div>
+          <div class="mb">Nhập tổng KL luôn<small>không cân từng bao</small></div>
+        </div></div></div>
+    </article>
+    <!-- step 4 -->
+    <article class="step">
+      <div class="hd"><span class="num">4</span><h3>Trừ bì</h3></div>
+      <p>Bì là trọng lượng bao đựng. Gõ <b>tổng số kg bì</b> cần trừ (ví dụ <b>1,3</b>). App tính ngay <b>KL tịnh</b>.</p>
+      <p class="mut">Không trừ gì thì bấm <b class="k">Không trừ (0 kg)</b>. Bước này lúc nào cũng hiện.</p>
+      <div class="fig"><div class="phone" role="img" aria-label="Bước 4 trên 7: Trừ bì bao nhiêu kg? Tổng cả bì 136,5 trừ bì 1,3 bằng KL tịnh 135,2 kg. Bàn phím số và nút Không trừ 0 kg.">
+        <div class="notch"></div><div class="scr" aria-hidden="true">
+          <div class="prog">Bước 4/7</div><div class="bar"><i style="width:57%"></i></div>
+          <div class="q">Trừ bì bao nhiêu kg?</div>
+          <div class="mc"><div class="rl"><span>Số bao</span><b>2</b></div><div class="rl"><span>Tổng cả bì</span><b class="big">136,5 kg</b></div></div>
+          <div class="kpd">Trừ bì: <b>1,3</b></div>
+          <div class="mc ctr">Tổng cả bì <b>136,5 kg</b> − Trừ bì <b>1,3 kg</b> =<br>KL TỊNH <span class="huge">135,2 kg</span></div>
+          <div class="mk"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>,</span><span>0</span><span class="d">⌫</span></div>
+          <div class="mb">Không trừ (0 kg)</div>
+        </div></div></div>
+    </article>
+    <!-- step 5 -->
+    <article class="step">
+      <div class="hd"><span class="num">5</span><h3>Nhập giá</h3></div>
+      <p>Gõ giá <b>1 kg</b>, ví dụ <b>20000</b>. App tự hiện <b>Thành tiền</b>. Nhìn kỹ số tiền rồi bấm <b class="k">Tiếp ›</b>.</p>
+      <div class="fig"><div class="phone" role="img" aria-label="Bước 5 trên 7: Giá bao nhiêu 1 kg? Cà tươi 135,2 kg, giá 20.000 trên kg, thành tiền 2.704.000 đồng.">
+        <div class="notch"></div><div class="scr" aria-hidden="true">
+          <div class="prog">Bước 5/7</div><div class="bar"><i style="width:71%"></i></div>
+          <div class="q">Giá bao nhiêu 1 kg?</div>
+          <div class="mc"><div class="rl"><span>Cà tươi</span><b>135,2 kg</b></div></div>
+          <div class="kpd"><b>20.000</b> / kg</div>
+          <div class="mk"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>000</span><span>0</span><span class="d">⌫</span></div>
+          <div class="mc ctr">Thành tiền<span class="huge">2.704.000 đ</span></div>
+        </div></div></div>
+    </article>
+    <!-- step 6 -->
+    <article class="step">
+      <div class="hd"><span class="num">6</span><h3>Trả tiền</h3></div>
+      <p>Chọn một nút:</p>
+      <ul class="s">
+        <li><b>💵 Trả đủ</b> – đã đưa đủ tiền.</li>
+        <li><b>✋ Trả một phần</b> – app hỏi số tiền đã đưa.</li>
+        <li><b>📝 Chưa trả (ghi nợ)</b> – chưa đưa đồng nào.</li>
+      </ul>
+      <p class="mut">Nếu khách đang nợ ứng, app hiện thêm nút <b>🧾 Trừ tiền ứng</b> để trừ vào tiền mua.</p>
+      <div class="fig"><div class="phone" role="img" aria-label="Bước 6 trên 7: Trả tiền thế nào? Thành tiền 2.704.000 đồng. Ba nút: Trả đủ, Trả một phần, Chưa trả ghi nợ.">
+        <div class="notch"></div><div class="scr" aria-hidden="true">
+          <div class="prog">Bước 6/7</div><div class="bar"><i style="width:85.7%"></i></div>
+          <div class="q">Trả tiền thế nào?</div>
+          <div class="mc ctr">Thành tiền<span class="huge">2.704.000 đ</span></div>
+          <div class="mb ok sel" style="min-height:42px">💵 Trả đủ (2.704.000 đ)</div>
+          <div class="mb" style="min-height:42px">✋ Trả một phần</div>
+          <div class="mb" style="min-height:42px">📝 Chưa trả (ghi nợ)</div>
+          <div class="nav2"><div class="mb ghost">‹ Quay lại</div><div class="mb go">Tiếp ›</div></div>
+        </div></div></div>
+    </article>
+    <!-- step 7 -->
+    <article class="step final">
+      <div class="hd"><span class="num">7</span><h3>Kiểm tra rồi Lưu</h3></div>
+      <p>Đọc lại: khách, loại cà, <b>KL tịnh</b>, <b>Thành tiền</b>. Đúng rồi thì bấm nút xanh <b class="k" style="background:var(--okbg);border-color:var(--ok);color:var(--ok)">✓ Lưu</b> ở <b>góc dưới bên phải</b>.</p>
+      <p class="mut">Muốn in luôn thì bấm <b>✓ Lưu và In</b>. Sai chỗ nào thì bấm ‹ Quay lại.</p>
+      <div class="fig"><div class="phone" role="img" aria-label="Bước 7 trên 7: Kiểm tra lại rồi lưu. Khách Chú Ba, cà tươi, tổng cả bì 136,5, trừ bì 1,3, KL tịnh 135,2 kg, đơn giá 20.000, thành tiền 2.704.000 đồng. Nút Lưu và In, nút xanh Lưu ở góc dưới bên phải.">
+        <div class="notch"></div><div class="scr" aria-hidden="true">
+          <div class="prog">Bước 7/7</div><div class="bar"><i style="width:100%"></i></div>
+          <div class="q">Kiểm tra lại rồi lưu</div>
+          <div class="mc">
+            <div class="rl"><span>Người bán</span><b>Chú Ba</b></div>
+            <div class="rl"><span>Loại cà</span><b>Cà tươi</b></div>
+            <div class="rl"><span>Số bao</span><b>2</b></div>
+            <div class="rl"><span>Tổng cả bì</span><b>136,5 kg</b></div>
+            <div class="rl"><span>Trừ bì</span><b>1,3 kg</b></div>
+            <div class="rl"><span>KL tịnh</span><b>135,2 kg</b></div>
+            <div class="rl"><span>Đơn giá</span><b>20.000 đ</b></div>
+            <div class="rl"><span>Thành tiền</span><b class="big">2.704.000 đ</b></div>
+            <div class="rl"><span>Đã trả</span><b>2.704.000 đ</b></div>
+            <div class="rl"><span>Còn nợ</span><b class="big">0 đ</b></div>
+          </div>
+          <div class="mb ok2">✓ Lưu và In</div>
+          <div class="nav2"><div class="mb ghost">‹ Quay lại</div><div class="mb right">✓ Lưu</div></div>
+        </div></div></div>
+    </article>
+    <!-- done -->
+    <article class="step final">
+      <div class="hd"><span class="num">✓</span><h3>Xong! Màn hình "Đã lưu xong"</h3></div>
+      <p>Bạn thấy chữ <b>"Đã lưu xong!"</b> và số phiếu. Lúc này bạn có thể:</p>
+      <ul class="s">
+        <li><b>🖨 In phiếu</b> đưa cho khách.</li>
+        <li><b>📤 Gửi Zalo</b> cho khách.</li>
+        <li><b>➕ Nhập phiếu mới cho khách này</b> nếu khách còn bán tiếp.</li>
+        <li><b>Về trang chính</b> khi làm xong.</li>
+      </ul>
+      <p class="mut">Màn hình in mở ngay trong app. Bấm <b>⬅ Quay lại ứng dụng</b> để về, hoặc <b>🖨 In lại</b> nếu in chưa được.</p>
+      <div class="fig"><div class="phone" role="img" aria-label="Màn hình Đã lưu xong, có các nút In phiếu, Gửi Zalo, Nhập phiếu mới cho khách này, Về trang chính.">
+        <div class="notch"></div><div class="scr" aria-hidden="true">
+          <div class="mc ctr"><div class="huge" style="color:#1e7a48;font-size:34px">✓</div><div class="q">Đã lưu xong!</div>Số phiếu: <b class="big">PM-0012</b></div>
+          <div class="mb">🖨 In phiếu</div>
+          <div class="mb ok">📤 Gửi Zalo</div>
+          <div class="mb go">➕ Nhập phiếu mới cho khách này</div>
+          <div class="mb ghost">Về trang chính</div>
+        </div></div></div>
+    </article>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="khac">
+  <div class="sh"><span class="n">5</span><h2>Các việc khác</h2></div>
+  <p>Cách làm giống Mua cà: app hỏi từng câu, bạn trả lời rồi bấm <b class="k">Tiếp ›</b>. Cuối cùng kiểm tra và bấm <b class="k">✓ Lưu</b>.</p>
+
+  <div class="cols c2" style="align-items:start">
+
+    <div class="card avoid" id="doi-ca">
+      <h3>🔄 Đổi cà</h3>
+      <p class="mut">Khách đưa cà tươi, mình trả lại nhân theo tỷ lệ.</p>
+      <div class="flow"><span>Khách</span><i>›</i><span>Cân bao</span><i>›</i><span>Trừ bì</span><i>›</i><span>Tỷ lệ</span><i>›</i><span>Trả ngay?</span><i>›</i><span>Lưu</span></div>
+      <ol class="s">
+        <li>Cân và trừ bì như Mua cà.</li>
+        <li>Bước <b>Tỷ lệ đổi</b>: app đã điền tỷ lệ (ví dụ <b>4,6</b>). Đúng thì bấm Tiếp. Khác thì bấm <b>✎ Đổi tỷ lệ</b>.</li>
+        <li>App hiện <b>"Phải trả khách … kg nhân"</b>.</li>
+        <li><b>Trả nhân ngay không?</b> Chọn <b>Không, trả sau</b> hoặc <b>Có, trả ngay</b>.</li>
+      </ol>
+      <div class="fig" style="display:flex;justify-content:center"><div class="phone" style="width:240px" role="img" aria-label="Bước tỷ lệ đổi: cà tươi nhận 135,2 kg, tỷ lệ 4,6, phải trả khách 29,39 kg nhân.">
+        <div class="notch"></div><div class="scr" aria-hidden="true">
+          <div class="q">Tỷ lệ đổi</div>
+          <div class="mc"><div class="rl"><span>Cà tươi nhận</span><b>135,2 kg</b></div><div class="rl"><span>Tỷ lệ (kg tươi / 1 kg nhân)</span><b class="big">4,6</b></div></div>
+          <div class="mc ctr">Phải trả khách<span class="huge">29,39 kg</span>nhân</div>
+          <div class="mb">✎ Đổi tỷ lệ</div>
+        </div></div></div>
+    </div>
+
+    <div class="card avoid">
+      <h3>🫘 Trả nhân</h3>
+      <p class="mut">Khách đã đổi cà, giờ đến lấy nhân.</p>
+      <div class="flow"><span>Khách</span><i>›</i><span>Số kg</span><i>›</i><span>Trả bằng gì</span><i>›</i><span>Lưu</span></div>
+      <ol class="s">
+        <li>Chọn khách. App hiện <b>"Còn nợ nhân"</b>.</li>
+        <li>Gõ số kg trả, hoặc bấm <b>Trả hết</b>.</li>
+        <li>Chọn <b>🫘 Trả bằng nhân</b> hoặc <b>💵 Quy ra tiền</b> (gõ giá 1 kg).</li>
+      </ol>
+    </div>
+
+    <div class="card avoid">
+      <h3>📦 Nhập kho nhân</h3>
+      <p class="mut">Ghi nhân xô vào kho <b>sau khi sấy / xay</b> xong.</p>
+      <div class="flow"><span>Ngày</span><i>›</i><span>Cách làm</span><i>›</i><span>Cân bao</span><i>›</i><span>Trừ bì</span><i>›</i><span>Lưu</span></div>
+      <ol class="s">
+        <li>Chọn ngày (<b>Hôm nay</b> hoặc <b>Hôm qua</b>).</li>
+        <li>Chọn cách làm: <b>☀️ Phơi sân</b>, <b>🔥 Đốt lò</b> hoặc <b>♻️ Cả hai</b>.</li>
+        <li>Cân bao, trừ bì như Mua cà. App hiện <b>KL NHÂN TỊNH</b>.</li>
+      </ol>
+    </div>
+
+    <div class="card avoid">
+      <h3>🏷️ Ký gửi</h3>
+      <p class="mut">Khách gửi cà ở đại lý, chưa bán. Bấm ô Ký gửi, chọn một trong ba:</p>
+      <ul class="s">
+        <li><b>📥 Nhận ký gửi</b> – khách gửi cà, cân và trừ bì.</li>
+        <li><b>🏷️ Chốt giá (mua)</b> – mua từ số cà khách đang gửi.</li>
+        <li><b>↩️ Trả lại cà</b> – khách lấy cà về.</li>
+      </ul>
+    </div>
+
+    <div class="card avoid">
+      <h3>💳 Ứng tiền</h3>
+      <p class="mut">Cho nông dân ứng trước (để trừ dần khi mua cà).</p>
+      <ol class="s">
+        <li>Chọn nông dân.</li>
+        <li>Chọn <b>💵 Tiền mặt</b> (chi từ quỹ) hoặc <b>📦 Hàng hóa</b> (phân, thuốc… gõ tên hàng).</li>
+        <li>Gõ số tiền (hoặc trị giá hàng), rồi Lưu.</li>
+      </ol>
+      <div class="tip">Khi <b>Mua cà</b> cho người này, ở bước <b>Trả tiền</b> bấm <b>🧾 Trừ tiền ứng</b>.</div>
+    </div>
+
+    <div class="card avoid">
+      <h3>💰 Thu / Chi</h3>
+      <p class="mut">Ghi mọi khoản tiền vào, tiền ra khác (xăng xe, trả nợ…).</p>
+      <ol class="s">
+        <li>Bấm <b>⬇ THU</b> (tiền vào) hoặc <b>⬆ CHI</b> (tiền ra).</li>
+        <li>Chọn khoản gì. Một số khoản hỏi thêm tên khách.</li>
+        <li>Gõ số tiền, ghi chú (không bắt buộc), rồi Lưu.</li>
+      </ol>
+    </div>
+
+    <div class="card avoid">
+      <h3>💵 Chốt quỹ cuối ngày</h3>
+      <p class="mut">Đếm tiền thật trong két, so với sổ.</p>
+      <ol class="s">
+        <li>Chọn ngày (thường là <b>Hôm nay</b>).</li>
+        <li>Gõ tổng tiền đếm được, hoặc bấm <b>🧮 Đếm theo mệnh giá</b> rồi bấm + từng tờ.</li>
+        <li>App so với sổ và báo:
+          <div class="flow"><span style="background:var(--okbg);color:var(--ok);border-color:var(--ok)">✓ Khớp</span><span style="background:var(--badbg);color:var(--bad);border-color:var(--bad)">Thiếu …</span><span style="background:var(--warnbg);color:var(--warn);border-color:#e3c176">Thừa …</span></div>
+        </li>
+      </ol>
+      <p class="mut">Thiếu hoặc thừa thì báo chủ, đừng tự sửa số.</p>
+    </div>
+
+    <div class="card avoid">
+      <h3>📒 Xem nợ và Sao kê</h3>
+      <ol class="s">
+        <li>Bấm <b>📒 Xem nợ</b>. Danh sách ai còn nợ hiện ra.</li>
+        <li>Bấm tên khách để xem chi tiết.</li>
+        <li>Bấm <b>📄 Sao kê</b> để xem, <b>🖨 In</b> hoặc <b>📤 Gửi Zalo</b>.</li>
+        <li>Khách đưa tiền trả nợ: bấm <b>💵 Thu tiền</b> / <b>💵 Trả tiền</b> ngay tại đó.</li>
+      </ol>
+    </div>
+
+    <div class="card avoid">
+      <h3>📅 Hôm nay – xem lại và sửa</h3>
+      <ol class="s">
+        <li>Bấm <b>📅 Hôm nay</b>. Mọi phiếu trong ngày hiện ra.</li>
+        <li>Xem ngày khác: bấm <b>‹ Ngày trước</b> / <b>Ngày sau ›</b>.</li>
+        <li>Nhập sai: bấm <b>✎ Sửa</b>, sửa rồi Lưu lại.</li>
+        <li><b>🗑 Xóa</b> app hỏi lại một lần. Xóa phiếu cần PIN của chủ.</li>
+      </ol>
+    </div>
+
+    <div class="card avoid">
+      <h3>🖨 In phiếu và 📤 Gửi Zalo</h3>
+      <ol class="s">
+        <li>Sau khi Lưu, bấm <b>🖨 In phiếu</b> hoặc <b>📤 Gửi Zalo</b>.</li>
+        <li>Màn hình in mở <b>ngay trong app</b>. Bấm <b>⬅ Quay lại ứng dụng</b> để về.</li>
+        <li>In chưa được thì bấm <b>🖨 In lại</b>, hoặc dùng <b>📤 Gửi Zalo</b> cho khách.</li>
+      </ol>
+    </div>
+
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="nhan">
+  <div class="sh"><span class="n">6</span><h2>Nhãn ở góc trên</h2></div>
+  <p>Góc trên màn hình có một nhãn màu cho biết dữ liệu đã lên mạng chưa. Bạn chỉ cần nhìn màu.</p>
+  <div class="pl">
+    <div class="card"><div><span class="pill ok">✓ Đã lưu lên mạng</span></div><div><b>Xanh lá – tốt.</b> Mọi thứ đã lưu an toàn. Không cần làm gì.</div></div>
+    <div class="card"><div><span class="pill wait">⏳ Chờ gửi (3)</span></div><div><b>Vàng – đang chờ.</b> Còn phiếu chưa gửi lên mạng (số trong ngoặc). Cứ làm tiếp, có mạng app tự gửi. Bấm vào nhãn để gửi ngay. <b>Đừng xóa dữ liệu hay gỡ app lúc này.</b></div></div>
+    <div class="card"><div><span class="pill off">⚠ Mất mạng – vẫn lưu trên máy</span></div><div><b>Xám – mất mạng.</b> Vẫn nhập bình thường, phiếu lưu trên máy. Có mạng lại app tự gửi.</div></div>
+    <div class="card"><div><span class="pill bad">⚠ Sai mã đồng bộ</span></div><div><b>Đỏ – có lỗi.</b> Phiếu vẫn lưu trên máy, nhưng chưa gửi được. <b>Báo chủ đại lý</b> xử lý. Bạn không tự sửa.</div></div>
+    <div class="card"><div><span class="pill none">💾 Chỉ lưu trên máy</span></div><div><b>Chưa nối Google Sheets.</b> Dữ liệu chỉ nằm trong điện thoại này. Báo chủ nếu thấy nhãn này mà lẽ ra phải kết nối.</div></div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="nho">
+  <div class="sh"><span class="n">7</span><h2>Những điều cần nhớ</h2></div>
+  <div class="warns">
+    <div class="warnc r"><span class="ic">🚫</span><div><b>Không xóa dữ liệu trình duyệt, không gỡ app</b>khi nhãn đang là <b>⏳ Chờ gửi</b>. Phiếu chưa gửi sẽ mất.</div></div>
+    <div class="warnc"><span class="ic">✏️</span><div><b>Nhập sai thì sửa ngay trong ngày.</b>Vào <b>📅 Hôm nay</b> → <b>✎ Sửa</b>. Phiếu của ngày cũ cần chủ mở bằng PIN.</div></div>
+    <div class="warnc r"><span class="ic">🔒</span><div><b>Xóa phiếu cần PIN của chủ.</b>Bạn không tự xóa được khi chủ đã đặt PIN.</div></div>
+    <div class="warnc"><span class="ic">📝</span><div><b>Mọi lần sửa, xóa đều được ghi lại.</b>Ai sửa, lúc nào đều có trong lịch sử. Cứ yên tâm sửa cho đúng.</div></div>
+    <div class="warnc"><span class="ic">📶</span><div><b>Mất mạng vẫn nhập bình thường.</b>Cứ làm việc. Có mạng lại, app tự gửi.</div></div>
+    <div class="warnc"><span class="ic">💵</span><div><b>Cuối ngày làm Chốt quỹ.</b>Đếm tiền trong két và nhập vào ô <b>💵 Chốt quỹ</b>.</div></div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section id="su-co">
+  <div class="sh"><span class="n">8</span><h2>Gặp sự cố?</h2></div>
+  <div class="faq">
+    <details>
+      <summary>Tôi không thấy nút Lưu</summary>
+      <div>Nút <b>✓ Lưu</b> chỉ hiện ở <b>bước cuối</b> (Bước 7/7 – "Kiểm tra lại rồi lưu"). Kéo màn hình xuống một chút. Nút xanh nằm ở <b>góc dưới bên phải</b>.</div>
+    </details>
+    <details>
+      <summary>Tôi lỡ bấm nhầm</summary>
+      <div>Bấm <b>‹ Quay lại</b> để về bước trước, rồi làm lại. Chưa bấm <b>✓ Lưu</b> thì chưa ghi gì vào sổ. Đã Lưu rồi thì vào <b>📅 Hôm nay</b> bấm <b>✎ Sửa</b>.</div>
+    </details>
+    <details>
+      <summary>App không cập nhật, thấy bản cũ</summary>
+      <div>Mở app khi <b>có mạng</b>. Rồi <b>đóng hẳn app</b> (vuốt tắt hẳn) và mở lại một lần nữa.</div>
+    </details>
+    <details>
+      <summary>Hiện "Sai mã đồng bộ"</summary>
+      <div>Đừng tự sửa. <b>Báo chủ đại lý.</b> Phiếu của bạn vẫn lưu trên máy, không mất.</div>
+    </details>
+    <details>
+      <summary>In không được</summary>
+      <div>Bấm <b>🖨 In lại</b> thử một lần nữa. Vẫn không được thì dùng <b>📤 Gửi Zalo</b> gửi phiếu cho khách. Xong bấm <b>⬅ Quay lại ứng dụng</b>.</div>
+    </details>
+    <details>
+      <summary>App đòi nhập mã PIN</summary>
+      <div>Đó là việc của <b>chủ</b> (xóa phiếu, sửa phiếu ngày cũ, Kiểm kê…). Bạn không cần biết PIN. Hãy nhờ chủ làm giúp.</div>
+    </details>
+  </div>
+</section>
+
+<footer>Có thắc mắc, hỏi chủ đại lý 💬</footer>
+
+<div class="btns no-print" style="margin-top:20px">
+  <a class="bt go" href="./">⬅ Về ứng dụng</a>
+  <a class="bt" href="#">⬆ Lên đầu trang</a>
+</div>
+
+</main>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script>
+(function(){
+  // Copy link
+  var b=document.getElementById('copybtn'),t=document.getElementById('toast');
+  function say(m){t.textContent=m;t.hidden=false;clearTimeout(say.h);say.h=setTimeout(function(){t.hidden=true;},2200);}
+  if(b)b.addEventListener('click',function(){
+    var u='https://vuhoa2001-tech.github.io/so-ca-phe/';
+    function fallback(){var i=document.createElement('input');i.value=u;document.body.appendChild(i);i.select();try{document.execCommand('copy');say('Đã sao chép link');}catch(e){say('Hãy giữ ngón tay lên link để sao chép');}document.body.removeChild(i);}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(u).then(function(){say('Đã sao chép link');},fallback);}else fallback();
+  });
+  // Highlight TOC chip of current section
+  var links=[].slice.call(document.querySelectorAll('.toc a'));
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id);});var on=document.querySelector('.toc a.on');if(on&&on.scrollIntoView){var r=on.parentNode;r.scrollLeft=on.offsetLeft-16;}}});},{rootMargin:'-90px 0px -65% 0px'});
+    links.forEach(function(a){var s=document.querySelector(a.getAttribute('href'));if(s)io.observe(s);});
+  }
+  // Open all FAQ when printing
+  window.addEventListener('beforeprint',function(){[].forEach.call(document.querySelectorAll('.faq details'),function(d){d.setAttribute('open','');});});
+})();
+</script>
+</body>
+</html>
