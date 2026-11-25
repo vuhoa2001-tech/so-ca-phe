@@ -1,0 +1,13 @@
+# CHỈ đưa lên GitHub các file của ứng dụng (danh sách cho phép).
+# Mọi file khác (dữ liệu Excel, file sao lưu .json, công cụ nhập...) đều bị bỏ qua.
+*
+!.gitignore
+!index.html
+!sw.js
+!manifest.webmanifest
+!icon-192.png
+!icon-512.png
+!HUONG_DAN.md
+!google-apps-script/
+!google-apps-script/Code.gs
+!google-apps-script/HUONG_DAN_CAI_DAT.md

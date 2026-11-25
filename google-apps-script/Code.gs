@@ -1,0 +1,167 @@
+/**
+ * SỔ CÀ PHÊ - máy chủ đồng bộ (Google Apps Script)
+ * Dán toàn bộ file này vào Apps Script của Google Sheet.
+ * Mỗi loại dữ liệu nằm ở một trang tính (tab), mỗi dòng là một phiếu/khách.
+ * Cột cuối cùng "Dữ liệu JSON" là bản gốc của phiếu - ĐỪNG sửa/xóa cột này và cột "Mã (id)".
+ */
+
+// >>> ĐỔI DÒNG DƯỚI ĐÂY thành mã đồng bộ của bạn (giống hệt mã nhập trong app) <<<
+var MA_DONG_BO = 'DOI-MA-NAY';
+
+var PREFIX = ['Mã (id)', 'Cập nhật lúc', 'Đã xóa', 'Người nhập'];
+var DATE_COLS = {}; // tên cột nào là ngày (lưu dạng chữ dd/mm/yyyy)
+
+function d_(iso) { return iso && /^\d{4}-\d\d-\d\d/.test(iso) ? iso.substr(8, 2) + '/' + iso.substr(5, 2) + '/' + iso.substr(0, 4) : (iso || ''); }
+
+// Mô tả các trang tính: tên tab + các cột dễ đọc (tiêu đề, hàm lấy giá trị)
+var DEF = {
+  settings: { tab: 'Cài đặt', cols: [
+    ['Tên cơ sở', function (r) { return r.shopName; }], ['Địa chỉ', function (r) { return r.address; }], ['Số điện thoại', function (r) { return r.phone; }],
+    ['Bì mặc định (kg/bao)', function (r) { return r.defaultTare; }], ['Tỷ lệ đổi mặc định', function (r) { return r.defaultRatio; }], ['Quỹ đầu kỳ (đ)', function (r) { return r.openingCash; }]] },
+  types: { tab: 'Loại cà phê', cols: [['Tên loại', function (r) { return r.name; }], ['Ghi chú', function (r) { return r.note; }]] },
+  customers: { tab: 'Khách hàng', cols: [
+    ['Tên', function (r) { return r.name; }], ['Số điện thoại', function (r) { return r.phone; }], ['Địa chỉ', function (r) { return r.address; }],
+    ['Nhóm', function (r) { return r.group; }], ['Ghi chú', function (r) { return r.note; }]] },
+  purchases: { tab: 'Thu mua', cols: [
+    ['Số phiếu', function (r) { return r.code; }], ['Ngày', function (r) { return d_(r.date); }, true], ['Người bán', function (r, n) { return n.cust(r.customerId); }],
+    ['Loại cà', function (r, n) { return n.type(r.typeId); }], ['Số bao', function (r) { return (r.bags || []).length; }], ['KL tịnh (kg)', function (r) { return r.kg; }],
+    ['Đơn giá (đ/kg)', function (r) { return r.price; }], ['Thành tiền (đ)', function (r) { return r.amount; }], ['Đã trả (đ)', function (r) { return r.paid; }],
+    ['Còn nợ (đ)', function (r) { return r.amount - r.paid; }], ['Ghi chú', function (r) { return r.note; }]] },
+  exchanges: { tab: 'Đổi cà', cols: [
+    ['Số phiếu', function (r) { return r.code; }], ['Ngày', function (r) { return d_(r.date); }, true], ['Khách hàng', function (r, n) { return n.cust(r.customerId); }],
+    ['Số bao', function (r) { return (r.bags || []).length; }], ['Cà tươi nhận (kg)', function (r) { return r.kgFresh; }], ['Tỷ lệ', function (r) { return r.ratio; }],
+    ['Nhân phải trả (kg)', function (r) { return r.kgBean; }], ['Nhân trả ngay (kg)', function (r) { return r.paidNow; }], ['Ghi chú', function (r) { return r.note; }]] },
+  beanPayments: { tab: 'Trả nhân', cols: [
+    ['Số phiếu', function (r) { return r.code; }], ['Ngày', function (r) { return d_(r.date); }, true], ['Khách hàng', function (r, n) { return n.cust(r.customerId); }],
+    ['Nhân trả (kg)', function (r) { return r.kg; }], ['Hình thức', function (r) { return r.mode === 'cash' ? 'Quy ra tiền' : 'Trả bằng nhân'; }],
+    ['Đơn giá (đ/kg)', function (r) { return r.price; }], ['Thành tiền (đ)', function (r) { return r.amount; }], ['Ghi chú', function (r) { return r.note; }]] },
+  sales: { tab: 'Bán ra', cols: [
+    ['Số phiếu', function (r) { return r.code; }], ['Ngày', function (r) { return d_(r.date); }, true], ['Người mua', function (r, n) { return n.cust(r.customerId); }],
+    ['Loại cà', function (r, n) { return n.type(r.typeId); }], ['Số bao', function (r) { return (r.bags || []).length; }], ['KL tịnh (kg)', function (r) { return r.kg; }],
+    ['Đơn giá (đ/kg)', function (r) { return r.price; }], ['Thành tiền (đ)', function (r) { return r.amount; }], ['Đã thu (đ)', function (r) { return r.paid; }],
+    ['Còn nợ (đ)', function (r) { return r.amount - r.paid; }], ['Ghi chú', function (r) { return r.note; }]] },
+  adjustments: { tab: 'Kho', cols: [
+    ['Ngày', function (r) { return d_(r.date); }, true], ['Nghiệp vụ', function (r) { return r.kind === 'convert' ? 'Chế biến' : 'Điều chỉnh'; }],
+    ['Loại', function (r, n) { return n.type(r.typeId); }], ['KL (kg)', function (r) { return r.kg; }], ['Sang loại', function (r, n) { return r.toTypeId ? n.type(r.toTypeId) : ''; }],
+    ['KL thu được (kg)', function (r) { return r.toKg; }], ['Lý do / ghi chú', function (r) { return [r.reason, r.note].filter(String).join(' - '); }]] },
+  cash: { tab: 'Sổ quỹ', cols: [
+    ['Ngày', function (r) { return d_(r.date); }, true], ['Thu / Chi', function (r) { return r.dir === 'thu' ? 'Thu' : 'Chi'; }], ['Danh mục', function (r) { return r.cat; }],
+    ['Khách hàng', function (r, n) { return r.customerId ? n.cust(r.customerId) : ''; }], ['Số tiền (đ)', function (r) { return r.amount; }], ['Ghi chú', function (r) { return r.note; }]] }
+};
+var ORDER = ['settings', 'types', 'customers', 'purchases', 'exchanges', 'beanPayments', 'sales', 'adjustments', 'cash'];
+
+function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
+
+function doGet() {
+  return ContentService.createTextOutput('Sổ Cà Phê - máy chủ đồng bộ đang chạy OK ✓').setMimeType(ContentService.MimeType.TEXT);
+}
+
+function sheetFor_(coll) {
+  var def = DEF[coll];
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(def.tab);
+  var headers = PREFIX.concat(def.cols.map(function (c) { return c[0]; }), ['Máy chủ nhận lúc', 'Dữ liệu JSON (đừng sửa)']);
+  if (!sh) {
+    sh = ss.insertSheet(def.tab);
+    sh.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold').setBackground('#efe0cb');
+    sh.setFrozenRows(1);
+    // cột kỹ thuật + ngày: lưu dạng chữ để Google không tự đổi định dạng
+    [1, 2].concat([headers.length - 1, headers.length]).forEach(function (c) { sh.getRange(1, c, sh.getMaxRows(), 1).setNumberFormat('@'); });
+    def.cols.forEach(function (c, i) { if (c[2]) sh.getRange(1, PREFIX.length + 1 + i, sh.getMaxRows(), 1).setNumberFormat('@'); });
+    sh.setColumnWidth(1, 110); sh.setColumnWidth(2, 160); sh.setColumnWidth(headers.length, 120);
+  }
+  return sh;
+}
+
+function lookup_(coll) { // id -> tên, đọc từ trang tính Khách hàng / Loại cà phê
+  var m = {}, sh = sheetFor_(coll), last = sh.getLastRow();
+  if (last < 2) return m;
+  var v = sh.getRange(2, 1, last - 1, PREFIX.length + 1).getValues();
+  v.forEach(function (r) { if (r[0]) m[r[0]] = r[PREFIX.length]; });
+  return m;
+}
+
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(25000);
+  } catch (err) {
+    return json_({ ok: false, error: 'busy' });
+  }
+  try {
+    var body = JSON.parse(e.postData.contents);
+    if (!MA_DONG_BO || MA_DONG_BO === 'DOI-MA-NAY' || body.secret !== MA_DONG_BO) return json_({ ok: false, error: 'auth' });
+    var serverTime = new Date().toISOString();
+    var since = body.since || '';
+    var names = { custMap: null, typeMap: null };
+    var N = {
+      cust: function (id) { if (!names.custMap) names.custMap = lookup_('customers'); return names.custMap[id] || ''; },
+      type: function (id) { if (!names.typeMap) names.typeMap = lookup_('types'); return names.typeMap[id] || ''; }
+    };
+    var push = (body.push || []).slice();
+    // khách hàng + loại cà phê xử lý trước để các phiếu tra được tên
+    push.sort(function (a, b) { return ORDER.indexOf(a.coll) - ORDER.indexOf(b.coll); });
+    var byColl = {};
+    push.forEach(function (it) { if (DEF[it.coll]) (byColl[it.coll] = byColl[it.coll] || []).push(it); });
+    ORDER.forEach(function (coll) {
+      if (!byColl[coll]) return;
+      upsert_(coll, byColl[coll], serverTime, N);
+      if (coll === 'customers') names.custMap = null;
+      if (coll === 'types') names.typeMap = null;
+    });
+    // lấy các thay đổi mới hơn "since"
+    var changes = [];
+    ORDER.forEach(function (coll) {
+      var sh = sheetFor_(coll), last = sh.getLastRow();
+      if (last < 2) return;
+      var n = PREFIX.length + DEF[coll].cols.length + 2;
+      var vals = sh.getRange(2, 1, last - 1, n).getValues();
+      vals.forEach(function (r) {
+        var srv = String(r[n - 2]);
+        if (!r[0] || srv <= since) return;
+        var rec = null;
+        try { rec = JSON.parse(r[n - 1]); } catch (x) { return; }
+        if (r[2] === 'ĐÃ XÓA') changes.push({ coll: coll, id: r[0], deleted: true, at: String(r[1]) });
+        else changes.push({ coll: coll, id: r[0], deleted: false, updatedAt: String(r[1]), rec: rec });
+      });
+    });
+    return json_({ ok: true, serverTime: serverTime, changes: changes });
+  } catch (err) {
+    return json_({ ok: false, error: 'server: ' + err });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function upsert_(coll, items, serverTime, N) {
+  var def = DEF[coll], sh = sheetFor_(coll);
+  var ncol = PREFIX.length + def.cols.length + 2;
+  var last = sh.getLastRow();
+  var rowOf = {}, tsOf = {};
+  if (last >= 2) {
+    var idv = sh.getRange(2, 1, last - 1, 2).getValues();
+    idv.forEach(function (r, i) { rowOf[r[0]] = i + 2; tsOf[r[0]] = String(r[1]); });
+  }
+  var appendRows = [], appendIdx = {};
+  items.forEach(function (it) {
+    var id = it.deleted ? it.id : it.rec.id;
+    var ts = it.deleted ? it.at : (it.rec.updatedAt || '');
+    if (tsOf[id] !== undefined && tsOf[id] > ts) return; // bản trên máy chủ mới hơn -> bỏ qua
+    var row;
+    if (it.deleted) {
+      var old = rowOf[id] ? sh.getRange(rowOf[id], 1, 1, ncol).getValues()[0] : null;
+      row = old || new Array(ncol).fill('');
+      row[0] = id; row[1] = ts; row[2] = 'ĐÃ XÓA'; row[ncol - 2] = serverTime; row[ncol - 1] = JSON.stringify({ id: id, deleted: true, at: ts });
+    } else {
+      var r = it.rec;
+      row = [id, ts, '', r.createdBy || ''];
+      def.cols.forEach(function (c) { var v; try { v = c[1](r, N); } catch (x) { v = ''; } row.push(v === undefined || v === null ? '' : v); });
+      row.push(serverTime, JSON.stringify(r));
+    }
+    if (rowOf[id] > 0) sh.getRange(rowOf[id], 1, 1, ncol).setValues([row]);
+    else if (appendIdx[id] !== undefined) appendRows[appendIdx[id]] = row;
+    else { appendIdx[id] = appendRows.length; appendRows.push(row); }
+    tsOf[id] = ts;
+  });
+  if (appendRows.length) sh.getRange(sh.getLastRow() + 1, 1, appendRows.length, ncol).setValues(appendRows);
+}
