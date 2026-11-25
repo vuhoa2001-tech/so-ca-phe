@@ -43,12 +43,33 @@ Bạn cần một tài khoản Google (Gmail).
 - ⏳ Chờ gửi (3) (vàng): còn 3 mục chưa gửi, sẽ tự gửi khi có mạng.
 - ⚠ Mất mạng – vẫn lưu trên máy (xám): cứ nhập bình thường.
 - ⚠ Sai mã đồng bộ (đỏ): kiểm tra lại mã.
+- ⚠ Mã máy đã bị khóa hoặc sai – báo chủ (đỏ): máy đang dùng mã riêng bị khóa hoặc mã không đúng.
 
 ## Lưu ý
 - **Không sửa hoặc xóa** cột "Mã (id)", "Cập nhật lúc" và cột cuối "Dữ liệu JSON" trong bảng tính; các cột còn lại chỉ để đọc. Muốn sửa số liệu hãy sửa trong app.
 - Khi sửa mã `Code.gs` sau này: **Triển khai → Quản lý bản triển khai → biểu tượng bút chì → Phiên bản: Phiên bản mới → Triển khai** (URL giữ nguyên).
 - Đổi mã đồng bộ: sửa trong Code.gs, triển khai lại như trên, rồi nhập mã mới vào app.
 - Khôi phục từ file sao lưu trên một máy sẽ không xóa dữ liệu cũ đã có trên bảng tính; nên khôi phục trước khi bật đồng bộ.
+
+## Mã riêng cho từng người
+Thay vì cả nhà dùng chung một mã, **mỗi người (chủ hoặc nhân viên) có mã riêng** do chủ cấp. Máy chủ nhận ra người theo mã, tên người nhập lấy từ máy chủ (không gõ giả được) và **quyền được kiểm tra ngay trên máy chủ** (sửa app trên điện thoại cũng không vượt quyền được).
+
+### Cách chuyển sang mã riêng (làm theo thứ tự)
+1. Mở Apps Script, dán **toàn bộ `Code.gs` mới** thay nội dung cũ. **Giữ nguyên mã của bạn ở dòng 9** (`var MA_DONG_BO = '...'`), kiểm tra dòng 11 là `var CHO_PHEP_MA_CHUNG = true;`. Bấm **Lưu**.
+2. **Triển khai → Quản lý bản triển khai → biểu tượng bút chì → Phiên bản: Phiên bản mới → Triển khai** (URL giữ nguyên).
+3. Trên **máy của chủ** (đang dùng mã chung cũ): vào **Chế độ đầy đủ → Hệ thống → Người dùng & mã máy** (hoặc **Cài đặt → 👥 Người dùng & mã máy** ở chế độ dễ dùng; cần PIN chủ). Trang tính **Người dùng** sẽ tự được tạo trong bảng tính.
+4. Bấm **+ Thêm người**, nhập tên của chủ, vai trò **Chủ** → hiện **mã riêng của chủ** (dạng `XXXX-XXXX-XXXX`, chỉ hiện một lần). Bấm **🔗 Sao chép link kết nối**, mở link đó trên chính máy này (hoặc bấm **Kết nối máy** và nhập địa chỉ + mã) → **✓ Kết nối**. Máy chủ từ giờ dùng mã riêng.
+5. Với **mỗi nhân viên**: **+ Thêm người** (vai trò **Nhân viên**) → bấm **📤 Gửi qua Zalo** (hoặc chép link) → **mở link trên điện thoại của nhân viên, chủ đứng cạnh** → **✓ Kết nối**. Tên nhân viên hiện sẵn, không gõ được. **Xóa tin nhắn chứa link/mã** sau khi nhân viên đã kết nối.
+6. Khi **mọi máy** (kể cả máy tính, máy của chủ) đã chuyển sang mã riêng: trong Apps Script đổi thành `var CHO_PHEP_MA_CHUNG = false;`, **Lưu**, rồi **Triển khai → Phiên bản mới**. Từ lúc này mã chung cũ hết tác dụng.
+
+### Khi nhân viên nghỉ việc hoặc mất điện thoại
+Vào **Người dùng & mã máy** → bấm **Khóa** ở dòng người đó. Máy của họ lập tức không đồng bộ được nữa (nhãn đỏ "Mã máy đã bị khóa hoặc sai"). Cần cấp lại thì bấm **Mở lại** hoặc **Tạo mã mới** (mã cũ hết dùng).
+
+### Nhân viên làm được gì, không làm được gì
+- Làm được: tạo phiếu mới (thu mua, đổi cà, trả nhân, bán, nhập kho, ký gửi, ứng tiền, thu/chi, chốt quỹ, khách mới); **sửa phiếu do chính mình nhập trong ngày hôm nay**; sửa số điện thoại / địa chỉ / ghi chú của khách.
+- Không làm được: **xóa bất cứ thứ gì**; sửa phiếu ngày cũ hoặc phiếu người khác nhập; sửa cài đặt, số dư đầu kỳ, kiểm kê, loại cà, điều chỉnh kho, nhật ký; sửa phiếu chốt quỹ đã lưu; quản lý người dùng. Nếu cố làm, máy chủ từ chối, app hiện thông báo đỏ và tự hoàn lại như trên máy chủ. Muốn sửa/xóa: báo chủ.
+- Nhân viên không có PIN chủ và không mở được các chức năng của chủ trên máy của họ ("Chức năng này chỉ dùng trên máy của chủ").
+- Ghi chú: đổi tên một nhân viên thì phiếu hôm nay họ đã nhập dưới tên cũ sẽ không tự sửa được nữa (báo chủ).
 
 ## Bật sao lưu tự động hằng ngày (Google Drive)
 Phần này giúp Sổ tự động lưu một bản sao vào Google Drive mỗi đêm, để lỡ có sự cố vẫn còn bản dự phòng.
