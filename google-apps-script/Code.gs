@@ -46,9 +46,20 @@ var DEF = {
     ['KL thu được (kg)', function (r) { return r.toKg; }], ['Lý do / ghi chú', function (r) { return [r.reason, r.note].filter(String).join(' - '); }]] },
   cash: { tab: 'Sổ quỹ', cols: [
     ['Ngày', function (r) { return d_(r.date); }, true], ['Thu / Chi', function (r) { return r.dir === 'thu' ? 'Thu' : 'Chi'; }], ['Danh mục', function (r) { return r.cat; }],
-    ['Khách hàng', function (r, n) { return r.customerId ? n.cust(r.customerId) : ''; }], ['Số tiền (đ)', function (r) { return r.amount; }], ['Ghi chú', function (r) { return r.note; }]] }
+    ['Khách hàng', function (r, n) { return r.customerId ? n.cust(r.customerId) : ''; }], ['Số tiền (đ)', function (r) { return r.amount; }], ['Ghi chú', function (r) { return r.note; }]] },
+  stockIns: { tab: 'Nhập kho', cols: [
+    ['Số phiếu', function (r) { return r.code; }], ['Ngày', function (r) { return d_(r.date); }, true],
+    ['Cách làm', function (r) { return r.method === 'lo' ? 'Đốt lò' : r.method === 'cahai' ? 'Cả hai' : 'Phơi sân'; }],
+    ['Số bao', function (r) { return (r.bags || []).length; }], ['Tổng cả bì (kg)', function (r) { return r.gross; }],
+    ['Trừ bì (kg)', function (r) { return r.tareTotal; }], ['KL nhân xô (kg)', function (r) { return r.kg; }], ['Ghi chú', function (r) { return r.note; }]] },
+  stocktakes: { tab: 'Kiểm kê', cols: [
+    ['Ngày', function (r) { return d_(r.date); }, true],
+    ['Loại', function (r) { return r.kind === 'close' ? 'Chốt kho (sân trống)' : 'Kiểm kê cuối tháng'; }],
+    ['Cà tươi còn lại (kg)', function (r) { return r.freshKg; }],
+    ['Nhân đếm thực tế (kg)', function (r) { return (r.beanCountKg === null || r.beanCountKg === undefined) ? '' : r.beanCountKg; }],
+    ['Ghi chú', function (r) { return r.note; }]] }
 };
-var ORDER = ['settings', 'types', 'customers', 'purchases', 'exchanges', 'beanPayments', 'sales', 'adjustments', 'cash'];
+var ORDER = ['settings', 'types', 'customers', 'purchases', 'exchanges', 'beanPayments', 'sales', 'adjustments', 'cash', 'stockIns', 'stocktakes'];
 
 // Đọc ô thời gian an toàn: nếu Google lỡ đổi chữ thành kiểu ngày thì đổi lại về chuỗi ISO
 function s_(v) { return v instanceof Date ? v.toISOString() : String(v); }
