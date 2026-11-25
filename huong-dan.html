@@ -265,7 +265,7 @@ footer{margin-top:36px;text-align:center;font-weight:700;font-size:20px;backgrou
   <p>Đây là màn hình bạn thấy mỗi lần mở app. Bấm vào ô nào thì làm việc đó. Ô có <span class="lock">🔒</span> là việc của <b>chủ</b>. Trên điện thoại nhân viên, bấm vào sẽ hiện <b>"Chức năng này chỉ dùng trên máy của chủ"</b> — đó là bình thường.</p>
   <div class="cols c2" style="align-items:start">
     <div class="fig" style="display:flex;justify-content:center">
-      <div class="phone" role="img" aria-label="Màn hình chính của app có 13 ô: Mua cà, Đổi cà, Trả nhân, Nhập kho, Ký gửi, Ứng tiền, Thu / Chi, Chốt quỹ, Xem nợ, Hôm nay, Kiểm kê, Báo cáo, Cài đặt. Mô tả từng ô ở danh sách bên cạnh.">
+      <div class="phone" role="img" aria-label="Màn hình chính của app có 12 ô: Mua cà, Đổi cà, Nhập kho, Ký gửi, Ứng tiền, Thu / Chi, Chốt quỹ, Xem nợ, Hôm nay, Kiểm kê, Báo cáo, Cài đặt. Mô tả từng ô ở danh sách bên cạnh.">
         <div class="notch"></div>
         <div class="scr" aria-hidden="true">
           <div class="pillrow"><span>☰ HOAVU</span><span class="pill ok" style="padding:2px 8px;font-size:10px">✓ Đã lưu lên mạng</span></div>
@@ -274,7 +274,6 @@ footer{margin-top:36px;text-align:center;font-weight:700;font-size:20px;backgrou
           <div class="tiles">
             <div class="tl"><span>🛒</span>Mua cà</div>
             <div class="tl"><span>🔄</span>Đổi cà</div>
-            <div class="tl"><span>🫘</span>Trả nhân</div>
             <div class="tl"><span>📦</span>Nhập kho</div>
             <div class="tl"><span>🏷️</span>Ký gửi</div>
             <div class="tl"><span>💳</span>Ứng tiền</div>
@@ -291,14 +290,13 @@ footer{margin-top:36px;text-align:center;font-weight:700;font-size:20px;backgrou
     </div>
     <ul class="tcap">
       <li><span class="ic">🛒</span><div><b>Mua cà</b><small>Mua cà của nông dân. Dùng nhiều nhất. <span class="who">Nhân viên</span></small></div></li>
-      <li><span class="ic">🔄</span><div><b>Đổi cà</b><small>Khách đưa cà tươi, mình hẹn trả nhân. <span class="who">Nhân viên</span></small></div></li>
-      <li><span class="ic">🫘</span><div><b>Trả nhân</b><small>Trả nhân cho khách đã đổi cà. <span class="who">Nhân viên</span></small></div></li>
+      <li><span class="ic">🔄</span><div><b>Đổi cà</b><small>Khách đưa cà tươi, nhân tự vào Ký gửi của khách. <span class="who">Nhân viên</span></small></div></li>
       <li><span class="ic">📦</span><div><b>Nhập kho</b><small>Ghi nhân xô vào kho sau khi sấy / xay. <span class="who">Nhân viên</span></small></div></li>
-      <li><span class="ic">🏷️</span><div><b>Ký gửi</b><small>Khách gửi cà: nhận, chốt giá, trả lại. <span class="who">Nhân viên</span></small></div></li>
+      <li><span class="ic">🏷️</span><div><b>Ký gửi</b><small>Nhân khách gửi: nhận, chốt giá (bán), trả lại nhân. <span class="who">Nhân viên</span></small></div></li>
       <li><span class="ic">💳</span><div><b>Ứng tiền</b><small>Cho nông dân ứng tiền hoặc hàng. <span class="who">Nhân viên</span></small></div></li>
       <li><span class="ic">💰</span><div><b>Thu / Chi</b><small>Ghi tiền vào, tiền ra trong ngày. <span class="who">Nhân viên</span></small></div></li>
       <li><span class="ic">💵</span><div><b>Chốt quỹ</b><small>Đếm tiền cuối ngày. <span class="who">Nhân viên</span></small></div></li>
-      <li><span class="ic">📒</span><div><b>Xem nợ</b><small>Xem ai còn nợ, in sao kê. <span class="who">Nhân viên</span></small></div></li>
+      <li><span class="ic">📒</span><div><b>Xem nợ</b><small>Xem ai còn nợ, trả tiền, chốt giá, trả lại nhân, sao kê. <span class="who">Nhân viên</span></small></div></li>
       <li><span class="ic">📅</span><div><b>Hôm nay</b><small>Xem lại phiếu trong ngày, sửa hoặc xóa. <span class="who">Nhân viên</span></small></div></li>
       <li><span class="ic">📋</span><div><b>Kiểm kê</b><small>Đếm kho cuối tháng. Việc của chủ. <span class="lock">🔒 Chủ</span></small></div></li>
       <li><span class="ic">📊</span><div><b>Báo cáo</b><small>Xem số mua, đổi, tiền. Phần lãi chỉ chủ xem. <span class="lock">🔒 một phần</span></small></div></li>
@@ -479,32 +477,22 @@ footer{margin-top:36px;text-align:center;font-weight:700;font-size:20px;backgrou
 
     <div class="card avoid" id="doi-ca">
       <h3>🔄 Đổi cà</h3>
-      <p class="mut">Khách đưa cà tươi, mình trả lại nhân theo tỷ lệ.</p>
-      <div class="flow"><span>Khách</span><i>›</i><span>Cân bao</span><i>›</i><span>Trừ bì</span><i>›</i><span>Tỷ lệ</span><i>›</i><span>Trả ngay?</span><i>›</i><span>Lưu</span></div>
+      <p class="mut">Khách đưa cà tươi, nhân quy đổi theo tỷ lệ <b>tự vào Ký gửi</b> của khách (không còn bước "trả nhân ngay").</p>
+      <div class="flow"><span>Khách</span><i>›</i><span>Cân bao</span><i>›</i><span>Trừ bì</span><i>›</i><span>Tỷ lệ</span><i>›</i><span>Lưu</span></div>
       <ol class="s">
         <li>Cân và trừ bì như Mua cà.</li>
         <li>Bước <b>Tỷ lệ đổi</b>: app đã điền tỷ lệ (ví dụ <b>4,6</b>). Đúng thì bấm Tiếp. Khác thì bấm <b>✎ Đổi tỷ lệ</b>.</li>
-        <li>App hiện <b>"Phải trả khách … kg nhân"</b>.</li>
-        <li><b>Trả nhân ngay không?</b> Chọn <b>Không, trả sau</b> hoặc <b>Có, trả ngay</b>.</li>
+        <li>App hiện <b>"Nhân được nhận … kg"</b>, số này tự cộng vào Ký gửi của khách.</li>
+        <li>Màn hình kiểm tra và <b>phiếu</b> ghi rõ: <b>Chuyển vào ký gửi + X kg</b>, <b>Ký gửi trước phiếu này</b>, <b>TỔNG KÝ GỬI HIỆN TẠI</b>. Bấm <b>🖨 In phiếu</b> hoặc <b>📤 Gửi Zalo</b> cho khách.</li>
       </ol>
-      <div class="fig" style="display:flex;justify-content:center"><div class="phone" style="width:240px" role="img" aria-label="Bước tỷ lệ đổi: cà tươi nhận 135,2 kg, tỷ lệ 4,6, phải trả khách 29,39 kg nhân.">
+      <div class="tip">Khách muốn lấy nhân về hoặc bán nhân: vào ô <b>🏷️ Ký gửi</b> (hoặc <b>📒 Xem nợ</b> → tên khách) rồi chọn <b>Trả lại nhân</b> / <b>Chốt giá</b>.</div>
+      <div class="fig" style="display:flex;justify-content:center"><div class="phone" style="width:240px" role="img" aria-label="Bước tỷ lệ đổi: cà tươi nhận 135,2 kg, tỷ lệ 4,6, nhân được nhận 29,39 kg tự vào ký gửi.">
         <div class="notch"></div><div class="scr" aria-hidden="true">
           <div class="q">Tỷ lệ đổi</div>
           <div class="mc"><div class="rl"><span>Cà tươi nhận</span><b>135,2 kg</b></div><div class="rl"><span>Tỷ lệ (kg tươi / 1 kg nhân)</span><b class="big">4,6</b></div></div>
-          <div class="mc ctr">Phải trả khách<span class="huge">29,39 kg</span>nhân</div>
+          <div class="mc ctr">Nhân được nhận<span class="huge">29,39 kg</span>tự vào ký gửi của khách</div>
           <div class="mb">✎ Đổi tỷ lệ</div>
         </div></div></div>
-    </div>
-
-    <div class="card avoid">
-      <h3>🫘 Trả nhân</h3>
-      <p class="mut">Khách đã đổi cà, giờ đến lấy nhân.</p>
-      <div class="flow"><span>Khách</span><i>›</i><span>Số kg</span><i>›</i><span>Trả bằng gì</span><i>›</i><span>Lưu</span></div>
-      <ol class="s">
-        <li>Chọn khách. App hiện <b>"Còn nợ nhân"</b>.</li>
-        <li>Gõ số kg trả, hoặc bấm <b>Trả hết</b>.</li>
-        <li>Chọn <b>🫘 Trả bằng nhân</b> hoặc <b>💵 Quy ra tiền</b> (gõ giá 1 kg).</li>
-      </ol>
     </div>
 
     <div class="card avoid">
@@ -520,11 +508,11 @@ footer{margin-top:36px;text-align:center;font-weight:700;font-size:20px;backgrou
 
     <div class="card avoid">
       <h3>🏷️ Ký gửi</h3>
-      <p class="mut">Khách gửi cà ở đại lý, chưa bán. Bấm ô Ký gửi, chọn một trong ba:</p>
+      <p class="mut">Nhân của khách đang gửi ở đại lý (kể cả nhân đổi cà chưa lấy). Mỗi khách chỉ có <b>một</b> số ký gửi. Bấm ô Ký gửi, chọn một trong ba:</p>
       <ul class="s">
-        <li><b>📥 Nhận ký gửi</b> – khách gửi cà, cân và trừ bì.</li>
-        <li><b>🏷️ Chốt giá (mua)</b> – mua từ số cà khách đang gửi.</li>
-        <li><b>↩️ Trả lại cà</b> – khách lấy cà về.</li>
+        <li><b>📥 Nhận ký gửi</b> – khách mang cà đến gửi, cân và trừ bì.</li>
+        <li><b>🏷️ Chốt giá (bán)</b> – khách gọi báo giá hôm nay. Bấm <b>Bán hết</b> hoặc gõ số kg bán một phần (không quá số đang gửi), rồi gõ giá. Bước trả tiền: <b>💵 Trả đủ</b> (nên chọn), <b>✋ Trả một phần</b>, <b>📝 Chưa trả (ghi nợ)</b>; nếu khách đang nợ ứng sẽ có thêm <b>🧾 Trừ tiền ứng</b>. Phiếu ghi <b>Thành tiền</b>, <b>Đã trả</b>, <b>Đại lý còn nợ</b> và <b>Ký gửi còn lại</b>.</li>
+        <li><b>🫘 Trả lại nhân</b> – khách lấy nhân về: <b>Trả hết</b> hoặc gõ số kg. Phiếu ghi <b>Ký gửi còn lại</b>.</li>
       </ul>
     </div>
 
@@ -565,10 +553,15 @@ footer{margin-top:36px;text-align:center;font-weight:700;font-size:20px;backgrou
     <div class="card avoid">
       <h3>📒 Xem nợ và Sao kê</h3>
       <ol class="s">
-        <li>Bấm <b>📒 Xem nợ</b>. Danh sách ai còn nợ hiện ra.</li>
-        <li>Bấm tên khách để xem chi tiết.</li>
-        <li>Bấm <b>📄 Sao kê</b> để xem, <b>🖨 In</b> hoặc <b>📤 Gửi Zalo</b>.</li>
-        <li>Khách đưa tiền trả nợ: bấm <b>💵 Thu tiền</b> / <b>💵 Trả tiền</b> ngay tại đó.</li>
+        <li>Bấm <b>📒 Xem nợ</b>. Mỗi khách hiện các dòng còn số: <b>Đại lý nợ tiền</b> (hoặc <b>Khách nợ ta</b>), <b>Ký gửi … kg nhân</b>, <b>Nợ ứng</b>.</li>
+        <li>Bấm tên khách: màn hình chi tiết có các nút lớn (chỉ hiện nút đang cần):
+          <ul class="s">
+            <li><b>💵 Trả tiền</b> – ta trả tiền nợ cho đại lý (số tiền tự điền đủ nợ; bấm <b>Trả hết</b> hoặc gõ số khác để trả bớt).</li>
+            <li><b>💰 Thu tiền</b> – khách trả nợ cho ta.</li>
+            <li><b>🏷️ Chốt giá</b> và <b>🫘 Trả lại nhân</b> – khi khách còn ký gửi.</li>
+            <li><b>📄 Sao kê</b> – xem, <b>🖨 In</b> hoặc <b>📤 Gửi Zalo</b>.</li>
+          </ul></li>
+        <li>Sau khi lưu <b>Trả tiền / Thu tiền</b>, app hiện <b>🖨 In phiếu</b> và <b>📤 Gửi Zalo</b>. Phiếu <b>"PHIẾU CHI TRẢ NỢ"</b> / <b>"PHIẾU THU NỢ"</b> ghi số tiền, <b>nợ còn lại</b>, <b>ký gửi còn lại</b> và chỗ ký tên.</li>
       </ol>
     </div>
 
