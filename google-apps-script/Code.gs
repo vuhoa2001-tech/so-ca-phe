@@ -279,7 +279,7 @@ function doPost(e) {
     var serverTime = new Date().toISOString();
     var since = body.since || '';
     var staff = user.role !== 'owner';
-    var ctx = { user: user, staff: staff, today: today_(), rejected: [], extra: [] };
+    var ctx = { user: user, staff: staff, today: today_(), rejected: [], extra: [], stale: [], failed: [] };
     var names = { custMap: null, typeMap: null };
     var N = {
       cust: function (id) { if (!names.custMap) names.custMap = lookup_('customers'); return names.custMap[id] || ''; },
@@ -329,7 +329,8 @@ function doPost(e) {
       if (seen[k]) { changes = changes.filter(function (x) { return x.coll + ':' + x.id !== k; }); }
       changes.push(c);
     });
-    return json_({ ok: true, serverTime: serverTime, changes: changes, rejected: ctx.rejected, user: { name: user.name, role: user.role } });
+    // stale = mục bị bỏ qua vì bản trên máy chủ mới hơn (máy khách lệch giờ / sửa chồng); failed = mục lỗi riêng lẻ, không chặn các mục khác. Cả hai là trường TÙY CHỌN (máy cũ bỏ qua được).
+    return json_({ ok: true, serverTime: serverTime, changes: changes, rejected: ctx.rejected, stale: ctx.stale, failed: ctx.failed, user: { name: user.name, role: user.role } });
   } catch (err) {
     return json_({ ok: false, error: 'server: ' + err });
   } finally {
@@ -340,7 +341,9 @@ function doPost(e) {
 function buildRow_(def, id, ts, r, serverTime, N) {
   var row = [id, ts, '', r.createdBy || ''];
   def.cols.forEach(function (c) { var v; try { v = c[1](r, N); } catch (x) { v = ''; } row.push(v === undefined || v === null ? '' : v); });
-  row.push(serverTime, JSON.stringify(r));
+  var js = JSON.stringify(r);
+  if (js.length > 49000) throw new Error('Phiếu quá lớn (' + js.length + ' ký tự, ô Google Sheet chỉ chứa tối đa 50.000)');
+  row.push(serverTime, js);
   return row;
 }
 
@@ -400,7 +403,7 @@ function upsert_(coll, items, serverTime, N, ctx) {
     ctx.rejected.push({ coll: coll, id: id, reason: why, label: label || '' });
     var c = serverCopy(id, cur); if (c) ctx.extra.push(c);
   };
-  items.forEach(function (it) {
+  var handle = function (it) {
     var id = it.deleted ? it.id : it.rec.id;
     var ts = it.deleted ? (it.at || '') : (it.rec.updatedAt || '');
     var cur = null, extraPush = false;
@@ -416,7 +419,23 @@ function upsert_(coll, items, serverTime, N, ctx) {
       if (chg) { cs.seq = seq; cs.updatedAt = serverTime; cs.updatedBy = ctx.user.name; put(id, buildRow_(def, id, serverTime, cs, serverTime, N), serverTime); }
       return;
     }
-    if (tsOf[id] !== undefined && tsOf[id] > ts) return; // bản trên máy chủ mới hơn -> bỏ qua
+    if (coll === 'settings' && !it.deleted && rowOf[id] > 0 && !delOf[id]) { // bộ đếm số phiếu (seq): máy chủ KHÔNG BAO GIỜ hạ số, luôn lấy số lớn hơn
+      var cs0 = curOf(id);
+      if (cs0 && it.rec && typeof it.rec === 'object') {
+        var s0 = (cs0.seq && typeof cs0.seq === 'object') ? cs0.seq : {}, i0 = (it.rec.seq && typeof it.rec.seq === 'object') ? it.rec.seq : {}, m0 = {}, k0, ch0 = false;
+        for (k0 in s0) m0[k0] = Number(s0[k0]) || 0;
+        for (k0 in i0) { var v0 = Number(i0[k0]); if (isFinite(v0) && !(Number(m0[k0]) >= v0)) { m0[k0] = v0; if (!(Number(s0[k0]) >= v0)) ch0 = true; } }
+        if (tsOf[id] > ts) { // bản cài đặt trên máy chủ mới hơn: giữ nguyên, chỉ gộp số đếm
+          if (ch0) { cs0.seq = m0; put(id, buildRow_(def, id, tsOf[id], cs0, serverTime, N), tsOf[id]); }
+          return;
+        }
+        it.rec.seq = m0;
+      }
+    }
+    if (tsOf[id] !== undefined && tsOf[id] > ts) { // bản trên máy chủ mới hơn -> bỏ qua, nhưng trả bản máy chủ về cho máy khách (lệch giờ / sửa chồng)
+      if (rowOf[id] > 0) { ctx.stale.push({ coll: coll, id: id }); var sc = serverCopy(id, curOf(id)); if (sc) ctx.extra.push(sc); }
+      return;
+    }
     if (ctx.staff) {
       cur = curOf(id);
       var chk = staffCheck_(coll, it, { exists: rowOf[id] > 0, isDel: !!delOf[id], cur: cur }, ctx, serverTime);
@@ -434,12 +453,28 @@ function upsert_(coll, items, serverTime, N, ctx) {
     }
     put(id, row, ts);
     if (extraPush) ctx.extra.push({ coll: coll, id: id, deleted: false, updatedAt: it.rec.updatedAt, rec: it.rec });
+  };
+  // mỗi mục xử lý riêng: một mục lỗi (quá lớn, sai dạng...) chỉ báo lỗi mục đó, không chặn các mục khác
+  items.forEach(function (it) {
+    try { handle(it); }
+    catch (err) { ctx.failed.push({ coll: coll, id: String(it && (it.deleted ? it.id : (it.rec && it.rec.id)) || ''), error: String(err && err.message ? err.message : err).substr(0, 200) }); }
   });
   if (appendRows.length) {
     var start = sh.getLastRow() + 1;
-    if (start + appendRows.length - 1 > sh.getMaxRows()) sh.insertRowsAfter(sh.getMaxRows(), start + appendRows.length - 1 - sh.getMaxRows() + 100);
-    setText_(sh, coll, ncol, start, appendRows.length);
-    sh.getRange(start, 1, appendRows.length, ncol).setValues(appendRows);
+    try {
+      if (start + appendRows.length - 1 > sh.getMaxRows()) sh.insertRowsAfter(sh.getMaxRows(), start + appendRows.length - 1 - sh.getMaxRows() + 100);
+      setText_(sh, coll, ncol, start, appendRows.length);
+      sh.getRange(start, 1, appendRows.length, ncol).setValues(appendRows);
+    } catch (err2) { // ghi cả loạt lỗi: thử ghi từng dòng để biết dòng nào hỏng
+      appendRows.forEach(function (row) {
+        try {
+          var at = sh.getLastRow() + 1;
+          if (at > sh.getMaxRows()) sh.insertRowsAfter(sh.getMaxRows(), 100);
+          setText_(sh, coll, ncol, at, 1);
+          sh.getRange(at, 1, 1, ncol).setValues([row]);
+        } catch (err3) { ctx.failed.push({ coll: coll, id: String(row[0]), error: String(err3 && err3.message ? err3.message : err3).substr(0, 200) }); }
+      });
+    }
   }
 }
 
@@ -451,6 +486,15 @@ var SO_BAN_SAO_GIU = 30;
 // Tạo một bản sao của Sổ hiện tại vào thư mục Drive, rồi chỉ giữ 30 bản mới nhất (bản cũ hơn vào Thùng rác).
 // Cách chạy thử bằng tay: chọn hàm "saoLuuHangNgay" ở ô cạnh nút "Chạy" → bấm "Chạy".
 function saoLuuHangNgay() {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(120000); // chờ đồng bộ đang ghi dở xong rồi mới chụp bản sao; không lấy được khóa thì báo lỗi, không sao lưu dở
+  try {
+    return saoLuu_();
+  } finally {
+    lock.releaseLock();
+  }
+}
+function saoLuu_() {
   var file = DriveApp.getFileById(SpreadsheetApp.getActiveSpreadsheet().getId());
   var it = DriveApp.getFoldersByName(THU_MUC_SAO_LUU);
   var folder = it.hasNext() ? it.next() : DriveApp.createFolder(THU_MUC_SAO_LUU);
