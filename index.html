@@ -1013,6 +1013,25 @@ Object.assign(Store,{
  role(){const c=Store.cfg();if(c.token){const w=Store.who();return w?w.role:'';}return c.secret?'owner':'';},
  auth(){const c=Store.cfg();return c.token?{token:c.token}:{secret:c.secret};},
  adminCall(act,extra){return Store.post(Store.cfg(),Object.assign({action:act},extra||{},Store.auth()));},
+ /* ----- bộ nhớ máy + dọn nhật ký cũ (chỉ máy nhân viên, chỉ trên máy này, KHÔNG gửi xóa lên máy chủ) ----- */
+ LIMIT:5000000,AUD_DAYS:90,
+ usage(){let n=0;try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&(k.indexOf('soSachCaPhe')===0||k.indexOf('soCaPhe')===0)){const v=localStorage.getItem(k);n+=k.length+(v?v.length:0);}}}catch(e){}return{chars:n,pct:Math.round(n*1000/Store.LIMIT)/10,mb:Math.round(n/1e5)/10};},
+ audOld(rec){if(!isStaff())return false;const t=Date.parse(rec&&rec.at);return!!t&&t<Date.now()-Store.AUD_DAYS*864e5;},
+ pruneAudit(force){if(!isStaff()||Store.pending())return 0;if(!force){const l=Date.parse(Store.getPref('auditPruneAt')||'');if(l&&Date.now()-l<20*36e5)return 0;}
+  const sy=Store.sy(),cut=Date.now()-Store.AUD_DAYS*864e5,keep=[];let n=0;
+  for(const r of DB.auditLog){const t=Date.parse(r.at);if(t&&t<cut&&sy.pushed['auditLog:'+r.id]===r.updatedAt){n++;delete Store.snap['auditLog:'+r.id];delete Store.ts['auditLog:'+r.id];delete sy.pushed['auditLog:'+r.id];}else keep.push(r);}
+  if(n){DB.auditLog=keep;if(!Store.save(DB))return 0;Store.saveSy();NF.c=null;}
+  Store.setPref('auditPruneAt',new Date().toISOString());return n;},
+ /* dọn "giấy nháp" đồng bộ (mọi máy): dấu xóa ĐÃ gửi lên máy chủ quá 30 ngày (máy chủ vẫn giữ dòng "Đã xóa") + dấu "đã gửi" của phiếu không còn trên máy. Không đụng phiếu thật. */
+ pruneTomb(force){if(Store.pending())return 0;if(!force){const l=Date.parse(Store.getPref('tombPruneAt')||'');if(l&&Date.now()-l<20*36e5)return 0;}
+  const sy=Store.sy(),cut=Date.now()-30*864e5;let n=0;const old=at=>{const t=Date.parse(at);return!!t&&t<cut;};
+  const keepD=DB.deleted.filter(d=>{const k=d.coll+':'+d.id+':'+d.at;if(old(d.at)&&sy.pushedDel[k]){delete sy.pushedDel[k];n++;return false;}return true;});
+  const liveD={};keepD.forEach(d=>{liveD[d.coll+':'+d.id+':'+d.at]=1;});
+  for(const k in sy.pushedDel){const m=/^[^:]+:[^:]+:(.+)$/.exec(k);if(m&&old(m[1])&&!liveD[k]){delete sy.pushedDel[k];n++;}}
+  const alive={};for(const c of ARR_KEYS)(DB[c]||[]).forEach(r=>{alive[c+':'+r.id]=1;});
+  for(const k in sy.pushed){const c=k.slice(0,k.indexOf(':'));if(ARR_KEYS.indexOf(c)>=0&&!alive[k]){delete sy.pushed[k];n++;}}
+  if(n){DB.deleted=keepD;if(!Store.save(DB))return 0;Store.saveSy();}
+  Store.setPref('tombPruneAt',new Date().toISOString());return n;},
  applyRejected(rj){const sy=Store.sy();for(const r of rj){const k=r.coll;if(ARR_KEYS.indexOf(k)<0)continue;const i=DB[k].findIndex(x=>x.id===r.id);if(i>=0)DB[k].splice(i,1);delete Store.snap[k+':'+r.id];delete sy.pushed[k+':'+r.id];DB.deleted=DB.deleted.filter(d=>!(d.coll===k&&d.id===r.id));}},
  sy(){if(!Store._sy)Store._sy=Object.assign({since:'',pushed:{},pushedDel:{},lastOk:''},Store._rd(Store.SK,{}));return Store._sy;},
  saveSy(){Store._wr(Store.SK,Store.sy());},
@@ -1055,7 +1074,8 @@ Object.assign(Store,{
    if(ARR_KEYS.indexOf(k)<0)continue;const arr=DB[k];const i=arr.findIndex(x=>x.id===ch.id);
    if(ch.deleted){const o=i>=0?arr[i]:null;if(o&&(o.updatedAt||'')<=ch.at){if(sy.pushed[k+':'+ch.id]!==o.updatedAt)try{nfDevEvent(1,'del:'+k+':'+ch.id+':'+ch.at,'Phiếu '+(o.code||o.name||(REJ_NAME[k]||k))+' vừa bị máy khác xóa; thay đổi chưa gửi của máy này không còn.',null);}catch(e){}arr.splice(i,1);delete Store.snap[k+':'+ch.id];delete Store.ts[k+':'+ch.id];n++;}
     if(!DB.deleted.some(d=>d.coll===k&&d.id===ch.id)){const t={coll:k,id:ch.id,at:ch.at,by:'máy chủ'};DB.deleted.push(t);sy.pushedDel[k+':'+ch.id+':'+ch.at]=1;}}
-   else if(ch.rec){const rec=ch.rec;const tomb=DB.deleted.find(d=>d.coll===k&&d.id===ch.id);
+   else if(ch.rec){const rec=ch.rec;if(k==='auditLog'&&Store.audOld(rec))continue; /* máy nhân viên: bỏ qua nhật ký quá 90 ngày */
+    const tomb=DB.deleted.find(d=>d.coll===k&&d.id===ch.id);
     if(tomb&&tomb.at>=rec.updatedAt)continue;
     if(tomb){DB.deleted=DB.deleted.filter(d=>d!==tomb);
      /* máy này đã xóa, nhưng máy khác sửa sau đó: giữ bản máy chủ nhưng báo chủ để chọn */
@@ -1093,7 +1113,7 @@ Object.assign(Store,{
     stale.forEach(st=>{const key=st.coll+':'+st.id;if(sy.pushed[key]===undefined&&DB[st.coll]){const r=DB[st.coll].find(x=>x.id===st.id);if(r)sy.pushed[key]=r.updatedAt;}});
     if((m+rj.length>0||Store.dirtyMem)&&!Store.save(DB)){Store.dirtyMem=true;const er=new Error('quota');if(Store.reloaded){Store.reloaded=false;er.kind='tab';}else er.kind='quota';throw er;} /* không lưu được dữ liệu tải về: KHÔNG dời con trỏ since */
     if(first){sy.first=true;firstJust=true;}
-    sy.since=j.serverTime||sy.since;Store.saveSy();if(!first&&ob.length<100)break;}
+    sy.since=j.serverTime||sy.since;if(typeof j.ms==='number'&&isFinite(j.ms)&&j.ms>=0)sy.ms=Math.round(j.ms);else delete sy.ms;Store.saveSy();if(!first&&ob.length<100)break;}
    Store.err='';if(Store.getPref('authFails'))Store.setPref('authFails',0);sy.lastOk=new Date().toISOString();if(rejAll.length)Store.showRejected(rejAll);else if(newFail)toast('Không gửi được '+newFail+' phiếu – xem 🔔 Thông báo.',true);else if(manual)toast('Đã đồng bộ xong.');}
   catch(e){Store.err=e.kind||'net';if(e.kind==='tab')Store.err='';
    if(e.kind==='quota')toast('Bộ nhớ máy đầy, chưa lưu được dữ liệu tải về',true);
@@ -1131,7 +1151,7 @@ window.addEventListener('storage',e=>{if(e.storageArea&&e.storageArea!==localSto
  if(e.key===KEY||e.key===null){if(e.key===KEY&&e.newValue===Store.raw)return;Store.tabReload();Store.reloaded=false;}
  else if(e.key===Store.SK&&!Store.busy)Store._sy=null;});
 window.addEventListener('online',()=>{Store.err='';Store.syncNow(false);});window.addEventListener('offline',()=>Store.pill());
-setInterval(()=>Store.syncNow(false),60000);
+setInterval(()=>Store.syncNow(false),60000);setInterval(()=>{try{Store.pruneAudit();}catch(e){}try{Store.pruneTomb();}catch(e){}},36e5);
 
 /* ===== EASY MODE ===== */
 const EZ={ev:'home',w:null,sub:null,date:null,live:null,editIdx:null,done:null,bcp:'today',sel:null,yes:null};
@@ -2238,7 +2258,10 @@ function b64uDec(t){t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+=
 function connectLink(url,code){const loc=/^(localhost|127\.0\.0\.1)$/.test(location.hostname);return(loc?location.href.split('#')[0].split('?')[0]:'https://vuhoa2001-tech.github.io/so-ca-phe/')+'#ket-noi='+b64uEnc({u:url,t:code});}
 function canAdmin(){return!isStaff()&&Store.has()&&(Store.cfg().token?Store.role()==='owner':true);}
 function fmtDT(iso){if(!iso)return'—';const d=new Date(iso);if(isNaN(d))return'—';return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes());}
-function syncCard(){const sn=Store.srvName();
+function storageLine(){const u=Store.usage(),c=u.pct>=80?'var(--bad,#c0392b)':u.pct>=60?'#b7791f':'inherit';return'<p style="margin:8px 0 0;color:'+c+'">Bộ nhớ trên máy: đã dùng <b>'+u.pct+'%</b> (khoảng '+u.mb+' MB / 5 MB)</p>';}
+function syncMsLine(){try{const m=Store.sy().ms;if(typeof m!=='number'||!isFinite(m))return'';const c=m>8000?'#b7791f':'inherit';return'<p style="margin:8px 0 0;color:'+c+'">Lần đồng bộ gần nhất: <b>'+(Math.round(m/100)/10)+' giây</b></p>';}catch(e){return'';}}
+function syncCard(){return syncCard0().replace(/<\/div>$/,syncMsLine()+storageLine()+'</div>');}
+function syncCard0(){const sn=Store.srvName();
  if(sn)return'<div class="card"><h2>Kết nối máy</h2><p>Đăng nhập: <b>'+esc(sn)+'</b> ('+roleVN(Store.role())+'). Tên người nhập do máy chủ cấp, không sửa được. Trạng thái: <b>'+esc(Store.status().t)+'</b></p><div class="btns"><button class="btn btn-p" data-act="syncNow">Đồng bộ ngay</button><button class="btn btn-d" data-act="disconnect">Ngắt kết nối máy này</button></div></div>';
  return'<div class="card"><h2>Kết nối máy / Đồng bộ qua Google Sheets</h2><p class="mut">Cách đúng: chủ tạo mã riêng cho từng người rồi gửi link kết nối (mục "Người dùng &amp; mã máy"). Hoặc dán địa chỉ và mã riêng vào đây. Cài đặt này chỉ lưu trên máy này. Trạng thái: <b>'+esc(Store.status().t)+'</b></p><div class="grid"><label class="span2">Địa chỉ đồng bộ (URL ứng dụng web)<input id="sy-url" value="'+esc(Store.cfg().url)+'" placeholder="https://script.google.com/macros/s/.../exec"></label><label>Mã riêng (XXXX-XXXX-XXXX)<input id="sy-token" placeholder="XXXX-XXXX-XXXX" autocomplete="off"></label><label>Mã đồng bộ chung (cách cũ)<input id="sy-secret" value="'+esc(Store.cfg().secret)+'"></label></div><div class="btns"><button class="btn btn-p" data-act="saveSync">Kết nối / Lưu và đồng bộ</button><button class="btn" data-act="syncNow">Đồng bộ ngay</button></div></div>';}
 let CONN=null;
@@ -2411,6 +2434,8 @@ function nfList(){if(NF.c)return NF.c;const L=[],owner=!isStaff(),now=new Date()
   (Store.getPref('nfDev')||[]).forEach(e=>add(e.sev,'dev:'+e.key,e.text,e.act,e.at));
   if(Store.getPref('revoked')||Store.err==='auth')add(1,'auth','Mã của máy này đã bị khóa hoặc sai, máy không đồng bộ được. Hãy báo cho chủ để được cấp mã mới.',{t:'cd'});
   (Store.getPref('rejLog')||[]).slice(0,10).forEach(e=>add(1,'rej:'+e.at+':'+e.id,'Máy chủ không nhận thay đổi của '+(e.by||'một máy')+' ('+(e.label||REJ_NAME[e.coll]||e.coll)+'): '+(e.reason||'không rõ lý do')+'.',{t:'cd'},e.at));}catch(e){}
+ try{const m=Store.sy().ms;if(typeof m==='number'&&m>8000)add(1,'slow','Đồng bộ chậm ('+(Math.round(m/100)/10)+' giây) – báo người hỗ trợ',null);}catch(e){}
+ try{const u=Store.usage();if(u.pct>=60)add(u.pct>=80?0:1,'sto','Bộ nhớ máy đã dùng '+u.pct+'% – báo chủ để nâng cấp cách lưu',null);}catch(e){}
  if(owner){
   try{const ex=new Set(DB.exchanges.map(x=>x.id)),B=cvBasis(DB);
    DB.deposits.forEach(d=>{if(d.source==='exchange'&&d.exchangeId&&!ex.has(d.exchangeId))add(0,'orphd:'+d.id,'Ký gửi không còn phiếu đổi gốc: '+(d.code||'')+' của '+custName(d.customerId)+' ('+fkg(d.kg)+') – số kg này không được tính vào tồn ký gửi. Máy chủ sẽ tự dọn, hoặc chủ xóa tay.',{t:'rec',coll:'deposits',id:d.id});
@@ -2604,6 +2629,7 @@ if(normalizeDB.migrated){normalizeDB.migrated=false;save();}
 if(!Store.pending())migrateTypes(); /* máy mới nối mạng: chờ tải lần đầu từ máy chủ rồi mới chạy các bước tự sửa (tránh ghi đè cài đặt trên máy chủ) */
 LOCK_OFF++;try{try{if(!isStaff()){const a=ensureCodes(),b=reconcileDeposits();if(a||b)save();}}catch(e){}}finally{LOCK_OFF--;}
 LOCK_OFF++;{let n=0;try{n=migrateOwedToDeposit();}finally{LOCK_OFF--;}if(n>0)setTimeout(()=>toast('Đã chuyển nhân còn nợ của '+n+' khách sang Ký gửi.'),700);}
+try{Store.pruneAudit();}catch(e){}try{Store.pruneTomb();}catch(e){}
 $('#userName').value=Store.getUser();
 $('#userName').addEventListener('input',e=>{if(!Store.srvName())Store.setUser(trim(e.target.value));});
 if(isStaff()&&ui.mode==='full'){ui.mode='easy';Store.setPref('mode','easy');}

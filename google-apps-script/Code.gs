@@ -265,6 +265,7 @@ function nameTaken_(users, name, exceptId) {
 }
 
 function doPost(e) {
+  var t0 = Date.now();
   var lock = LockService.getScriptLock();
   try {
     lock.waitLock(25000);
@@ -279,7 +280,7 @@ function doPost(e) {
     var serverTime = new Date().toISOString();
     var since = body.since || '';
     var staff = user.role !== 'owner';
-    var ctx = { user: user, staff: staff, today: today_(), rejected: [], extra: [], stale: [], failed: [] };
+    var ctx = { user: user, staff: staff, today: today_(), rejected: [], extra: [], stale: [], failed: [], touched: {} };
     var names = { custMap: null, typeMap: null };
     var N = {
       cust: function (id) { if (!names.custMap) names.custMap = lookup_('customers'); return names.custMap[id] || ''; },
@@ -300,21 +301,38 @@ function doPost(e) {
         ctx.extra.push({ coll: 'users', id: pid, deleted: true, at: serverTime });
       }
     });
-    ORDER.forEach(function (coll) {
-      if (!byColl[coll]) return;
-      upsert_(coll, byColl[coll], serverTime, N, ctx);
-      if (coll === 'customers') names.custMap = null;
-      if (coll === 'types') names.typeMap = null;
-    });
+    try {
+      ORDER.forEach(function (coll) {
+        if (!byColl[coll]) return;
+        upsert_(coll, byColl[coll], serverTime, N, ctx);
+        if (coll === 'customers') names.custMap = null;
+        if (coll === 'types') names.typeMap = null;
+      });
+    } finally { // dù lỗi giữa chừng vẫn ghi mốc "đã đổi" cho các trang tính đã bị ghi (an toàn: chỉ làm đọc nhiều hơn, không bao giờ bỏ sót)
+      var chg = {};
+      for (var tc in ctx.touched) chg['chg_' + tc] = serverTime;
+      if (Object.keys(chg).length) { try { PropertiesService.getScriptProperties().setProperties(chg); } catch (pe) { /* không ghi được mốc -> lần sau đọc đầy đủ */ } }
+    }
     // lấy các thay đổi mới hơn "since"
+    // Tăng tốc: mỗi trang tính có mốc "lần đổi cuối" (Script Properties chg_<coll>, cùng định dạng với cột "Máy chủ nhận lúc").
+    // Nếu máy khách có "since" và mốc <= since thì trang đó không có gì mới -> bỏ qua, không đọc.
+    // Chưa có mốc (lần đầu sau khi cập nhật) -> đọc như cũ rồi ghi mốc = giá trị lớn nhất tìm thấy.
+    // Lưu ý: sửa tay trên trang tính không đổi cột "Máy chủ nhận lúc" nên máy khách vốn đã không thấy; mốc cũng không biết. Muốn ép đọc lại toàn bộ: chạy lamMoiDauThoiGian().
+    var props = {};
+    try { props = PropertiesService.getScriptProperties().getProperties() || {}; } catch (pe2) { props = {}; }
+    var seed = {};
     var changes = [], seen = {};
     ORDER.forEach(function (coll) {
+      var mark = props['chg_' + coll];
+      if (since && mark !== undefined && mark !== null && String(mark) <= since) return;
       var sh = sheetFor_(coll), last = sh.getLastRow();
-      if (last < 2) return;
+      if (last < 2) { if (mark === undefined || mark === null) seed['chg_' + coll] = '0'; return; }
       var n = PREFIX.length + DEF[coll].cols.length + 2;
       var vals = sh.getRange(2, 1, last - 1, n).getValues();
+      var mx = '0';
       vals.forEach(function (r) {
         var srv = s_(r[n - 2]);
+        if (srv > mx) mx = srv;
         if (!r[0] || srv <= since) return;
         var rec = null;
         try { rec = JSON.parse(r[n - 1]); } catch (x) { return; }
@@ -322,7 +340,9 @@ function doPost(e) {
         else changes.push({ coll: coll, id: String(r[0]), deleted: false, updatedAt: rec.updatedAt || s_(r[1]), rec: rec });
         seen[coll + ':' + r[0]] = 1;
       });
+      if (mark === undefined || mark === null) seed['chg_' + coll] = mx;
     });
+    if (Object.keys(seed).length) { try { PropertiesService.getScriptProperties().setProperties(seed); } catch (pe3) { } }
     // bản "đúng theo máy chủ" của các mục bị từ chối (để máy khách hoàn lại)
     ctx.extra.forEach(function (c) {
       var k = c.coll + ':' + c.id;
@@ -330,7 +350,7 @@ function doPost(e) {
       changes.push(c);
     });
     // stale = mục bị bỏ qua vì bản trên máy chủ mới hơn (máy khách lệch giờ / sửa chồng); failed = mục lỗi riêng lẻ, không chặn các mục khác. Cả hai là trường TÙY CHỌN (máy cũ bỏ qua được).
-    return json_({ ok: true, serverTime: serverTime, changes: changes, rejected: ctx.rejected, stale: ctx.stale, failed: ctx.failed, user: { name: user.name, role: user.role } });
+    return json_({ ok: true, serverTime: serverTime, changes: changes, rejected: ctx.rejected, stale: ctx.stale, failed: ctx.failed, user: { name: user.name, role: user.role }, ms: Date.now() - t0 });
   } catch (err) {
     return json_({ ok: false, error: 'server: ' + err });
   } finally {
@@ -393,6 +413,7 @@ function upsert_(coll, items, serverTime, N, ctx) {
     else if (appendIdx[id] !== undefined) appendRows[appendIdx[id]] = row;
     else { appendIdx[id] = appendRows.length; appendRows.push(row); }
     tsOf[id] = ts;
+    ctx.touched[coll] = true;
   };
   var serverCopy = function (id, cur) { // bản đúng theo máy chủ của một mục bị từ chối
     if (!rowOf[id]) return { coll: coll, id: id, deleted: true, at: serverTime };
@@ -529,6 +550,17 @@ function tatSaoLuuTuDong() {
     if (t.getHandlerFunction() === 'saoLuuHangNgay') { ScriptApp.deleteTrigger(t); n++; }
   });
   var msg = 'Đã tắt sao lưu tự động (xóa ' + n + ' lịch).';
+  Logger.log(msg);
+  return msg;
+}
+
+// Xóa các mốc "lần đổi cuối" (chg_...) dùng để bỏ qua trang tính không đổi khi đồng bộ.
+// Chạy khi nghi ngờ máy khách thiếu dữ liệu (vd. sau khi tự sửa/dán dữ liệu trực tiếp trên trang tính): lần đồng bộ kế tiếp sẽ đọc đầy đủ rồi tự tạo lại mốc.
+// Cách chạy: chọn hàm "lamMoiDauThoiGian" ở ô cạnh nút "Chạy" → bấm "Chạy".
+function lamMoiDauThoiGian() {
+  var p = PropertiesService.getScriptProperties(), n = 0;
+  Object.keys(p.getProperties()).forEach(function (k) { if (k.indexOf('chg_') === 0) { p.deleteProperty(k); n++; } });
+  var msg = 'Đã xóa ' + n + ' mốc thời gian. Lần đồng bộ tới sẽ đọc đầy đủ.';
   Logger.log(msg);
   return msg;
 }
