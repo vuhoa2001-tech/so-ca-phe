@@ -265,13 +265,15 @@ footer{margin-top:36px;text-align:center;font-weight:700;font-size:20px;backgrou
   <p>Đây là màn hình bạn thấy mỗi lần mở app. Bấm vào ô nào thì làm việc đó. Ô có <span class="lock">🔒</span> là việc của <b>chủ</b>. Trên điện thoại nhân viên, bấm vào sẽ hiện <b>"Chức năng này chỉ dùng trên máy của chủ"</b> — đó là bình thường.</p>
   <div class="cols c2" style="align-items:start">
     <div class="fig" style="display:flex;justify-content:center">
-      <div class="phone" role="img" aria-label="Màn hình chính của app có 12 ô: Mua cà, Đổi cà, Nhập kho, Ký gửi, Ứng tiền, Thu / Chi, Chốt quỹ, Xem nợ, Hôm nay, Kiểm kê, Báo cáo, Cài đặt. Mô tả từng ô ở danh sách bên cạnh.">
+      <div class="phone" role="img" aria-label="Màn hình chính của app có 13 ô: Thông báo, Mua cà, Đổi cà, Nhập kho, Ký gửi, Ứng tiền, Thu / Chi, Chốt quỹ, Xem nợ, Hôm nay, Kiểm kê, Báo cáo, Cài đặt. Mô tả từng ô ở danh sách bên cạnh.">
         <div class="notch"></div>
         <div class="scr" aria-hidden="true">
           <div class="pillrow"><span>☰ HOAVU</span><span class="pill ok" style="padding:2px 8px;font-size:10px">✓ Đã lưu lên mạng</span></div>
           <div class="hero"><img src="logo-128.png" alt="">HOAVU</div>
+          <div class="mc" style="margin:4px 0;text-align:left">🔍 Tìm khách, số phiếu...</div>
           <div class="kpis"><div class="mc">Tiền mặt trong quỹ<span class="big">12.500.000 đ</span></div><div class="mc">Hôm nay đã mua<span class="big">135,2 kg</span></div></div>
           <div class="tiles">
+            <div class="tl"><span>🔔</span>Thông báo</div>
             <div class="tl"><span>🛒</span>Mua cà</div>
             <div class="tl"><span>🔄</span>Đổi cà</div>
             <div class="tl"><span>📦</span>Nhập kho</div>
@@ -289,6 +291,7 @@ footer{margin-top:36px;text-align:center;font-weight:700;font-size:20px;backgrou
       </div>
     </div>
     <ul class="tcap">
+      <li><span class="ic">🔔</span><div><b>Thông báo</b><small>Các việc cần chú ý, có số đỏ nếu có tin mới. Xem phần "Thông báo" bên dưới. <span class="who">Nhân viên</span></small></div></li>
       <li><span class="ic">🛒</span><div><b>Mua cà</b><small>Mua cà của nông dân. Dùng nhiều nhất. <span class="who">Nhân viên</span></small></div></li>
       <li><span class="ic">🔄</span><div><b>Đổi cà</b><small>Khách đưa cà tươi, nhân tự vào Ký gửi của khách. <span class="who">Nhân viên</span></small></div></li>
       <li><span class="ic">📦</span><div><b>Nhập kho</b><small>Ghi nhân xô vào kho sau khi sấy / xay. <span class="who">Nhân viên</span></small></div></li>
@@ -583,6 +586,35 @@ footer{margin-top:36px;text-align:center;font-weight:700;font-size:20px;backgrou
         <li>Sau khi Lưu, bấm <b>🖨 In phiếu</b> hoặc <b>📤 Gửi Zalo</b>.</li>
         <li>Màn hình in mở <b>ngay trong app</b>. Bấm <b>⬅ Quay lại ứng dụng</b> để về.</li>
         <li>In chưa được thì bấm <b>🖨 In lại</b>, hoặc dùng <b>📤 Gửi Zalo</b> cho khách.</li>
+      </ol>
+    </div>
+
+    <div class="card avoid" id="ma-khach">
+      <h3>🏷 Mã khách và số phiếu mới</h3>
+      <ol class="s">
+        <li>Mỗi khách có một <b>mã</b> ngắn, app tự đặt khi tạo khách và <b>không đổi</b> khi sửa tên. Mã hiện trước tên: <b>HOA – Nguyễn Thị Hoa</b>.</li>
+        <li>Mã lấy từ tên: <b>HOA</b>. Nếu đã có người tên Hoa thì thêm tên đệm: <b>VAN-HOA</b>, rồi họ tên đầy đủ: <b>LE-VAN-HOA</b>. Trùng cả họ tên thì thêm số: <b>NGUYEN-VAN-HOA-2</b>.</li>
+        <li><b>Trùng tên:</b> khi tạo khách mới mà đã có người cùng tên, app hỏi "có phải người này không?". Đúng người cũ thì bấm <b>Chọn người này</b>. Là người khác thì phải <b>gõ đủ họ tên</b> (ít nhất 2 từ) rồi bấm <b>+ Đúng, tạo khách mới</b>.</li>
+        <li><b>Số phiếu</b> mới có thêm năm: <b>PM26-0012</b> (mua cà, năm 2026, phiếu thứ 12). Đầu năm sau tự về 0001. Phiếu cũ giữ số cũ.</li>
+      </ol>
+    </div>
+
+    <div class="card avoid" id="thong-bao">
+      <h3>🔔 Thông báo</h3>
+      <ol class="s">
+        <li>Bấm <b>🔔 Thông báo</b> (ô đầu trang chính hoặc chuông ở góc trên). Số đỏ là số tin chưa xem.</li>
+        <li><b>🔴 Đỏ = lỗi, báo chủ ngay.</b> <b>🟠 Cam = cần chú ý.</b> <b>🔵 Xanh = nhắc việc</b> (ví dụ kiểm kê cuối tháng, sao lưu).</li>
+        <li>Bấm <b>Xem / Sửa</b> để mở đúng chỗ. Xem xong bấm <b>Đã xem</b> để tin biến mất (tin sẽ hiện lại nếu nội dung thay đổi).</li>
+        <li>Nhân viên chỉ thấy tin về máy mình (chưa gửi được lên mạng, mã bị khóa...). Chủ thấy đầy đủ.</li>
+      </ol>
+    </div>
+
+    <div class="card avoid" id="tim-kiem">
+      <h3>🔍 Tìm kiếm</h3>
+      <ol class="s">
+        <li>Gõ vào <b>ô tìm kiếm</b> ở đầu trang chính: <b>mã khách</b> (vanhoa), <b>tên</b>, <b>số điện thoại</b> (vài số cuối), <b>thôn</b> hoặc <b>số phiếu</b> (PM26-0012 hoặc chỉ 0012).</li>
+        <li>Bấm tên khách: xem nợ và các nút <b>Mua cà · Đổi cà · Ký gửi · Chốt giá · Trả lại nhân · Trả / Thu tiền · Sao kê</b>.</li>
+        <li>Bấm một phiếu: xem, <b>🖨 In</b>, <b>📤 Gửi Zalo</b>, sửa hoặc xóa.</li>
       </ol>
     </div>
 

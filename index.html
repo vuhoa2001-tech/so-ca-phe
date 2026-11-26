@@ -257,13 +257,31 @@ body.gated #gate{display:flex;position:fixed;inset:0;z-index:50;background:var(-
 #gate .gerr{color:var(--bad,#b3261e);font-weight:700;font-size:17px;margin:6px 0;min-height:1px}
 #gate .glinks{display:flex;flex-direction:column;gap:12px;margin-top:14px;font-size:16px}#gate .glinks a{color:var(--text);text-decoration:underline;cursor:pointer}
 #gate input{width:100%;box-sizing:border-box;text-align:center}
+.bellbtn{position:relative;background:transparent;border:1px solid var(--side-line);color:var(--side-text);border-radius:8px;padding:4px 9px;font-size:18px;cursor:pointer;line-height:1.2}
+.bellbtn .bn{position:absolute;top:-7px;right:-7px;background:#d32f2f;color:#fff;border-radius:10px;font-size:11px;font-weight:700;min-width:18px;height:18px;line-height:18px;text-align:center;padding:0 4px}
+#gSearch{width:210px;max-width:30vw;padding:6px 10px;border-radius:8px;border:1px solid var(--side-line);background:rgba(255,255,255,.12);color:var(--side-text);font-size:14px}
+#gSearch::placeholder{color:var(--side-muted)}
+body.easy #gSearch{display:none}
+#gsPanel{position:fixed;top:56px;left:16px;width:min(580px,calc(100vw - 32px));max-height:72vh;overflow:auto;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px var(--shadow);z-index:80;padding:8px}
+.gsh{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:8px 4px 4px}
+.gsr{display:block;width:100%;text-align:left;font-family:var(--font);font-size:15px;color:var(--text);background:transparent;border:1px solid transparent;border-radius:8px;padding:8px 10px;margin:2px 0;cursor:pointer}
+.gsr small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.gsr:hover,.gsr.on{background:var(--sel);border-color:var(--accent)}
+#eGsRes .gsr{border:1px solid var(--line);background:var(--panel);font-size:18px;padding:12px;margin:6px 0}
+#eGsRes .gsr small{font-size:15px}
+.nfi{border:1px solid var(--line);border-left:6px solid var(--muted);border-radius:10px;padding:10px 12px;margin:8px 0;background:var(--panel)}
+.nfi.s0{border-left-color:#d32f2f}.nfi.s1{border-left-color:#f59e0b}.nfi.s2{border-left-color:#2563eb}
+.nfi .nft{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);margin-bottom:4px}
+.nfi .nfb{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.tile{position:relative}.tbadge{position:absolute;top:8px;right:10px;background:#d32f2f;color:#fff;border-radius:12px;font-style:normal;font-size:14px;font-weight:700;min-width:24px;height:24px;line-height:24px;text-align:center;padding:0 6px}
 </style>
 </head>
 <body>
-<header><button type="button" class="brand" data-act="brandGo" title="Về trang chính"><span class="logo"><img src="logo-128.png" alt="HOAVU"></span><div class="bt"><b>HOAVU</b><small id="subtitle">Lý Thuỷ · Sổ cà phê</small></div></button><small id="shopname"></small><button id="syncPill" class="pill2 none" data-act="syncNow">💾 Chỉ lưu trên máy</button><button id="modeBtn" class="mbtn" data-act="toggleMode">Chế độ đầy đủ</button><button id="lockBtn" class="mbtn" data-act="lockNow" style="display:none">🔒 Khóa lại</button><button id="themeBtn" class="theme-btn" data-act="toggleTheme" aria-label="Đổi giao diện sáng/tối" title="Đổi giao diện sáng/tối">🌙</button><label class="who">Người nhập: <input id="userName" placeholder="Tên của bạn" autocomplete="off"></label></header>
+<header><button type="button" class="brand" data-act="brandGo" title="Về trang chính"><span class="logo"><img src="logo-128.png" alt="HOAVU"></span><div class="bt"><b>HOAVU</b><small id="subtitle">Lý Thuỷ · Sổ cà phê</small></div></button><small id="shopname"></small><input id="gSearch" type="search" placeholder="🔍 Tìm khách, số phiếu (Ctrl+K)" autocomplete="off" autocapitalize="off"><button id="bellBtn" class="bellbtn" data-act="bell" title="Thông báo" aria-label="Thông báo">🔔<span id="bellN" class="bn" style="display:none"></span></button><button id="syncPill" class="pill2 none" data-act="syncNow">💾 Chỉ lưu trên máy</button><button id="modeBtn" class="mbtn" data-act="toggleMode">Chế độ đầy đủ</button><button id="lockBtn" class="mbtn" data-act="lockNow" style="display:none">🔒 Khóa lại</button><button id="themeBtn" class="theme-btn" data-act="toggleTheme" aria-label="Đổi giao diện sáng/tối" title="Đổi giao diện sáng/tối">🌙</button><label class="who">Người nhập: <input id="userName" placeholder="Tên của bạn" autocomplete="off"></label></header>
 <div class="shell"><nav id="nav"></nav>
 <main id="view"></main></div>
 <datalist id="dlCust"></datalist>
+<div id="gsPanel" style="display:none"></div>
 <div id="toast"></div>
 <div id="gate"></div>
 <dialog id="dlg"></dialog>
@@ -323,7 +341,7 @@ const Store={
  remove(st,coll,id){const n=st[coll].length;st[coll]=st[coll].filter(x=>x.id!==id);return st[coll].length<n;}
 };
 function load(){DB=Store.load();}
-function save(){cache=null;if(Store.save(DB)){if(Store.afterSave)Store.afterSave();return true;}toast('Không lưu được dữ liệu (bộ nhớ đầy hoặc bị chặn). Hãy sao lưu ngay!','err');return false;}
+function save(){cache=null;NF.c=null;if(!RECON.off&&!isStaff()){try{reconcileDeposits();}catch(e){}}if(Store.save(DB)){if(Store.afterSave)Store.afterSave();return true;}toast('Không lưu được dữ liệu (bộ nhớ đầy hoặc bị chặn). Hãy sao lưu ngay!','err');return false;}
 
 /* ===== utils ===== */
 const $=(s,r)=>(r||document).querySelector(s);
@@ -346,7 +364,7 @@ function pNum(s){if(s==null)return NaN;s=String(s).trim().replace(/\s/g,'');if(s
 function pMoney(s){s=String(s==null?'':s).replace(/[^\d-]/g,'');if(s===''||s==='-')return 0;return parseInt(s,10);}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
 let tsLast=0;function nextTs(){tsLast=Math.max(Date.now(),tsLast+1);return tsLast;}
-function nextCode(p){const s=DB.settings.seq;s[p]=(s[p]||0)+1;return p+pad(s[p],4);}
+function nextCode(p,dt){const d=/^\d{4}-/.test(dt||'')?dt:today();const k=p+d.slice(2,4);const s=DB.settings.seq;s[k]=(s[k]||0)+1;return k+'-'+pad(s[k],4);}
 function cmpDate(a,b){return a.date<b.date?-1:a.date>b.date?1:(a.ts||0)-(b.ts||0);}
 function cmpDateDesc(a,b){return -cmpDate(a,b);}
 function toast(msg,err){const t=document.createElement('div');t.className='toast'+(err?' err':'');t.textContent=msg;$('#toast').appendChild(t);setTimeout(()=>t.remove(),err?5000:2500);}
@@ -362,11 +380,24 @@ function calcBean(fresh,ratio){return ratio>0?r2(fresh/ratio):0;}
 function calcAmount(kg,price){return Math.round((kg||0)*(price||0));}
 
 const custById=id=>DB.customers.find(c=>c.id===id);
-const custName=id=>{const c=custById(id);return c?c.name:'(đã xóa)';};
+const custLabel=c=>c?((c.code?c.code+' – ':'')+c.name):'(đã xóa)';
+const custName=id=>custLabel(custById(id));
+const custSub=c=>[c.address,c.phone].filter(Boolean).join(' · ');
+const codeWords=n=>fold(trim(n)).toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim().split(' ').filter(Boolean);
+const givenOf=n=>{const w=codeWords(n);return w.length?w[w.length-1]:'';};
+const codeNorm=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+function codeTaken(code,exceptId){const u=String(code).toUpperCase();return DB.customers.some(c=>c.id!==exceptId&&c.code&&String(c.code).toUpperCase()===u);}
+function genCode(name,exceptId){const w=codeWords(name);if(!w.length)return'';const cand=[w[w.length-1]];if(w.length>=3)cand.push(w.slice(1).join('-'));if(w.length>=2)cand.push(w.join('-'));
+ for(const c of cand)if(!codeTaken(c,exceptId))return c;const base=cand[cand.length-1];for(let n=2;;n++){const c=base+'-'+n;if(!codeTaken(c,exceptId))return c;}}
 const typeName=id=>{const t=DB.types.find(t=>t.id===id);return t?t.name:'(không rõ)';};
-function findCust(name){const n=normName(name);return n?DB.customers.find(c=>normName(c.name)===n):null;}
-function ensureCust(name,group){let c=findCust(name);if(!c){c={id:uid(),name:trim(name),phone:'',address:'',group:group||'Khác',note:''};DB.customers.push(c);refreshCustList();}return c;}
-function refreshCustList(){$('#dlCust').innerHTML=DB.customers.slice().sort((a,b)=>a.name.localeCompare(b.name,'vi')).map(c=>'<option value="'+esc(c.name)+'">').join('');}
+function findCust(txt){const t=trim(txt);if(!t)return null;const m=t.match(/^([A-Za-z0-9-]+) – /);
+ if(m){const u=m[1].toUpperCase();const c=DB.customers.find(c=>c.code&&String(c.code).toUpperCase()===u);if(c)return c;}
+ const n=normName(t);const c=DB.customers.find(c=>normName(c.name)===n);if(c)return c;
+ const k=codeNorm(t);return k?(DB.customers.find(c=>c.code&&codeNorm(c.code)===k)||null):null;}
+function custNeedFull(name){if(codeWords(name).length<2&&DB.customers.some(c=>givenOf(c.name)===givenOf(name)))return'Đã có khách tên "'+trim(name)+'". Hãy chọn đúng người trong danh sách, hoặc gõ ĐỦ HỌ TÊN (ví dụ "Trần Văn Hoa") để tạo khách mới.';return'';}
+function newCust(o){const c=Object.assign({id:uid(),name:'',phone:'',address:'',group:'Khác',note:''},o);c.name=trim(c.name);c.code=genCode(c.name);DB.customers.push(c);refreshCustList();return c;}
+function ensureCust(name,group){let c=findCust(name);if(!c){const e=custNeedFull(name);if(e)throw new Error(e);c=newCust({name,group:group||'Khác'});}return c;}
+function refreshCustList(){$('#dlCust').innerHTML=DB.customers.slice().sort((a,b)=>a.name.localeCompare(b.name,'vi')).map(c=>'<option value="'+esc(custLabel(c))+'" label="'+esc(custSub(c))+'">').join('');}
 
 function stats(){if(cache)return cache;
  const S={cust:{},stock:{},cash:0,thu:0,chi:0,debtBuy:0,debtSale:0,bean:0,adv:0,dep:{}};
@@ -397,7 +428,7 @@ function syncBean(b){removeLinked(b.id);if(b.mode==='cash'&&b.amount>0)addCash({
 /* phiếu đổi mới → tự tạo phiếu ký gửi LIÊN KẾT (cùng ngày, cùng người tạo); phiếu đổi cũ chưa có ký gửi liên kết vẫn theo đường cũ (trả nhân ngay) */
 const exDeposit=id=>DB.deposits.find(d=>d.exchangeId===id&&d.source==='exchange');
 function syncExchange(x,isNew){let dp=exDeposit(x.id);
- if(dp||isNew){const bid=DB.settings.beanTypeId;if(!dp){dp={id:uid(),code:nextCode('KG'),ts:nextTs(),kind:'in',source:'exchange',exchangeId:x.id,bags:[]};DB.deposits.push(dp);}
+ if(dp||isNew){const bid=DB.settings.beanTypeId;if(!dp){dp={id:uid(),code:nextCode('KG',x.date),ts:nextTs(),kind:'in',source:'exchange',exchangeId:x.id,bags:[]};DB.deposits.push(dp);}
   Object.assign(dp,{date:x.date,customerId:x.customerId,typeId:bid,kg:x.kgBean,gross:x.kgBean,tareTotal:0,note:'Từ phiếu đổi '+x.code});return;}
  let b=DB.beanPayments.find(b=>b.exchangeId===x.id);
  if(x.paidNow>0){if(!b){b={id:uid(),code:'',exchangeId:x.id,ts:nextTs()};DB.beanPayments.push(b);}Object.assign(b,{date:x.date,customerId:x.customerId,kg:x.paidNow,mode:'bean',price:0,amount:0,note:'Trả ngay khi đổi '+x.code});}
@@ -480,11 +511,11 @@ ACT.del=b=>{const k=b.dataset.k,id=b.dataset.id;if(!confirm('Bạn có chắc mu
 const DEL={};
 function findRec(arr,id){return DB[arr].find(r=>r.id===id);}
 
-document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(b&&ACT[b.dataset.act]){e.preventDefault();ACT[b.dataset.act](b,e);}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(b&&ACT[b.dataset.act]){e.preventDefault();try{ACT[b.dataset.act](b,e);}catch(err){fail(String(err&&err.message||err));}}});
 function onInput(e){const t=e.target;if(t.dataset&&t.dataset.flt){const[a,k]=t.dataset.flt.split('.');ui.f[a][k]=t.type==='checkbox'?t.checked:t.value;refreshList(t.dataset.list||a);return;}
  const f=t.closest&&t.closest('form[data-live]');if(f&&LIVE[f.id])LIVE[f.id](t);}
 document.addEventListener('input',onInput);document.addEventListener('change',onInput);
-document.addEventListener('submit',e=>{e.preventDefault();const f=e.target;if(SUBMIT[f.id])SUBMIT[f.id]();});
+document.addEventListener('submit',e=>{e.preventDefault();const f=e.target;if(SUBMIT[f.id]){try{SUBMIT[f.id]();}catch(err){fail(String(err&&err.message||err));}}});
 document.addEventListener('focusout',e=>{const t=e.target;if(t.classList&&t.classList.contains('money')){t.value=t.value.trim()===''?'':fnum(pMoney(t.value));}});
 
 /* ===== weighing block ===== */
@@ -529,9 +560,8 @@ const nameHas=(id,q)=>!q||fold(custName(id)).includes(fold(q));
 ACT.quickCust=b=>{const name=trim(getV(b.dataset.for));
  openDlg('<h2>Thêm khách hàng mới</h2><form id="fQC" data-for="'+b.dataset.for+'"><div class="grid"><label>Tên<input id="qc-name" value="'+esc(name)+'"></label><label>Số điện thoại<input id="qc-phone" inputmode="tel"></label><label>Địa chỉ<input id="qc-addr"></label><label>Nhóm<select id="qc-group">'+GROUPS.map(g=>'<option'+(g===b.dataset.group?' selected':'')+'>'+g+'</option>').join('')+'</select></label></div><div class="btns"><button class="btn btn-p" type="submit">Lưu</button><button type="button" class="btn" data-act="closeDlg">Hủy</button></div></form>');
  setTimeout(()=>$('#qc-name').focus(),50);};
-SUBMIT.fQC=()=>{const n=trim(getV('qc-name'));if(!n)return fail('Vui lòng nhập tên khách.');
- const ex=findCust(n);if(ex){toast('Khách "'+ex.name+'" đã có, dùng lại.');}else{DB.customers.push({id:uid(),name:n,phone:trim(getV('qc-phone')),address:trim(getV('qc-addr')),group:getV('qc-group'),note:''});save();toast('Đã thêm khách "'+n+'".');}
- const f=$('#fQC').dataset.for;closeDlg();refreshCustList();setV(f,ex?ex.name:n);const t=document.getElementById(f);if(t)t.dispatchEvent(new Event('input',{bubbles:true}));};
+SUBMIT.fQC=()=>{const n=trim(getV('qc-name'));if(!n)return fail('Vui lòng nhập tên khách.');const f=$('#fQC').dataset.for;
+ custCreate(n,{phone:trim(getV('qc-phone')),address:trim(getV('qc-addr')),group:getV('qc-group')},(c,isNew)=>{closeDlg();refreshCustList();setV(f,custName(c.id));const t=document.getElementById(f);if(t)t.dispatchEvent(new Event('input',{bubbles:true}));toast(isNew?'Đã thêm khách "'+c.name+'" (mã '+c.code+').':'Đã chọn khách "'+c.name+'".');});};
 
 /* ===== THU MUA / BÁN RA (generic trade) ===== */
 const T={mua:{arr:'purchases',pre:'PM',who:'Người bán',grp:'Nông dân',paidL:'Đã trả ngay (đ)',paidCol:'Đã trả',full:'Trả đủ',debtL:'Còn nợ',doc:'PHIẾU THU MUA',file:'thu-mua',head:'Phiếu thu mua',typeL:'Loại cà phê'},
@@ -585,7 +615,7 @@ function saveTrade(k,print,opt){const c=T[k];const date=getV(k+'-date');if(!date
  if(depChk){const bal=cust0?depTotal(DB,typeId,null,cust0.id)+((eid&&(findRec('purchases',eid)||{}).depositSettle&&cust0.id===(findRec('purchases',eid)||{}).customerId&&typeId===(findRec('purchases',eid)||{}).typeId)?findRec('purchases',eid).kg:0):0;if(w.net>bal+0.001)return fail('Chốt '+fkg(w.net)+' nhiều hơn số đang ký gửi ('+fkg(bal)+').');}
  if(k==='ban'&&typeId===DB.settings.beanTypeId&&!(opt&&opt.force)){const A=ownAvail(eid);if(w.net>A+0.001){ui.shB={print,R:w.net,A};openDlg('<h2>⚠ Nhân của đại lý chỉ còn '+fkg(A)+'</h2><p class="mut">Phần còn lại là của khách ký gửi. Bạn muốn bán '+fkg(w.net)+'.</p><div class="btns" style="flex-direction:column;align-items:stretch">'+(A>0?'<button class="btn btn-p" data-act="shbPart">Bán '+fkg(A)+'</button>':'<button class="btn" disabled>Bán 0 kg</button>')+(isStaff()?'':'<button class="btn" data-act="shbForce">Vẫn bán '+fkg(w.net)+' (chỉ chủ)</button>')+'<button class="btn" data-act="shbNo">Quay lại sửa số kg</button></div>');return false;}}
  const cust=ensureCust(name,c.grp);let r=eid&&findRec(c.arr,eid);
- if(!r){r={id:uid(),code:nextCode(c.pre),ts:nextTs()};DB[c.arr].push(r);}
+ if(!r){r={id:uid(),code:nextCode(c.pre,date),ts:nextTs()};DB[c.arr].push(r);}
  if(k==='mua'){r.advanceDeduct=adv;r.depositSettle=depChk;}
  Object.assign(r,{date,customerId:cust.id,typeId,bags:w.bags,kg:w.net,price,amount,paid,note:trim(getV(k+'-note'))});
  r.tareTotal=w.tareTotal;r.gross=w.gross;if(r.tare===undefined)r.tare=0;
@@ -635,7 +665,7 @@ function saveEx(print){const date=getV('doi-date');if(!date)return fail('Vui lò
  const ri=exRatioInfo();if(!(ri.ratio>0))return fail('Chưa có tỷ lệ đổi mặc định hợp lệ, vào Cài đặt để nhập.');
  const bean=calcBean(w.net,ri.ratio);
  const eid=ui.edit.doi;let r=eid&&findRec('exchanges',eid);const c0=findCust(name);if(r&&!exGuard(r,bean,c0?c0.id:'x'))return false;
- const cust=ensureCust(name,'Khách đổi');const isNew=!r;if(!r){r={id:uid(),code:nextCode('PD'),ts:nextTs(),paidNow:0};DB.exchanges.push(r);}
+ const cust=ensureCust(name,'Khách đổi');const isNew=!r;if(!r){r={id:uid(),code:nextCode('PD',date),ts:nextTs(),paidNow:0};DB.exchanges.push(r);}
  if(r.tare===undefined)r.tare=0;r.tareTotal=w.tareTotal;r.gross=w.gross;
  Object.assign(r,{date,customerId:cust.id,bags:w.bags,kgFresh:w.net,ratioOwn:ri.own,ratio:ri.ratio,kgBean:bean,note:trim(getV('doi-note'))});
  syncExchange(r,isNew);if(!save())return false;ui.edit={};ui.lastDate=date;toast('Đã lưu '+r.code+'.');render();if(print)printEx(r.id);return true;}
@@ -678,7 +708,7 @@ function saveTra(print){const date=getV('tra-date');if(!date)return fail('Vui l�
  if(c){let left=cs(c.id).beanLeft+(old&&old.customerId===c.id?old.kg:0);if(kg>left+0.001&&!confirm('Khách "'+c.name+'" chỉ còn phải trả '+fkg(left)+', bạn đang trả '+fkg(kg)+'. Vẫn lưu?'))return false;}
  else if(!confirm('Khách "'+name+'" chưa có phiếu đổi nào. Vẫn tạo khách mới và lưu?'))return false;
  if(mode==='bean'){const st=stats().stock[DB.settings.beanTypeId]||0;const back=old&&old.mode==='bean'?old.kg:0;if(st+back<kg&&!confirm('Tồn kho '+typeName(DB.settings.beanTypeId)+' hiện là '+fkg(st+back)+', ít hơn số trả '+fkg(kg)+'. Vẫn lưu?'))return false;}
- const cust=ensureCust(name,'Khách đổi');let r=old;if(!r){r={id:uid(),code:nextCode('TN'),ts:nextTs(),exchangeId:''};DB.beanPayments.push(r);}
+ const cust=ensureCust(name,'Khách đổi');let r=old;if(!r){r={id:uid(),code:nextCode('TN',date),ts:nextTs(),exchangeId:''};DB.beanPayments.push(r);}
  Object.assign(r,{date,customerId:cust.id,kg,mode,price,amount,note:trim(getV('tra-note'))});syncBean(r);if(!save())return false;ui.edit={};ui.lastDate=date;toast('Đã lưu '+r.code+'.');render();if(print)printTra(r.id);return true;}
 function printTra(id){const r=findRec('beanPayments',id);if(!r)return;const rows=[['KL nhân trả',fkg(r.kg)],['Hình thức',r.mode==='cash'?'Quy ra tiền':'Trả bằng nhân']];
  if(r.mode==='cash')rows.push(['Đơn giá quy đổi',money(r.price)+'/kg'],['Thành tiền',money(r.amount)]);rows.push(['Ký gửi còn lại (hiện tại)',fkg(cs(r.customerId).depKg)]);
@@ -774,14 +804,14 @@ VIEWS.cn=()=>{const f=ui.f.cn;return'<div class="card"><h2>Công nợ theo khác
  +'<p class="mut" style="margin:0 0 8px">Số âm = ngược chiều (ví dụ đã ứng trước / trả dư).</p><div id="list-cn">'+renderTable(SPEC.cn())+'</div></div>';};
 SPEC.cn=()=>{const f=ui.f.cn;const S=stats();const rows=DB.customers.filter(c=>nameHas(c.id,f.q)).map(c=>({c,s:cs(c.id)})).filter(o=>!f.hide||Math.round(o.s.debtBuy)!==0||Math.round(o.s.debtSale)!==0||Math.round(o.s.advLeft)!==0||Math.abs(o.s.depKg)>0.004).sort((a,b)=>a.c.name.localeCompare(b.c.name,'vi'));
  const sum=a=>rows.reduce((s,o)=>s+a(o),0);
- return{file:'cong-no',title:'Công nợ khách hàng',rows,cols:[{h:'Khách hàng',f:o=>o.c.name},{h:'Nhóm',f:o=>o.c.group},{h:'Ta nợ khách – tiền mua (đ)',num:1,f:o=>M(o.s.debtBuy)},{h:'Khách nợ ta – tiền bán (đ)',num:1,f:o=>M(o.s.debtSale)},{h:'Nợ ứng – khách nợ ta (đ)',num:1,f:o=>M(o.s.advLeft)},{h:'Ký gửi (kg nhân)',num:1,f:o=>K(o.s.depKg)},
+ return{file:'cong-no',title:'Công nợ khách hàng',rows,cols:[{h:'Mã KH',f:o=>o.c.code||''},{h:'Khách hàng',f:o=>o.c.name},{h:'Nhóm',f:o=>o.c.group},{h:'Ta nợ khách – tiền mua (đ)',num:1,f:o=>M(o.s.debtBuy)},{h:'Khách nợ ta – tiền bán (đ)',num:1,f:o=>M(o.s.debtSale)},{h:'Nợ ứng – khách nợ ta (đ)',num:1,f:o=>M(o.s.advLeft)},{h:'Ký gửi (kg nhân)',num:1,f:o=>K(o.s.depKg)},
  {h:'',x:false,c:'act',f:o=>H('<button class="btn btn-s" data-act="stmtOpen" data-id="'+o.c.id+'">Sao kê</button>'+(o.s.advLeft>0?'<button class="btn btn-s" data-act="payAdv" data-id="'+o.c.id+'">Thu hồi ứng</button>':'')+(o.s.debtBuy>0?'<button class="btn btn-s" data-act="payMoney" data-id="'+o.c.id+'" data-dir="chi">Trả tiền</button>':'')+(o.s.debtSale>0?'<button class="btn btn-s" data-act="payMoney" data-id="'+o.c.id+'" data-dir="thu">Thu tiền</button>':'')+(o.s.depKg>0.004?'<button class="btn btn-s" data-act="dChot" data-id="'+o.c.id+'" data-t="'+esc(DB.settings.beanTypeId)+'">Chốt giá</button><button class="btn btn-s" data-act="dOut" data-id="'+o.c.id+'" data-t="'+esc(DB.settings.beanTypeId)+'">Trả lại nhân</button>':'')+'<button class="btn btn-s btn-p" data-act="detail" data-id="'+o.c.id+'">Chi tiết</button>')}],
- foot:['Tổng cộng ('+rows.length+' khách)','',M(sum(o=>o.s.debtBuy)),M(sum(o=>o.s.debtSale)),M(sum(o=>o.s.advLeft)),K(sum(o=>o.s.depKg)),'']};};
+ foot:['','Tổng cộng ('+rows.length+' khách)','',M(sum(o=>o.s.debtBuy)),M(sum(o=>o.s.debtSale)),M(sum(o=>o.s.advLeft)),K(sum(o=>o.s.depKg)),'']};};
 /* Trả tiền / Thu tiền (chế độ đầy đủ) – cùng cách ghi như màn hình dễ dùng: cat, customerId, mã PC/PT, debtBefore */
 let PD=null;
 const pdDebt=(id,dir)=>{const s=cs(id);return Math.max(0,Math.round(dir==='chi'?s.debtBuy:s.debtSale));};
 ACT.payMoney=b=>{const c=custById(b.dataset.id);if(!c)return;closeDlg();ui.edit={};const dir=b.dataset.dir==='chi'?'chi':'thu',chi=dir==='chi',debt=pdDebt(c.id,dir);PD={custId:c.id,dir,id:null,busy:false};
- openDlg('<h2>'+(chi?'💵 Trả tiền cho đại lý':'💰 Thu tiền của khách')+'</h2><div class="card" style="margin:0 0 10px"><div><b>'+esc(c.name)+'</b></div><div class="mut">'+(chi?'Đại lý đang nợ:':'Khách đang nợ:')+'</div><div class="big" style="font-size:28px;font-weight:800">'+money(debt)+'</div></div>'
+ openDlg('<h2>'+(chi?'💵 Trả tiền cho đại lý':'💰 Thu tiền của khách')+'</h2><div class="card" style="margin:0 0 10px"><div><b>'+esc(custLabel(c))+'</b></div><div class="mut">'+(chi?'Đại lý đang nợ:':'Khách đang nợ:')+'</div><div class="big" style="font-size:28px;font-weight:800">'+money(debt)+'</div></div>'
  +'<div class="grid"><label>Số tiền '+(chi?'trả':'thu')+' (đ)<div class="inl"><input id="pd-amt" class="money" inputmode="numeric" value="'+esc(mfmt(debt))+'"><button type="button" class="btn" data-act="pdAll">'+(chi?'Trả hết':'Thu hết')+'</button></div></label><label>Ngày<input type="date" id="pd-date" value="'+esc(ui.lastDate||today())+'"></label><label class="span2">Ghi chú (không bắt buộc)<input id="pd-note" value="'+esc(chi?'Trả nợ tiền mua cà phê':'Thu nợ bán cà phê')+'"></label></div>'
  +'<div class="btns"><button class="btn btn-p" data-act="pdSave">✓ Lưu</button><button class="btn btn-p" data-act="pdSavePrint">✓ Lưu và In</button><button class="btn" data-act="closeDlg">Hủy</button></div>');};
 ACT.pdAll=()=>{if(PD)setV('pd-amt',mfmt(pdDebt(PD.custId,PD.dir)));};
@@ -789,7 +819,7 @@ function pdSave(print){const p=PD;if(!p||p.busy)return;const date=getV('pd-date'
  if(!custById(p.custId))return fail('Không tìm thấy khách hàng.');const cur=pdDebt(p.custId,p.dir);
  if(amount>cur&&!confirm('Số tiền '+money(amount)+' lớn hơn số đang nợ '+money(cur)+'. Vẫn ghi nhận (trả dư)?'))return;
  const chi=p.dir==='chi';p.busy=true;const r={id:uid(),ts:nextTs(),phieuId:'',phieuKind:'',date,dir:p.dir,cat:chi?CAT_NO:CAT_THUNO,amount,customerId:p.custId,note:trim(getV('pd-note'))};
- r.code=nextCode(chi?'PC':'PT');r.debtBefore=debtAsOf(r).before;DB.cash.push(r);
+ r.code=nextCode(chi?'PC':'PT',date);r.debtBefore=debtAsOf(r).before;DB.cash.push(r);
  if(!save()){DB.cash=DB.cash.filter(x=>x!==r);p.busy=false;return;}
  p.id=r.id;ui.lastDate=date;render();if(print){closeDlg();printDebt(r.id,pdDone);}else pdDone();}
 ACT.pdSave=()=>pdSave(false);ACT.pdSavePrint=()=>pdSave(true);
@@ -824,24 +854,29 @@ function ledgerSpecs(id){const L=ledger(id);return{sections:[
  .concat(L.a.length?[{title:'Nợ ứng (khách nợ ta)',rows:L.a,cols:[{h:'Ngày',f:r=>fmtDate(r.date)},{h:'Chứng từ',f:r=>r.code},{h:'Diễn giải',f:r=>r.desc},{h:'Tăng/giảm (đ)',num:1,f:r=>M(r.d)},{h:'Còn nợ ứng (đ)',num:1,f:r=>M(r.bal)}]}]:[])
  .concat(L.dp.length?[{title:'Ký gửi nhân (kg) – gồm cả nhân đổi chưa lấy',rows:L.dp,cols:[{h:'Ngày',f:r=>fmtDate(r.date)},{h:'Chứng từ',f:r=>r.code},{h:'Diễn giải',f:r=>r.desc},{h:'Tăng/giảm (kg)',num:1,f:r=>K(r.d)},{h:'Đang ký gửi (kg)',num:1,f:r=>K(r.bal)}]}]:[])};}
 ACT.detail=b=>{const c=custById(b.dataset.id);ui.ledgerId=c.id;const s=cs(c.id);
- openDlg('<h2>Chi tiết công nợ: '+esc(c.name)+'</h2><div class="sumbox"><span>Ta nợ khách: <b>'+money(s.debtBuy)+'</b></span><span>Khách nợ ta: <b>'+money(s.debtSale)+'</b></span><span>Nợ ứng: <b>'+money(s.advLeft)+'</b></span><span>Ký gửi: <b>'+fkg(s.depKg)+' nhân</b></span></div>'+renderSpec(ledgerSpecs(c.id))
-  +'<div class="btns"><button class="btn btn-p" data-act="stmtOpen" data-id="'+c.id+'">Sao kê</button>'+(s.debtBuy>0?'<button class="btn" data-act="payMoney" data-id="'+c.id+'" data-dir="chi">💵 Trả tiền</button>':'')+(s.debtSale>0?'<button class="btn" data-act="payMoney" data-id="'+c.id+'" data-dir="thu">💰 Thu tiền</button>':'')+(s.depKg>0.004?'<button class="btn" data-act="dChot" data-id="'+c.id+'" data-t="'+esc(DB.settings.beanTypeId)+'">🏷️ Chốt giá</button><button class="btn" data-act="dOut" data-id="'+c.id+'" data-t="'+esc(DB.settings.beanTypeId)+'">🫘 Trả lại nhân</button>':'')+'<button class="btn" data-act="ledgerPrint">In</button><button class="btn" data-act="ledgerXls">Xuất Excel</button><button class="btn" data-act="closeDlg">Đóng</button></div>');};
-ACT.ledgerPrint=()=>{const c=custById(ui.ledgerId);const s=DB.settings;closeDlg();printDoc('Công nợ '+c.name,''+printHead(s)+'<h2>SỔ CHI TIẾT CÔNG NỢ</h2><div class="cd">Khách hàng: <b>'+esc(c.name)+'</b> – '+esc(c.phone)+' – Ngày in: '+fmtDate(today())+'</div>'+renderSpec(ledgerSpecs(c.id)),()=>ACT.detail({dataset:{id:c.id}}));};
+ openDlg('<h2>Chi tiết công nợ: '+esc(custLabel(c))+'</h2><div class="sumbox"><span>Ta nợ khách: <b>'+money(s.debtBuy)+'</b></span><span>Khách nợ ta: <b>'+money(s.debtSale)+'</b></span><span>Nợ ứng: <b>'+money(s.advLeft)+'</b></span><span>Ký gửi: <b>'+fkg(s.depKg)+' nhân</b></span></div>'+renderSpec(ledgerSpecs(c.id))
+  +'<div class="btns"><button class="btn" data-act="hubGo" data-k="mua" data-id="'+c.id+'">🛒 Mua cà</button><button class="btn" data-act="hubGo" data-k="doi" data-id="'+c.id+'">🔄 Đổi cà</button><button class="btn" data-act="hubGo" data-k="kg" data-id="'+c.id+'">🏷️ Ký gửi</button><button class="btn btn-p" data-act="stmtOpen" data-id="'+c.id+'">Sao kê</button>'+(s.debtBuy>0?'<button class="btn" data-act="payMoney" data-id="'+c.id+'" data-dir="chi">💵 Trả tiền</button>':'')+(s.debtSale>0?'<button class="btn" data-act="payMoney" data-id="'+c.id+'" data-dir="thu">💰 Thu tiền</button>':'')+(s.depKg>0.004?'<button class="btn" data-act="dChot" data-id="'+c.id+'" data-t="'+esc(DB.settings.beanTypeId)+'">🏷️ Chốt giá</button><button class="btn" data-act="dOut" data-id="'+c.id+'" data-t="'+esc(DB.settings.beanTypeId)+'">🫘 Trả lại nhân</button>':'')+'<button class="btn" data-act="ledgerPrint">In</button><button class="btn" data-act="ledgerXls">Xuất Excel</button><button class="btn" data-act="closeDlg">Đóng</button></div>');};
+ACT.ledgerPrint=()=>{const c=custById(ui.ledgerId);const s=DB.settings;closeDlg();printDoc('Công nợ '+c.name,''+printHead(s)+'<h2>SỔ CHI TIẾT CÔNG NỢ</h2><div class="cd">Khách hàng: <b>'+esc(custLabel(c))+'</b> – '+esc(c.phone)+' – Ngày in: '+fmtDate(today())+'</div>'+renderSpec(ledgerSpecs(c.id)),()=>ACT.detail({dataset:{id:c.id}}));};
 ACT.ledgerXls=()=>{const c=custById(ui.ledgerId);const sp=ledgerSpecs(c.id);sp.sections.forEach(x=>x.title=c.name+' - '+x.title);exportXls('cong-no-'+fold(c.name).replace(/\s+/g,'-'),sp);};
 
 /* ===== KHÁCH HÀNG ===== */
 function txCount(id){return DB.purchases.filter(r=>r.customerId===id).length+DB.exchanges.filter(r=>r.customerId===id).length+DB.sales.filter(r=>r.customerId===id).length+DB.beanPayments.filter(r=>r.customerId===id).length+DB.cash.filter(r=>r.customerId===id).length;}
-VIEWS.khach=()=>{const f=ui.f.khach;return'<div class="card"><h2 id="kh-title"></h2><form id="f-khach" autocomplete="off"><div class="grid"><label>Tên khách hàng<input id="kh-name"></label><label>Số điện thoại<input id="kh-phone" inputmode="tel"></label><label>Địa chỉ<input id="kh-addr"></label><label>Nhóm<select id="kh-group">'+GROUPS.map(g=>'<option>'+g+'</option>').join('')+'</select></label><label class="span2">Ghi chú<input id="kh-note"></label></div><div class="btns"><button class="btn btn-p" type="submit">Lưu khách hàng</button><button class="btn" type="button" data-act="cancel" id="kh-cancel" style="display:none">Hủy sửa</button></div></form></div>'
+VIEWS.khach=()=>{const f=ui.f.khach;return'<div class="card"><h2 id="kh-title"></h2><form id="f-khach" autocomplete="off"><div class="grid"><label>Tên khách hàng<input id="kh-name"></label><label>Mã khách<input id="kh-code" autocomplete="off" placeholder="Tự tạo khi lưu"></label><label>Số điện thoại<input id="kh-phone" inputmode="tel"></label><label>Địa chỉ<input id="kh-addr"></label><label>Nhóm<select id="kh-group">'+GROUPS.map(g=>'<option>'+g+'</option>').join('')+'</select></label><label class="span2">Ghi chú<input id="kh-note"></label></div><div class="btns"><button class="btn btn-p" type="submit">Lưu khách hàng</button><button class="btn" type="button" data-act="cancel" id="kh-cancel" style="display:none">Hủy sửa</button></div></form></div>'
  +'<div class="card"><h2>Danh sách khách hàng</h2><div class="filters"><label>Tìm (tên, SĐT, địa chỉ)<input data-flt="khach.q" value="'+esc(f.q)+'"></label><label>Nhóm<select data-flt="khach.group"><option value="">Tất cả</option>'+GROUPS.map(g=>'<option'+(f.group===g?' selected':'')+'>'+g+'</option>').join('')+'</select></label><button class="btn" data-act="export" data-k="khach">Xuất Excel</button></div><div id="list-khach">'+renderTable(SPEC.khach())+'</div></div>';};
-SPEC.khach=()=>{const f=ui.f.khach;const q=fold(f.q);const rows=DB.customers.filter(c=>(!f.group||c.group===f.group)&&(!q||fold(c.name+' '+c.phone+' '+c.address).includes(q))).sort((a,b)=>a.name.localeCompare(b.name,'vi'));
- return{file:'khach-hang',title:'Khách hàng',rows,cols:[{h:'Tên',f:c=>c.name},{h:'SĐT',f:c=>c.phone},{h:'Địa chỉ',f:c=>c.address},{h:'Nhóm',f:c=>c.group},{h:'Ghi chú',f:c=>c.note},{h:'Số giao dịch',num:1,f:c=>I(txCount(c.id))},
+SPEC.khach=()=>{const f=ui.f.khach;const q=fold(f.q);const rows=DB.customers.filter(c=>(!f.group||c.group===f.group)&&(!q||fold(c.name+' '+c.phone+' '+c.address+' '+(c.code||'')).includes(q)||(codeNorm(q)&&codeNorm(c.code).includes(codeNorm(q))))).sort((a,b)=>a.name.localeCompare(b.name,'vi'));
+ return{file:'khach-hang',title:'Khách hàng',rows,cols:[{h:'Mã KH',f:c=>c.code||''},{h:'Tên',f:c=>c.name},{h:'SĐT',f:c=>c.phone},{h:'Địa chỉ',f:c=>c.address},{h:'Nhóm',f:c=>c.group},{h:'Ghi chú',f:c=>c.note},{h:'Số giao dịch',num:1,f:c=>I(txCount(c.id))},
  {h:'',x:false,c:'act',f:c=>H('<button class="btn btn-s" data-act="edit" data-k="khach" data-id="'+c.id+'">Sửa</button><button class="btn btn-s btn-d" data-act="del" data-k="khach" data-id="'+c.id+'">Xóa</button>')}]};};
-AFTER.khach=()=>{const c=ui.edit.khach&&custById(ui.edit.khach);setV('kh-name',c?c.name:'');setV('kh-phone',c?c.phone:'');setV('kh-addr',c?c.address:'');setV('kh-group',c?c.group:GROUPS[0]);setV('kh-note',c?c.note:'');
+AFTER.khach=()=>{const c=ui.edit.khach&&custById(ui.edit.khach);setV('kh-name',c?c.name:'');setV('kh-code',c?c.code||'':'');{const e=$('#kh-code');if(e){e.disabled=!c||isStaff();e.title=!c?'Mã được tạo tự động khi lưu':isStaff()?'Chỉ chủ được sửa mã':'Chủ có thể sửa mã (cần PIN)';}}setV('kh-phone',c?c.phone:'');setV('kh-addr',c?c.address:'');setV('kh-group',c?c.group:GROUPS[0]);setV('kh-note',c?c.note:'');
  $('#kh-title').textContent=c?'Sửa khách hàng':'Thêm khách hàng';$('#kh-cancel').style.display=c?'':'none';};
-SUBMIT['f-khach']=()=>{const n=trim(getV('kh-name'));if(!n)return fail('Vui lòng nhập tên khách hàng.');const ex=findCust(n);const eid=ui.edit.khach;
- if(ex&&ex.id!==eid)return fail('Đã có khách tên "'+ex.name+'" (không phân biệt hoa/thường và khoảng trắng). Hãy dùng khách này hoặc đổi tên.');
- let c=eid&&custById(eid);if(!c){c={id:uid()};DB.customers.push(c);}Object.assign(c,{name:n,phone:trim(getV('kh-phone')),address:trim(getV('kh-addr')),group:getV('kh-group'),note:trim(getV('kh-note'))});
- if(!save())return false;ui.edit={};toast('Đã lưu khách hàng.');render();};
+SUBMIT['f-khach']=()=>{const n=trim(getV('kh-name'));if(!n)return fail('Vui lòng nhập tên khách hàng.');const eid=ui.edit.khach;
+ const fields={phone:trim(getV('kh-phone')),address:trim(getV('kh-addr')),group:getV('kh-group'),note:trim(getV('kh-note'))};
+ if(!eid){custCreate(n,fields,(c,isNew)=>{ui.edit={};toast(isNew?'Đã lưu khách hàng (mã '+c.code+').':'Khách này đã có sẵn.');render();});return;}
+ const c=custById(eid);if(!c)return fail('Không tìm thấy khách.');
+ if(normName(n)!==normName(c.name)){const ex=findCust(n);if(ex&&ex.id!==eid&&normName(ex.name)===normName(n))return fail('Đã có khách tên "'+ex.name+'" (không phân biệt hoa/thường và khoảng trắng). Hãy dùng khách này hoặc đổi tên.');}
+ const cc=trim(getV('kh-code')).toUpperCase();const chg=cc&&cc!==String(c.code||'').toUpperCase();
+ if(chg){if(!/^[A-Z0-9]+(-[A-Z0-9]+)*$/.test(cc))return fail('Mã khách chỉ gồm chữ A-Z, số 0-9 và dấu gạch ngang (ví dụ VAN-HOA).');if(codeTaken(cc,c.id))return fail('Mã "'+cc+'" đã có khách khác dùng.');}
+ const apply=()=>{Object.assign(c,fields,{name:n});if(chg)c.code=cc;if(!save())return false;ui.edit={};toast('Đã lưu khách hàng.');render();};
+ if(chg)return needOwner(apply);apply();};
 const delKh=ACT.del;
 ACT.del=b=>{if(b.dataset.k==='khach'){const n=txCount(b.dataset.id);if(n>0){fail('Khách này đã có '+n+' giao dịch, không thể xóa. Hãy xóa hoặc sửa các giao dịch trước.');return;}}delKh(b);};
 DEL.khach=id=>{DB.customers=DB.customers.filter(c=>c.id!==id);};
@@ -879,8 +914,8 @@ SPEC.bc_khoang=()=>{const f=ui.f.bc;const inR=r=>inRange(r.date,f);const ca=DB.c
 SPEC.bc_khach=()=>{const f=ui.f.bc;const rows=DB.customers.map(c=>{const ps=DB.purchases.filter(r=>r.customerId===c.id&&inRange(r.date,f)),xs=DB.exchanges.filter(r=>r.customerId===c.id&&inRange(r.date,f)),bp=DB.beanPayments.filter(r=>r.customerId===c.id&&inRange(r.date,f));
  const sm=(a,fn)=>a.reduce((s,r)=>s+fn(r),0);return{c,pn:ps.length,pkg:sm(ps,r=>r.kg),pamt:sm(ps,r=>r.amount),ppaid:sm(ps,r=>r.paid),xn:xs.length,fr:sm(xs,r=>r.kgFresh),due:sm(xs,r=>r.kgBean),pd:sm(bp,r=>r.kg)};}).filter(r=>r.pn||r.xn||r.pd).sort((a,b)=>a.c.name.localeCompare(b.c.name,'vi'));
  const s=fn=>rows.reduce((t,r)=>t+fn(r),0);
- return{file:'bao-cao-theo-khach',title:'Tổng hợp theo khách hàng',rows,cols:[{h:'Khách hàng',f:r=>r.c.name},{h:'Số lần mua',num:1,f:r=>I(r.pn)},{h:'KL mua (kg)',num:1,f:r=>K(r.pkg)},{h:'Tiền mua (đ)',num:1,f:r=>M(r.pamt)},{h:'Đã trả (đ)',num:1,f:r=>M(r.ppaid)},{h:'Còn nợ (đ)',num:1,f:r=>M(r.pamt-r.ppaid)},{h:'Số lần đổi',num:1,f:r=>I(r.xn)},{h:'Tổng cà tươi (kg)',num:1,f:r=>K(r.fr)},{h:'Nhân phải trả (kg)',num:1,f:r=>K(r.due)},{h:'Nhân đã trả (kg)',num:1,f:r=>K(r.pd)},{h:'Nhân còn phải trả (kg)',num:1,f:r=>K(r.due-r.pd)}],
- foot:['Tổng cộng',I(s(r=>r.pn)),K(s(r=>r.pkg)),M(s(r=>r.pamt)),M(s(r=>r.ppaid)),M(s(r=>r.pamt-r.ppaid)),I(s(r=>r.xn)),K(s(r=>r.fr)),K(s(r=>r.due)),K(s(r=>r.pd)),K(s(r=>r.due-r.pd))]};};
+ return{file:'bao-cao-theo-khach',title:'Tổng hợp theo khách hàng',rows,cols:[{h:'Mã KH',f:r=>r.c.code||''},{h:'Khách hàng',f:r=>r.c.name},{h:'Số lần mua',num:1,f:r=>I(r.pn)},{h:'KL mua (kg)',num:1,f:r=>K(r.pkg)},{h:'Tiền mua (đ)',num:1,f:r=>M(r.pamt)},{h:'Đã trả (đ)',num:1,f:r=>M(r.ppaid)},{h:'Còn nợ (đ)',num:1,f:r=>M(r.pamt-r.ppaid)},{h:'Số lần đổi',num:1,f:r=>I(r.xn)},{h:'Tổng cà tươi (kg)',num:1,f:r=>K(r.fr)},{h:'Nhân phải trả (kg)',num:1,f:r=>K(r.due)},{h:'Nhân đã trả (kg)',num:1,f:r=>K(r.pd)},{h:'Nhân còn phải trả (kg)',num:1,f:r=>K(r.due-r.pd)}],
+ foot:['','Tổng cộng',I(s(r=>r.pn)),K(s(r=>r.pkg)),M(s(r=>r.pamt)),M(s(r=>r.ppaid)),M(s(r=>r.pamt-r.ppaid)),I(s(r=>r.xn)),K(s(r=>r.fr)),K(s(r=>r.due)),K(s(r=>r.pd)),K(s(r=>r.due-r.pd))]};};
 
 /* ===== CÀI ĐẶT ===== */
 VIEWS.cd=()=>{const s=DB.settings;const lb=s.lastBackup;const guideCard='<div class="card"><a class="btn btn-p" href="huong-dan.html" style="display:inline-block;text-decoration:none;font-size:18px;padding:12px 20px">📖 Hướng dẫn sử dụng</a> <span class="mut">Cách dùng app cho nhân viên nhập liệu.</span></div>';
@@ -889,6 +924,7 @@ VIEWS.cd=()=>{const s=DB.settings;const lb=s.lastBackup;const guideCard='<div cl
  +'<p class="mut">Chỉ có hai loại cà phê: Cà tươi và Nhân xô. Tồn nhân xô tính từ các phiếu Nhập kho; cà tươi ước lượng khi Kiểm kê.</p>'
  +'<div class="btns"><button class="btn btn-p" type="submit">Lưu cài đặt</button></div></form></div>'
  +syncCard()
+ +(isStaff()?'':'<div class="card"><h2>🧹 Xóa dữ liệu thử</h2><p class="mut">Xóa các phiếu nhập thử (hôm nay hoặc một khoảng ngày) để sổ sạch trước khi dùng thật. Cần PIN chủ.</p><div class="btns"><button class="btn btn-d" data-act="wipeOpen">🧹 Xóa dữ liệu thử...</button></div></div>')
  +'<div class="card"><h2>Dữ liệu</h2><p class="mut">Dữ liệu lưu trong trình duyệt này (máy này). Sao lưu lần cuối: <b>'+(lb?fmtDate(lb):'chưa bao giờ')+'</b>. Nên sao lưu mỗi tuần và cất file ở USB/Zalo/Drive.</p>'
  +'<div class="btns"><button class="btn btn-p" data-act="backup">Sao lưu (tải file JSON)</button><button class="btn" data-act="restore">Khôi phục từ file JSON</button><button class="btn btn-d" data-act="wipe">Xóa toàn bộ dữ liệu</button></div><input type="file" id="restoreFile" accept=".json,application/json" style="display:none"></div>';};
 function typeRow(t){const role=t.id===DB.settings.beanTypeId||t.id===DB.settings.freshTypeId;return'<tr data-tid="'+esc(t.id)+'"><td><input data-f="name" value="'+esc(t.name)+'"></td><td><input data-f="note" value="'+esc(t.note||'')+'"></td><td><input data-f="os" inputmode="decimal" value="'+esc(DB.settings.openingStock[t.id]?nfK.format(DB.settings.openingStock[t.id]):'')+'" placeholder="0"></td><td>'+(role?'<span class="pill">loại hệ thống</span>':'<button type="button" class="btn btn-s btn-d" data-act="delType">Xóa</button>')+'</td></tr>';}
@@ -960,12 +996,12 @@ Object.assign(Store,{
     if(!j||!j.ok){const er=new Error(j&&j.error);er.kind=j&&j.error==='auth'?'auth':'bad';throw er;}
     if(cfg.token&&j.user&&j.user.name){const w=Store.who();if(!w||w.name!==j.user.name||w.role!==j.user.role){Store.setPref('srvUser',{name:j.user.name,role:j.user.role});whoCh=true;}}
     ob.forEach((o,x)=>{if(o.deleted)sy.pushedDel[o.coll+':'+o.id+':'+o.at]=1;else sy.pushed[o.coll+':'+o.rec.id]=stamp[x];});
-    const rj=j.rejected||[];if(rj.length){Store.applyRejected(rj);changed+=rj.length;rejAll.push(...rj);}
+    const rj=j.rejected||[];if(rj.length){logRej(rj);Store.applyRejected(rj);changed+=rj.length;rejAll.push(...rj);}
     changed+=Store.merge(j.changes||[]);sy.since=j.serverTime||sy.since;Store.saveSy();if(ob.length<100)break;}
    Store.err='';if(Store.getPref('authFails'))Store.setPref('authFails',0);sy.lastOk=new Date().toISOString();if(rejAll.length)Store.showRejected(rejAll);else if(manual)toast('Đã đồng bộ xong.');}
   catch(e){Store.err=e.kind||'net';if(e.kind==='auth'){const nf=(+Store.getPref('authFails')||0)+1;Store.setPref('authFails',nf);if(nf>=2){Store.setPref('revoked',cfg.token?'token':'secret');Store.setPref('authFails',0);}}
    if(manual&&!Store.getPref('revoked'))toast(Store.err==='auth'?(cfg.token?'Mã máy đã bị khóa hoặc sai – báo chủ.':'Sai mã đồng bộ.'):Store.err==='bad'?'Địa chỉ đồng bộ không đúng.':'Không có mạng, dữ liệu vẫn lưu trên máy.',true);}
-  finally{Store.busy=false;Store.saveSy();if(changed){Store.save(DB);cache=null;}Store.pill();if(Store.getPref('revoked')){render();}else if(whoCh){chrome();rerenderNow();}else if(changed)Store.onMerged();}},
+  finally{Store.busy=false;Store.saveSy();NF.c=null;if(changed){if(!Store.err&&!isStaff()){try{ensureCodes();reconcileDeposits();}catch(e){}}Store.save(DB);cache=null;}Store.pill();if(Store.getPref('revoked')){render();}else if(whoCh){chrome();rerenderNow();}else if(changed)Store.onMerged();}},
  showRejected(rj){const names={types:'loại cà',customers:'khách',purchases:'thu mua',exchanges:'đổi cà',beanPayments:'trả nhân',sales:'bán ra',adjustments:'điều chỉnh kho',cash:'sổ quỹ',stockIns:'nhập kho',stocktakes:'kiểm kê',openings:'số dư đầu kỳ',advances:'ứng tiền',deposits:'ký gửi',cashCounts:'chốt quỹ',settings:'cài đặt',auditLog:'nhật ký',users:'người dùng'};
   const t=document.createElement('div');t.className='toast err';t.style.cursor='pointer';t.title='Bấm để đóng';
   t.textContent='Không lưu được '+rj.length+' thay đổi: '+rj.slice(0,4).map(r=>r.reason+' ('+(r.label||names[r.coll]||r.coll)+')').join('; ')+(rj.length>4?'; ...':'')+'. Dữ liệu đã được hoàn lại như trên máy chủ.';
@@ -985,7 +1021,7 @@ function applyTheme(t){document.documentElement.setAttribute('data-theme',t);con
 ACT.toggleTheme=()=>{const t=Store.getTheme()==='dark'?'light':'dark';Store.setTheme(t);applyTheme(t);};
 function chrome(){applyTheme(Store.getTheme());document.body.classList.toggle('nv-min',!!Store.getPref('navMin'));{const st=document.getElementById('subtitle');if(st)st.textContent=((DB.settings.shopName||'').trim()||'Sổ sách')+' · Sổ cà phê';}document.body.classList.toggle('easy',ui.mode==='easy');$('#modeBtn').textContent=ui.mode==='easy'?'Chế độ đầy đủ':'Chế độ dễ dùng';$('#nav').style.display=ui.mode==='easy'?'none':'';{const lb=$('#lockBtn');if(lb)lb.style.display=hasPin()&&isUnlocked()&&!Store.getPref('ownerDevice')?'':'none';}
  {const un=$('#userName'),w=Store.srvName();if(un){un.readOnly=!!w;un.title=w?'Tên do máy chủ cấp – không sửa được':'';if(w&&un.value!==w)un.value=w;}}
- document.documentElement.style.setProperty('--hh',$('header').offsetHeight+'px');Store.pill();}
+ document.documentElement.style.setProperty('--hh',$('header').offsetHeight+'px');Store.pill();bellUpdate();}
 ACT.syncNow=()=>Store.syncNow(true);
 ACT.toggleMode=()=>{ui.mode=ui.mode==='easy'?'full':'easy';Store.setPref('mode',ui.mode);ui.edit={};EZ.ev=Store.getUser()?'home':'welcome';EZ.w=null;EZ.sub=null;render();window.scrollTo(0,0);};
 ACT.saveSync=()=>{const u=trim(getV('sy-url')),s=trim(getV('sy-secret')),t=trim(getV('sy-token'));if(u&&!/^https:\/\//.test(u)&&!/^http:\/\/(127\.0\.0\.1|localhost)/.test(u))return fail('Địa chỉ phải bắt đầu bằng https://');
@@ -1015,21 +1051,21 @@ document.addEventListener('keydown',e=>{if(ui.mode!=='easy'||POV||!document.quer
  let v=null;if(/^\d$/.test(e.key))v=e.key;else if(e.key===','||e.key==='.')v=',';else if(e.key==='Backspace')v='del';
  if(v!==null){e.preventDefault();ACT.ekey({dataset:{v}});}else if(e.key==='Enter'){const b=document.querySelector('[data-act=eAddBag],[data-act=eSubOk],[data-act=eNext]:not([disabled])');if(b){e.preventDefault();b.click();}}});
 
-const TILES=[['mua','🛒','Mua cà'],['doi','🔄','Đổi cà'],['nk','📦','Nhập kho'],['kg','🏷️','Ký gửi'],['ug','💳','Ứng tiền'],['quy','💰','Thu / Chi'],['cq','💵','Chốt quỹ'],['no','📒','Xem nợ'],['ngay','📅','Hôm nay'],['kk','📋','Kiểm kê'],['bc','📊','Báo cáo'],['cd','⚙️','Cài đặt']];
+const TILES=[['tb','🔔','Thông báo'],['mua','🛒','Mua cà'],['doi','🔄','Đổi cà'],['nk','📦','Nhập kho'],['kg','🏷️','Ký gửi'],['ug','💳','Ứng tiền'],['quy','💰','Thu / Chi'],['cq','💵','Chốt quỹ'],['no','📒','Xem nợ'],['ngay','📅','Hôm nay'],['kk','📋','Kiểm kê'],['bc','📊','Báo cáo'],['cd','⚙️','Cài đặt']];
 function eRender(top){EZ.live=null;chrome();if(gateCheck())return;let h;
- if(EZ.ev==='welcome')h=eWelcome();else if(EZ.sub)h=eSub();else if(EZ.ev==='home')h=eHome();else if(EZ.ev==='wiz')h=eWiz();else if(EZ.ev==='done')h=eDone();else if(EZ.ev==='no')h=eNo();else if(EZ.ev==='nodetail')h=eNoDetail();else if(EZ.ev==='kgmenu')h=eKgMenu();else if(EZ.ev==='ngay')h=eNgay();else if(EZ.ev==='bc')h=eBc();else if(EZ.ev==='cd')h=eCd();else h=eHome();
+ if(EZ.ev==='welcome')h=eWelcome();else if(EZ.sub)h=eSub();else if(EZ.ev==='home')h=eHome();else if(EZ.ev==='wiz')h=eWiz();else if(EZ.ev==='done')h=eDone();else if(EZ.ev==='no')h=eNo();else if(EZ.ev==='nodetail')h=eNoDetail();else if(EZ.ev==='kgmenu')h=eKgMenu();else if(EZ.ev==='ngay')h=eNgay();else if(EZ.ev==='bc')h=eBc();else if(EZ.ev==='cd')h=eCd();else if(EZ.ev==='tb')h=eTb();else h=eHome();
  $('#view').innerHTML=(EZ.ev==='home'||EZ.ev==='welcome'?'':'<div class="etop">'+EB('ghost','eHome','⬅ Về trang chính')+'</div>')+h;if(top)window.scrollTo(0,0);}
 ACT.eHome=()=>{EZ.ev='home';EZ.w=null;EZ.sub=null;eRender(true);};
 function eWelcome(){return'<div class="ecard" style="text-align:center"><div class="huge">👋</div><h2 class="eq">Xin chào! Bạn tên là gì?</h2><p>Tên này sẽ được ghi lại trên mỗi phiếu bạn nhập.</p><input id="eWelcomeName" class="einput" placeholder="Gõ tên của bạn" autocomplete="off" value="'+esc(Store.getUser())+'">'+EB('go','eWelcomeOk','Tiếp tục ›')+'</div>';}
 ACT.eWelcomeOk=()=>{const n=trim(getV('eWelcomeName'));if(!n)return fail('Vui lòng gõ tên của bạn.');Store.setUser(n);$('#userName').value=n;EZ.ev='home';eRender(true);};
 function eHero(){return'<div class="ehero"><span class="logo"><img src="logo-128.png" alt="HOAVU"></span><b>HOAVU</b></div>';}
 function eHome(){const td=today(),mp=DB.purchases.filter(r=>r.date===td);const lb=DB.settings.lastBackup;const hasData=DB.purchases.length+DB.exchanges.length+DB.cash.length>0;
- return eHero()+'<div class="ekpi"><div class="ecard"><span>Tiền mặt trong quỹ</span><div class="big">'+money(stats().cash)+'</div></div><div class="ecard"><span>Hôm nay đã mua</span><div class="big">'+fkg(mp.reduce((s,r)=>s+r.kg,0))+'</div></div></div>'
+ return eHero()+'<input id="eGs" class="einput" placeholder="🔍 Tìm khách, mã khách, SĐT, số phiếu..." autocomplete="off" autocapitalize="off"><div id="eGsRes"></div><div class="ekpi"><div class="ecard"><span>Tiền mặt trong quỹ</span><div class="big">'+money(stats().cash)+'</div></div><div class="ecard"><span>Hôm nay đã mua</span><div class="big">'+fkg(mp.reduce((s,r)=>s+r.kg,0))+'</div></div></div>'
  +negStockHTML(true)
  +(hasData&&(!lb||daysSince(lb)>=7)?'<div class="warn">⚠ '+(lb?'Đã '+daysSince(lb)+' ngày chưa sao lưu.':'Chưa từng sao lưu.')+EB('alt','backup','💾 Sao lưu ngay')+'</div>':'')
- +'<div class="tiles">'+TILES.map(t=>'<button class="tile" data-act="eStart" data-k="'+t[0]+'"><span>'+t[1]+'</span>'+t[2]+'</button>').join('')+'</div>'
+ +'<div class="tiles">'+TILES.map(t=>'<button class="tile" data-act="eStart" data-k="'+t[0]+'"><span>'+t[1]+'</span>'+t[2]+(t[0]==='tb'&&nfCount()?'<i class="tbadge">'+nfCount()+'</i>':'')+'</button>').join('')+'</div>'
  +'<p style="text-align:center;margin-top:18px">'+EB('ghost','toggleMode','Chế độ đầy đủ (dành cho chủ)')+'</p>';}
-ACT.eStart=b=>{const k=b.dataset.k;EZ.sub=null;if(k==='kk')return needOwner(()=>eNew('kk'));if(k==='mua'||k==='doi'||k==='quy'||k==='nk'||k==='ug'||k==='cq')return eNew(k);
+ACT.eStart=b=>{const k=b.dataset.k;EZ.sub=null;if(k==='tb'){EZ.ev='tb';return eRender(true);}if(k==='kk')return needOwner(()=>eNew('kk'));if(k==='mua'||k==='doi'||k==='quy'||k==='nk'||k==='ug'||k==='cq')return eNew(k);
  if(k==='kg')EZ.ev='kgmenu';else if(k==='no')EZ.ev='no';else if(k==='ngay'){EZ.ev='ngay';EZ.date=today();}else if(k==='bc'){EZ.ev='bc';EZ.bcp='today';}else EZ.ev='cd';eRender(true);};
 
 /* ----- wizard engine ----- */
@@ -1069,17 +1105,18 @@ const rl=(a,b)=>'<div class="rl"><span>'+a+'</span><b>'+b+'</b></div>';
 /* customer picker */
 function lastActMap(){const m={};const up=r=>{if(r.customerId&&(m[r.customerId]||0)<(r.ts||0))m[r.customerId]=r.ts||0;};['purchases','exchanges','sales','beanPayments','cash'].forEach(k=>DB[k].forEach(up));return m;}
 function custButtons(q){const w=EZ.w,tra=w.kind==='tra',dk=w.kind==='chot'||w.kind==='kgo';const la=lastActMap();const f=fold(q||'');
- let list=DB.customers.filter(c=>!f||fold(c.name+' '+c.phone).includes(f));if(tra)list=list.filter(c=>cs(c.id).beanLeft>0.004);if(dk)list=list.filter(c=>depTypes(c.id).length>0);
+ let list=DB.customers.filter(c=>!f||fold(custLabel(c)+' '+c.phone+' '+(c.address||'')).includes(f)||codeNorm(c.code).includes(codeNorm(q||'')&&codeNorm(q||'')||'#'));if(tra)list=list.filter(c=>cs(c.id).beanLeft>0.004);if(dk)list=list.filter(c=>depTypes(c.id).length>0);
  list.sort(tra?(a,b)=>cs(b.id).beanLeft-cs(a.id).beanLeft:(a,b)=>(la[b.id]||0)-(la[a.id]||0)||a.name.localeCompare(b.name,'vi'));const total=list.length;list=list.slice(0,40);
  if(!list.length)return'<p class="mut">'+(tra?'Không có khách nào còn nợ nhân.':dk?'Không có khách nào đang ký gửi cà.':'Không tìm thấy. Bấm "+ Khách mới".')+'</p>';
  return list.map(c=>{const s=cs(c.id);const sub=tra?'Còn nợ '+fkg(s.beanLeft):dk?'Đang ký gửi '+fkg(s.depKg):w.kind==='ug'&&s.advLeft>0?'Đang nợ ứng '+money(s.advLeft):(s.debtBuy>0?'Ta còn nợ '+money(s.debtBuy):(c.phone||c.address||''));
-  return'<button class="eb cust'+(w.d.custId===c.id?' sel':'')+'" data-act="ePick" data-id="'+esc(c.id)+'">'+esc(c.name)+(sub?'<small>'+esc(sub)+'</small>':'')+'</button>';}).join('')+(total>40?'<p class="mut">Còn '+(total-40)+' khách nữa, gõ tên để tìm.</p>':'');}
+  return'<button class="eb cust'+(w.d.custId===c.id?' sel':'')+'" data-act="ePick" data-id="'+esc(c.id)+'">'+esc(custLabel(c))+(sub?'<small>'+esc(sub)+'</small>':'')+'</button>';}).join('')+(total>40?'<p class="mut">Còn '+(total-40)+' khách nữa, gõ tên để tìm.</p>':'');}
 const EBODY={};
 EBODY.cust=()=>{const d=EZ.w.d;const nn=EZ.w.kind==='tra'||EZ.w.kind==='chot'||EZ.w.kind==='kgo';return{html:(d.custId?'<div class="ecard">Đã chọn: <b class="big">'+esc(custName(d.custId))+'</b></div>':'')+(EZ.w.kind==='tra'?'':'<input id="eSearch" class="einput" placeholder="🔍 Gõ tên để tìm" autocomplete="off">')+'<div id="eCustList">'+custButtons('')+'</div>'+(nn?'':EB('alt','eNewCust','+ Khách mới')),disabled:!d.custId};};
 document.addEventListener('input',e=>{const t=e.target;if(t.id==='eSearch'){const l=$('#eCustList');if(l)l.innerHTML=custButtons(t.value);}else if(t.id==='eUser'&&!Store.srvName()){Store.setUser(trim(t.value));$('#userName').value=trim(t.value);}});
 ACT.ePick=b=>{const w=EZ.w;w.d.custId=b.dataset.id;if(w.kind==='tra'){w.d.kg=0;}if(w.kind==='chot'||w.kind==='kgo'){const t=depTypes(w.d.custId);w.d.typeId=t.length===1?t[0]:'';w.d.kg=0;w.d.advDeduct=0;}advance();};
 ACT.eNewCust=()=>{EZ.sub={type:'newcust',name:getV('eSearch')};eRender(true);};
-ACT.eNewCustSave=()=>{const n=trim(getV('eNewName'));if(!n)return fail('Hãy gõ tên khách.');const w=EZ.w;const c=ensureCust(n,w.kind==='doi'?'Khách đổi':'Nông dân');const ph=trim(getV('eNewPhone'));if(ph&&!c.phone)c.phone=ph;save();w.d.custId=c.id;EZ.sub=null;advance();};
+ACT.eNewCustSave=()=>{const n=trim(getV('eNewName'));if(!n)return fail('Hãy gõ tên khách.');const w=EZ.w;const ph=trim(getV('eNewPhone'));
+ custCreate(n,{group:w.kind==='doi'?'Khách đổi':'Nông dân',phone:ph},(c,isNew)=>{if(ph&&!c.phone)c.phone=ph;save();w.d.custId=c.id;EZ.sub=null;closeDlg();advance();});};
 
 /* sub screens (number entry / new customer) */
 function openNum(title,mode,init,cb,quick){EZ.sub={type:'num',title,cb,quick,saved:{s:KP.s,mode:KP.mode}};KP.mode=mode;KP.s=init?(mode==='kg'?kgStr(init):String(init)):'';KP.fresh=!!KP.s;eRender(true);}
@@ -1179,22 +1216,22 @@ ACT.eSave=()=>eSave(false);ACT.eSavePrint=()=>eSave(true);
 const WRITE={
  mua(w){const d=w.d,c=muaCalc(d);if(!d.custId||!d.typeId||!(c.net>0)||!(d.price>0))throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');
   if(c.adv>advLeftFor(d.custId,w.eid)+0.5)throw new Error('Tiền ứng trừ lớn hơn số khách đang nợ ứng.');
-  let r=w.eid&&findRec('purchases',w.eid);if(!r){r={id:uid(),code:nextCode('PM'),ts:nextTs()};DB.purchases.push(r);}
+  let r=w.eid&&findRec('purchases',w.eid);if(!r){r={id:uid(),code:nextCode('PM',d.date),ts:nextTs()};DB.purchases.push(r);}
   Object.assign(r,{date:d.date,customerId:d.custId,typeId:d.typeId,bags:d.total!=null?[]:d.bags.slice(),kg:c.net,tareTotal:r2(d.tareTotal||0),gross:eGross(d),price:d.price,amount:c.amount,paid:c.paid,advanceDeduct:c.adv,note:d.note||''});
   if(r.depositSettle===undefined)r.depositSettle=false;
   if(r.tare===undefined)r.tare=0;syncTrade('mua',r);return save()?r:null;},
  doi(w){const d=w.d,net=eNet(d);if(!d.custId||!(net>0)||!(d.ratio>0))throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');const bean=calcBean(net,d.ratio);
-  let r=w.eid&&findRec('exchanges',w.eid);if(r&&!exGuard(r,bean,d.custId))throw new Error('Không sửa được: nhân ký gửi của phiếu này đã được dùng.');const isNew=!r;if(!r){r={id:uid(),code:nextCode('PD'),ts:nextTs(),paidNow:0};DB.exchanges.push(r);}
+  let r=w.eid&&findRec('exchanges',w.eid);if(r&&!exGuard(r,bean,d.custId))throw new Error('Không sửa được: nhân ký gửi của phiếu này đã được dùng.');const isNew=!r;if(!r){r={id:uid(),code:nextCode('PD',d.date),ts:nextTs(),paidNow:0};DB.exchanges.push(r);}
   Object.assign(r,{date:d.date,customerId:d.custId,bags:d.total!=null?[]:d.bags.slice(),tareTotal:r2(d.tareTotal||0),gross:eGross(d),kgFresh:net,ratioOwn:d.ratioOwn||null,ratio:d.ratio,kgBean:bean,note:d.note||''});
   if(r.tare===undefined)r.tare=0;syncExchange(r,isNew);return save()?r:null;},
  tra(w){const d=w.d;if(!d.custId||!(d.kg>0)||!d.mode)throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');if(d.kg>eLeft()+0.001)throw new Error('Số trả nhiều hơn số còn nợ.');
-  const amount=d.mode==='cash'?calcAmount(d.kg,d.price):0;let r=w.eid&&findRec('beanPayments',w.eid);if(!r){r={id:uid(),code:nextCode('TN'),ts:nextTs(),exchangeId:''};DB.beanPayments.push(r);}
+  const amount=d.mode==='cash'?calcAmount(d.kg,d.price):0;let r=w.eid&&findRec('beanPayments',w.eid);if(!r){r={id:uid(),code:nextCode('TN',d.date),ts:nextTs(),exchangeId:''};DB.beanPayments.push(r);}
   Object.assign(r,{date:d.date,customerId:d.custId,kg:d.kg,mode:d.mode,price:d.mode==='cash'?d.price:0,amount,note:d.note||''});syncBean(r);return save()?r:null;},
  quy(w){const d=w.d;if(!d.dir||!d.cat||!(d.amount>0))throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');if(needCust(d.cat)&&!d.custId)throw new Error('Danh mục này cần chọn khách.');
   let r=w.eid&&findRec('cash',w.eid);if(!r){r={id:uid(),ts:nextTs(),phieuId:'',phieuKind:''};DB.cash.push(r);}
   const debtCat=!!d.custId&&(d.cat===CAT_NO||d.cat===CAT_THUNO);const before=debtCat?debtMax(d):0;
   Object.assign(r,{date:d.date,dir:d.dir,cat:d.cat,amount:d.amount,customerId:d.custId||'',note:d.note||''});
-  if(debtCat){if(!r.code)r.code=nextCode(d.dir==='chi'?'PC':'PT');r.debtBefore=before;}
+  if(debtCat){if(!r.code)r.code=nextCode(d.dir==='chi'?'PC':'PT',d.date);r.debtBefore=before;}
   return save()?r:null;}};
 function eSave(print){const w=EZ.w;if(!w||w.saving)return;w.saving=true;document.querySelectorAll('[data-act=eSave],[data-act=eSavePrint]').forEach(b=>b.disabled=true);let rec;
  try{rec=WRITE[w.kind](w);}catch(e){w.saving=false;eRender(false);fail(String(e.message||e));return;}
@@ -1246,12 +1283,13 @@ ACT.eYes=()=>{closeDlg();const f=EZ.yes;EZ.yes=null;if(f)f();};
 
 /* ----- Xem nợ ----- */
 function eNo(){const rows=DB.customers.map(c=>({c,s:cs(c.id)})).filter(o=>Math.round(o.s.debtBuy)>0||Math.round(o.s.debtSale)>0||o.s.advLeft>0.5||o.s.depKg>0.004).sort((a,b)=>(b.s.debtBuy+b.s.debtSale)-(a.s.debtBuy+a.s.debtSale)||b.s.depKg-a.s.depKg);
- return'<h2 class="eq">Ai còn nợ?</h2>'+(rows.length?rows.map(o=>'<button class="eb cust" data-act="eNoOpen" data-id="'+o.c.id+'" style="text-align:left"><b>'+esc(o.c.name)+'</b>'+(Math.round(o.s.debtBuy)>0?'<span class="big" style="display:block">Đại lý nợ tiền: '+money(o.s.debtBuy)+'</span>':'')+(Math.round(o.s.debtSale)>0?'<span class="big" style="display:block">Khách nợ ta: '+money(o.s.debtSale)+'</span>':'')+(o.s.depKg>0.004?'<span class="big" style="display:block">Ký gửi: '+fkg(o.s.depKg)+' nhân</span>':'')+(o.s.advLeft>0.5?'<span class="big" style="display:block">Nợ ứng: '+money(o.s.advLeft)+'</span>':'')+'</button>').join(''):'<p class="mut" style="text-align:center">Không ai nợ. 👍</p>');}
+ return'<h2 class="eq">Ai còn nợ?</h2>'+(rows.length?rows.map(o=>'<button class="eb cust" data-act="eNoOpen" data-id="'+o.c.id+'" style="text-align:left"><b>'+esc(custLabel(o.c))+'</b>'+(Math.round(o.s.debtBuy)>0?'<span class="big" style="display:block">Đại lý nợ tiền: '+money(o.s.debtBuy)+'</span>':'')+(Math.round(o.s.debtSale)>0?'<span class="big" style="display:block">Khách nợ ta: '+money(o.s.debtSale)+'</span>':'')+(o.s.depKg>0.004?'<span class="big" style="display:block">Ký gửi: '+fkg(o.s.depKg)+' nhân</span>':'')+(o.s.advLeft>0.5?'<span class="big" style="display:block">Nợ ứng: '+money(o.s.advLeft)+'</span>':'')+'</button>').join(''):'<p class="mut" style="text-align:center">Không ai nợ. 👍</p>');}
 ACT.eNoOpen=b=>{EZ.sel=b.dataset.id;EZ.ev='nodetail';eRender(true);};
-function eNoDetail(){const c=custById(EZ.sel),s=cs(EZ.sel);return'<div class="ecard"><h2 class="eq">'+esc(c.name)+'</h2>'+(c.phone?'<div>☎ '+esc(c.phone)+'</div>':'')+(Math.round(s.debtBuy)>0?rl('Đại lý nợ tiền','<span class="big">'+money(s.debtBuy)+'</span>'):'')+(Math.round(s.debtSale)>0?rl('Khách nợ ta','<span class="big">'+money(s.debtSale)+'</span>'):'')+(s.depKg>0.004?rl('Ký gửi','<span class="big">'+fkg(s.depKg)+' nhân</span>'):'')+(s.advLeft>0.5?rl('Nợ ứng (khách nợ ta)',money(s.advLeft)):'')+'</div>'
+function eNoDetail(){const c=custById(EZ.sel),s=cs(EZ.sel);return'<div class="ecard"><h2 class="eq">'+esc(custLabel(c))+'</h2>'+(c.phone?'<div>☎ '+esc(c.phone)+'</div>':'')+(Math.round(s.debtBuy)>0?rl('Đại lý nợ tiền','<span class="big">'+money(s.debtBuy)+'</span>'):'')+(Math.round(s.debtSale)>0?rl('Khách nợ ta','<span class="big">'+money(s.debtSale)+'</span>'):'')+(s.depKg>0.004?rl('Ký gửi','<span class="big">'+fkg(s.depKg)+' nhân</span>'):'')+(s.advLeft>0.5?rl('Nợ ứng (khách nợ ta)',money(s.advLeft)):'')+'</div>'
  +(Math.round(s.debtBuy)>0?EB('ok','eNoPay','💵 Trả tiền<small>ta trả '+money(s.debtBuy)+' cho khách</small>','data-dir="chi"'):'')+(Math.round(s.debtSale)>0?EB('ok','eNoPay','💰 Thu tiền<small>khách trả ta '+money(s.debtSale)+'</small>','data-dir="thu"'):'')
- +(s.depKg>0.004?EB('go','eNoChot','🏷️ Chốt giá<small>bán nhân đang ký gửi</small>')+EB('go','eNoOut','🫘 Trả lại nhân<small>khách lấy nhân về</small>'):'')
+ +'<div class="row2">'+EB('go','eHubNew','🛒 Mua cà','data-k="mua"')+EB('go','eHubNew','🔄 Đổi cà','data-k="doi"')+'</div>'+EB('go','eHubNew','🏷️ Ký gửi<small>khách gửi thêm cà</small>','data-k="kgi"')+(s.depKg>0.004?EB('go','eNoChot','🏷️ Chốt giá<small>bán nhân đang ký gửi</small>')+EB('go','eNoOut','🫘 Trả lại nhân<small>khách lấy nhân về</small>'):'')
  +(s.advLeft>0.5?EB('alt','eNoAdv','💳 Thu hồi tiền ứng'):'')+EB('go','stmtOpen','📄 Sao kê','data-id="'+c.id+'"')+EB('ghost','detail','📜 Xem sổ chi tiết','data-id="'+c.id+'"');}
+ACT.eHubNew=b=>{const k=b.dataset.k;eNew(k,{custId:EZ.sel},k==='doi'?'bags':'type');};
 ACT.eNoPay=b=>{const s=cs(EZ.sel),chi=b.dataset.dir==='chi';eNew('quy',{dir:chi?'chi':'thu',cat:chi?CAT_NO:CAT_THUNO,custId:EZ.sel,amount:chi?Math.round(s.debtBuy):Math.round(s.debtSale),note:chi?'Trả nợ tiền mua cà phê':'Thu nợ bán cà phê'},'amt');};
 const eNoDep=kind=>{const t=depTypes(EZ.sel),bid=DB.settings.beanTypeId;eNew(kind,{custId:EZ.sel,typeId:t.length===1?t[0]:(t.includes(bid)?bid:''),kg:0,advDeduct:0},t.length>1&&!t.includes(bid)?'dtype':'dkg');};
 ACT.eNoChot=()=>eNoDep('chot');ACT.eNoOut=()=>eNoDep('kgo');
@@ -1537,7 +1575,7 @@ AFTER.nk=()=>{const id=ui.edit.nk;const r=id&&findRec('stockIns',id);
  else{setV('nk-date',today());setV('nk-method','phoi');setV('nk-note','');resetW('nk');$('#nk-title').textContent='Phiếu nhập kho mới';}LIVE['f-nk']();};
 function saveNK(print){const date=getV('nk-date');if(!date)return fail('Vui lòng chọn ngày.');const method=getV('nk-method');if(!METHODS.some(m=>m[0]===method))return fail('Vui lòng chọn cách làm.');
  const w=readW('nk');if(!checkW(w,'KL nhân xô'))return false;
- const eid=ui.edit.nk;let r=eid&&findRec('stockIns',eid);if(!r){r={id:uid(),code:nextCode('NK'),ts:nextTs()};DB.stockIns.push(r);}
+ const eid=ui.edit.nk;let r=eid&&findRec('stockIns',eid);if(!r){r={id:uid(),code:nextCode('NK',date),ts:nextTs()};DB.stockIns.push(r);}
  Object.assign(r,{date,method,bags:w.bags,gross:w.gross,tareTotal:w.tareTotal,kg:w.net,note:trim(getV('nk-note'))});
  if(!save())return false;ui.edit={};toast('Đã lưu '+r.code+'.');render();if(print)printNK(r.id);return true;}
 SUBMIT['f-nk']=()=>saveNK(false);
@@ -1653,7 +1691,7 @@ function kkConfirmHTML(d){const rec=kkRec(d,EZ.w),p=kkTemp(rec);
   +(d.kind==='close'?rl('Tỷ lệ chính xác (từ lần chốt trước)',p.exactRatio==null?'—':nfP.format(p.exactRatio)):'')+(p.bookAt!=null?rl('Hao hụt / chênh lệch kho',fkg(p.diffKg)+' · '+money(p.diffValue)):'')+rl('Lãi kỳ này','<span class="big">'+money(p.profit)+'</span>')+p.warnings.map(x=>'<div style="color:var(--bad);font-size:16px">⚠ '+esc(x)+'</div>').join('');}
  return h;}
 WRITE.nk=w=>{const d=w.d,net=eNet(d);if(!d.method||!(net>0)||!d.date)throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');
- let r=w.eid&&findRec('stockIns',w.eid);if(!r){r={id:uid(),code:nextCode('NK'),ts:nextTs()};DB.stockIns.push(r);}
+ let r=w.eid&&findRec('stockIns',w.eid);if(!r){r={id:uid(),code:nextCode('NK',d.date),ts:nextTs()};DB.stockIns.push(r);}
  Object.assign(r,{date:d.date,method:d.method,bags:d.total!=null?[]:d.bags.slice(),gross:eGross(d),tareTotal:r2(d.tareTotal||0),kg:net,note:d.note||''});return save()?r:null;};
 WRITE.kk=w=>{const d=w.d;if(!d.kind||!d.date)throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');if(d.kind==='month'&&d.freshKg==null)throw new Error('Chưa nhập cà tươi còn lại.');
  if(DB.stocktakes.some(s=>s.date===d.date&&s.id!==w.eid))throw new Error('Ngày này đã có kiểm kê.');
@@ -1886,10 +1924,10 @@ AFTER.ug=()=>{const id=ui.edit.ug;const r=id&&findRec('advances',id);
  if(r){setV('ug-date',r.date);setV('ug-cust',custName(r.customerId));setV('ug-kind',r.kind);setV('ug-item',r.item||'');setV('ug-amt',mfmt(r.amount));setV('ug-note',r.note||'');$('#ug-title').textContent='Sửa phiếu ứng '+r.code;$('#ug-cancel').style.display='';}
  else{setV('ug-date',ui.lastDate||today());setV('ug-cust','');setV('ug-kind','cash');setV('ug-item','');setV('ug-amt','');setV('ug-note','');$('#ug-title').textContent='Phiếu ứng tiền mới';}LIVE['f-ug']();};
 function saveUG(print){const date=getV('ug-date');if(!date)return fail('Vui lòng chọn ngày.');const name=trim(getV('ug-cust'));if(!name)return fail('Vui lòng chọn nông dân.');const kind=getV('ug-kind');const item=trim(getV('ug-item'));if(kind==='goods'&&!item)return fail('Vui lòng ghi hàng hóa ứng.');
- const amount=pMoney(getV('ug-amt'));if(!(amount>0))return fail('Số tiền phải lớn hơn 0.');const cust=ensureCust(name,'Nông dân');const eid=ui.edit.ug;let r=eid&&findRec('advances',eid);if(!r){r={id:uid(),code:nextCode('UT'),ts:nextTs()};DB.advances.push(r);}
+ const amount=pMoney(getV('ug-amt'));if(!(amount>0))return fail('Số tiền phải lớn hơn 0.');const cust=ensureCust(name,'Nông dân');const eid=ui.edit.ug;let r=eid&&findRec('advances',eid);if(!r){r={id:uid(),code:nextCode('UT',date),ts:nextTs()};DB.advances.push(r);}
  Object.assign(r,{date,customerId:cust.id,kind,item:kind==='goods'?item:'',amount,note:trim(getV('ug-note'))});syncAdvance(r);if(!save())return false;ui.edit={};ui.lastDate=date;toast('Đã lưu '+r.code+'.');render();if(print)printUG(r.id);return true;}
 SUBMIT['f-ug']=()=>saveUG(false);ACT.ugPrint=()=>saveUG(true);
-ACT.payAdv=b=>{const c=custById(b.dataset.id),s=cs(c.id);ui.edit={};ui.prefill={dir:'thu',cat:CAT_THUUNG,name:c.name,amount:s.advLeft,note:'Thu hồi tiền ứng'};go('quy');};
+ACT.payAdv=b=>{const c=custById(b.dataset.id),s=cs(c.id);ui.edit={};ui.prefill={dir:'thu',cat:CAT_THUUNG,name:custLabel(c),amount:s.advLeft,note:'Thu hồi tiền ứng'};go('quy');};
 ACT.eNoAdv=()=>{const s=cs(EZ.sel);eNew('quy',{dir:'thu',cat:CAT_THUUNG,custId:EZ.sel,amount:s.advLeft,note:'Thu hồi tiền ứng'},'amt');};
 {const _p=ACT.print;ACT.print=b=>{if(b.dataset.k==='ug')return printUG(b.dataset.id);if(b.dataset.k==='kg')return printKG(b.dataset.id);_p(b);};}
 
@@ -1901,9 +1939,9 @@ function kgForm(){return'<div class="card"><h2 id="kgi-title"></h2><p class="mut
 function kgList(){const f=ui.f.kg;return'<div class="card"><h2>Số dư ký gửi &amp; lịch sử</h2>'+dateRange('kg','<label>Nhận / trả<select data-flt="kg.kind"><option value="">Tất cả</option><option value="in"'+(f.kind==='in'?' selected':'')+'>Nhận ký gửi</option><option value="out"'+(f.kind==='out'?' selected':'')+'>Trả lại cà</option></select></label><label>Tìm tên<input data-flt="kg.q" value="'+esc(f.q)+'" placeholder="Tên khách"></label><button class="btn" data-act="export" data-k="kg">Xuất Excel</button>')+'<div id="list-kg">'+renderSpec(SPEC.kg())+'</div></div>';}
 function kgBalRows(){const rows=[];DB.customers.forEach(c=>{const s=cs(c.id);Object.keys(s.dep).forEach(t=>{if(Math.abs(s.dep[t])>0.004)rows.push({c,t,kg:s.dep[t]});});});return rows.sort((a,b)=>a.c.name.localeCompare(b.c.name,'vi'));}
 SPEC.kg=()=>{const f=ui.f.kg;const bal=kgBalRows();const rows=DB.deposits.filter(r=>inRange(r.date,f)&&(!f.kind||r.kind===f.kind)&&nameHas(r.customerId,f.q)).sort(cmpDateDesc);
- return{file:'ky-gui',title:'Ký gửi',sections:[{title:'Số dư ký gửi theo khách',rows:bal,cols:[{h:'Khách hàng',f:o=>o.c.name},{h:'Loại cà',f:o=>typeName(o.t)},{h:'Đang ký gửi (kg)',num:1,f:o=>K(o.kg)},{h:'',x:false,c:'act',f:o=>H('<button class="btn btn-s btn-p" data-act="dChot" data-id="'+o.c.id+'" data-t="'+esc(o.t)+'">Chốt giá</button><button class="btn btn-s" data-act="dOut" data-id="'+o.c.id+'" data-t="'+esc(o.t)+'">Trả lại cà</button>')}],foot:['Tổng cộng','',K(bal.reduce((s,o)=>s+o.kg,0)),'']},
+ return{file:'ky-gui',title:'Ký gửi',sections:[{title:'Số dư ký gửi theo khách',rows:bal,cols:[{h:'Mã KH',f:o=>o.c.code||''},{h:'Khách hàng',f:o=>o.c.name},{h:'Loại cà',f:o=>typeName(o.t)},{h:'Đang ký gửi (kg)',num:1,f:o=>K(o.kg)},{h:'',x:false,c:'act',f:o=>H('<button class="btn btn-s btn-p" data-act="dChot" data-id="'+o.c.id+'" data-t="'+esc(o.t)+'">Chốt giá</button><button class="btn btn-s" data-act="dOut" data-id="'+o.c.id+'" data-t="'+esc(o.t)+'">Trả lại cà</button>')}],foot:['','Tổng cộng','',K(bal.reduce((s,o)=>s+o.kg,0)),'']},
  {title:'Lịch sử nhận / trả ký gửi',rows,cols:[{h:'Số phiếu',f:r=>r.code},{h:'Ngày',f:r=>fmtDate(r.date)},{h:'Khách hàng',f:r=>custName(r.customerId)},{h:'Nhận / trả',f:r=>r.kind==='out'?'Trả lại cà':r.source==='exchange'?'Từ phiếu đổi':r.source==='convert'?'Chuyển nhân nợ cũ':'Nhận ký gửi'},{h:'Loại cà',f:r=>typeName(r.typeId)},{h:'Số bao',num:1,f:r=>I((r.bags||[]).length)},{h:'Tổng cả bì (kg)',num:1,f:r=>K(grossOf(r))},{h:'Trừ bì (kg)',num:1,f:r=>K(tareTotalOf(r))},{h:'KL (kg)',num:1,f:r=>K(r.kg)},{h:'Ghi chú',f:r=>r.note||''},
- {h:'',x:false,c:'act',f:r=>r.source==='exchange'?H('<button class="link" data-act="edit" data-k="doi" data-id="'+r.exchangeId+'">sửa ở phiếu đổi</button>'):r.source==='convert'?H('<span class="mut">tự chuyển</span>'):H('<button class="btn btn-s" data-act="edit" data-k="kg" data-id="'+r.id+'">Sửa</button><button class="btn btn-s" data-act="print" data-k="kg" data-id="'+r.id+'">In phiếu</button><button class="btn btn-s btn-d" data-act="del" data-k="kg" data-id="'+r.id+'">Xóa</button>')}]}]};};
+ {h:'',x:false,c:'act',f:r=>r.source==='exchange'?H((exchById(r.exchangeId)?'<button class="link" data-act="edit" data-k="doi" data-id="'+r.exchangeId+'">sửa ở phiếu đổi</button>':'<span class="mut">mất phiếu đổi</span>')+sysDelBtn(r)):r.source==='convert'?H('<span class="mut">tự chuyển</span>'+sysDelBtn(r)):H('<button class="btn btn-s" data-act="edit" data-k="kg" data-id="'+r.id+'">Sửa</button><button class="btn btn-s" data-act="print" data-k="kg" data-id="'+r.id+'">In phiếu</button><button class="btn btn-s btn-d" data-act="del" data-k="kg" data-id="'+r.id+'">Xóa</button>')}]}]};};
 LIVE['f-kgi']=()=>{const w=updW('kgi');$('#kgi-net').textContent=fkg(w.net);const c=findCust(getV('kgi-cust'));$('#kgi-bal').textContent=c?fkg(depTotal(DB,getV('kgi-type'),null,c.id)):'-';custHint('kgi-cust','kgi-hint');};
 AFTER.kg=()=>{const id=ui.edit.kg;const r=id&&findRec('deposits',id);const pf=ui.preKg;ui.preKg=null;
  if(r){setV('kgi-date',r.date);setV('kgi-cust',custName(r.customerId));setV('kgi-kind',r.kind);setV('kgi-type',r.typeId);setV('kgi-note',r.note||'');fillW('kgi',r);$('#kgi-title').textContent='Sửa phiếu ký gửi '+r.code;$('#kgi-cancel').style.display='';}
@@ -1913,15 +1951,15 @@ function saveKG(print,opt){const date=getV('kgi-date');if(!date)return fail('Vui
  if(opt&&opt.kg!=null){w.net=opt.kg;w.bags=[];w.gross=opt.kg;w.tareTotal=0;}
  if(kind==='out'){const bal=c0?depLeftFor(c0.id,typeId,eid):0;if(w.net>bal+0.001)return fail('Trả lại '+fkg(w.net)+' nhiều hơn số đang ký gửi ('+fkg(bal)+').');
   if(typeId===DB.settings.beanTypeId&&!(opt&&opt.force)){const P=beanAvail(eid);if(w.net>P+0.001){ui.shK={name,typeId,R:w.net,P,print};openDlg('<h2>⚠ Nhân trong kho chỉ còn '+fkg(P)+', không đủ '+fkg(w.net)+'</h2><p class="mut">Khách muốn lấy lại '+fkg(w.net)+' nhưng nhân thật trong kho chưa đủ.</p><div class="btns" style="flex-direction:column;align-items:stretch">'+(P>0?'<button class="btn btn-p" data-act="shkPart">🫘 Trả trước '+fkg(P)+' (phần còn lại vẫn ký gửi)</button>':'<button class="btn" disabled>🫘 Trả trước 0 kg</button>')+(eid?'':'<button class="btn" data-act="shkCash">💵 Quy '+fkg(r2(w.net-P))+' còn thiếu ra tiền (Chốt giá)</button>')+(isStaff()?'':'<button class="btn" data-act="shkForce">✓ Vẫn trả đủ '+fkg(w.net)+' (nhân có thật nhưng chưa ghi Nhập kho) – chỉ chủ</button>')+'<button class="btn" data-act="shkNo">Quay lại sửa số kg</button></div>');return false;}}}
- const cust=ensureCust(name,'Nông dân');let r=eid&&findRec('deposits',eid);if(!r){r={id:uid(),code:nextCode('KG'),ts:nextTs()};DB.deposits.push(r);}
+ const cust=ensureCust(name,'Nông dân');let r=eid&&findRec('deposits',eid);if(!r){r={id:uid(),code:nextCode('KG',date),ts:nextTs()};DB.deposits.push(r);}
  Object.assign(r,{date,customerId:cust.id,kind,typeId,bags:w.bags,gross:w.gross,tareTotal:w.tareTotal,kg:w.net,note:trim(getV('kgi-note'))});if(!save())return false;ui.edit={};ui.lastDate=date;toast('Đã lưu '+r.code+'.');render();if(print)printKG(r.id);return true;}
 SUBMIT['f-kgi']=()=>saveKG(false);ACT.kgPrint=()=>saveKG(true);
 ACT.shkNo=()=>{ui.shK=null;closeDlg();};
 ACT.shkPart=()=>{const s=ui.shK;if(!s||!(s.P>0))return;closeDlg();saveKG(s.print,{kg:s.P});};
 ACT.shkForce=()=>needOwner(()=>{const s=ui.shK;if(!s)return;closeDlg();saveKG(s.print,{force:true});});
 ACT.shkCash=()=>{const s=ui.shK;if(!s)return;closeDlg();if(s.P>0&&!saveKG(false,{kg:s.P}))return;ui.edit={};ui.preMua={name:s.name,typeId:s.typeId,kg:r2(s.R-s.P)};go('mua');};
-ACT.dChot=b=>{closeDlg();const c=custById(b.dataset.id);ui.edit={};ui.preMua={name:c.name,typeId:b.dataset.t,kg:cs(c.id).dep[b.dataset.t]};go('mua');};
-ACT.dOut=b=>{closeDlg();const c=custById(b.dataset.id);ui.edit={};ui.preKg={name:c.name,typeId:b.dataset.t,kind:'out',kg:cs(c.id).dep[b.dataset.t]};go('kg');};
+ACT.dChot=b=>{closeDlg();const c=custById(b.dataset.id);ui.edit={};ui.preMua={name:custLabel(c),typeId:b.dataset.t,kg:cs(c.id).dep[b.dataset.t]};go('mua');};
+ACT.dOut=b=>{closeDlg();const c=custById(b.dataset.id);ui.edit={};ui.preKg={name:custLabel(c),typeId:b.dataset.t,kind:'out',kg:cs(c.id).dep[b.dataset.t]};go('kg');};
 
 /* chuyển hướng: Sổ quỹ → phiếu gốc ứng tiền */
 {const _g=ACT.gotoDoc;ACT.gotoDoc=b=>{if(b.dataset.pk==='cq'){toast('Chênh lệch chốt quỹ: xóa ở bảng Chốt quỹ bên dưới.');return;}_g(b);};}
@@ -1981,21 +2019,21 @@ function denomHTML(){const c=EZ.sub.counts;return'<h2 class="eq">Đếm theo m�
  else{const book=cashBookAt(d.date,w.eid?w.eid:null),diff=d.counted-book;h+=rl('Sổ sách',money(book))+rl('Đếm được','<span class="big">'+money(d.counted)+'</span>')+'<div class="rl"><span>Chênh lệch</span><b class="big" style="color:'+(diff<0?'var(--bad)':diff>0?'var(--warn)':'var(--ok)')+'">'+(diff===0?'✓ Khớp':diff<0?'Thiếu '+money(-diff):'Thừa '+money(diff))+'</b></div>';}
  h+=rl('Ngày',fmtDate(d.date))+'</div>';return{html:h+(w.kind==='cq'?'':EB('ok2','eSavePrint','✓ Lưu và In',w.saving?'disabled':'')),nonext:true};};}
 /* ghi sổ */
-WRITE.ug=w=>{const d=w.d;if(!d.custId||!(d.amount>0)||!d.ukind)throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');let r=w.eid&&findRec('advances',w.eid);if(!r){r={id:uid(),code:nextCode('UT'),ts:nextTs()};DB.advances.push(r);}
+WRITE.ug=w=>{const d=w.d;if(!d.custId||!(d.amount>0)||!d.ukind)throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');let r=w.eid&&findRec('advances',w.eid);if(!r){r={id:uid(),code:nextCode('UT',d.date),ts:nextTs()};DB.advances.push(r);}
  Object.assign(r,{date:d.date,customerId:d.custId,kind:d.ukind,item:d.ukind==='goods'?d.item:'',amount:d.amount,note:d.note||''});syncAdvance(r);return save()?r:null;};
-WRITE.kgi=w=>{const d=w.d,net=eNet(d);if(!d.custId||!d.typeId||!(net>0))throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');let r=w.eid&&findRec('deposits',w.eid);if(!r){r={id:uid(),code:nextCode('KG'),ts:nextTs()};DB.deposits.push(r);}
+WRITE.kgi=w=>{const d=w.d,net=eNet(d);if(!d.custId||!d.typeId||!(net>0))throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');let r=w.eid&&findRec('deposits',w.eid);if(!r){r={id:uid(),code:nextCode('KG',d.date),ts:nextTs()};DB.deposits.push(r);}
  Object.assign(r,{date:d.date,customerId:d.custId,kind:'in',typeId:d.typeId,bags:d.total!=null?[]:d.bags.slice(),gross:eGross(d),tareTotal:r2(d.tareTotal||0),kg:net,note:d.note||''});return save()?r:null;};
-WRITE.kgo=w=>{const d=w.d;if(!d.custId||!d.typeId||!(d.kg>0))throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');if(d.kg>dBal()+0.001)throw new Error('Trả nhiều hơn số đang ký gửi.');let r=w.eid&&findRec('deposits',w.eid);if(!r){r={id:uid(),code:nextCode('KG'),ts:nextTs()};DB.deposits.push(r);}
+WRITE.kgo=w=>{const d=w.d;if(!d.custId||!d.typeId||!(d.kg>0))throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');if(d.kg>dBal()+0.001)throw new Error('Trả nhiều hơn số đang ký gửi.');let r=w.eid&&findRec('deposits',w.eid);if(!r){r={id:uid(),code:nextCode('KG',d.date),ts:nextTs()};DB.deposits.push(r);}
  Object.assign(r,{date:d.date,customerId:d.custId,kind:'out',typeId:d.typeId,bags:[],gross:d.kg,tareTotal:0,kg:d.kg,note:d.note||''});return save()?r:null;};
 WRITE.chot=w=>{const d=w.d,c=muaCalc(d);if(!d.custId||!d.typeId||!(c.net>0)||!(d.price>0))throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');
  if(c.net>dBal()+0.001)throw new Error('Chốt nhiều hơn số đang ký gửi.');if(c.adv>advLeftFor(d.custId,w.eid)+0.5)throw new Error('Tiền ứng trừ lớn hơn số khách đang nợ ứng.');
- let r=w.eid&&findRec('purchases',w.eid);if(!r){r={id:uid(),code:nextCode('PM'),ts:nextTs()};DB.purchases.push(r);}
+ let r=w.eid&&findRec('purchases',w.eid);if(!r){r={id:uid(),code:nextCode('PM',d.date),ts:nextTs()};DB.purchases.push(r);}
  Object.assign(r,{date:d.date,customerId:d.custId,typeId:d.typeId,bags:[],kg:c.net,tareTotal:0,gross:c.net,tare:0,price:d.price,amount:c.amount,paid:c.paid,advanceDeduct:c.adv,depositSettle:true,note:d.note||'Chốt giá ký gửi'});syncTrade('mua',r);return save()?r:null;};
 WRITE.cq=w=>{const d=w.d;if(!d.date||d.counted==null)throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');return cqApply({date:d.date,counted:d.counted,note:d.note},w.eid);};
 /* màn hình Ký gửi */
 function eKgMenu(){const rows=kgBalRows();
  return'<h2 class="eq">Ký gửi cà</h2>'+EB('go','eKgGo','📥 Nhận ký gửi<small>khách gửi cà, cân và trừ bì</small>','data-k="kgi"')+EB('ok','eKgGo','🏷️ Chốt giá (bán)<small>bán hết hoặc một phần nhân khách đang gửi</small>','data-k="chot"')+EB('alt','eKgGo','🫘 Trả lại nhân<small>khách lấy nhân về (hết hoặc một phần)</small>','data-k="kgo"')
- +'<div class="egh">Đang ký gửi</div>'+(rows.length?rows.map(o=>'<div class="ecard">'+rl('<b>'+esc(o.c.name)+'</b> · '+esc(typeName(o.t)),'<span class="big">'+fkg(o.kg)+'</span>')+'</div>').join(''):'<p class="mut" style="text-align:center">Chưa có cà ký gửi.</p>');}
+ +'<div class="egh">Đang ký gửi</div>'+(rows.length?rows.map(o=>'<div class="ecard">'+rl('<b>'+esc(custLabel(o.c))+'</b> · '+esc(typeName(o.t)),'<span class="big">'+fkg(o.kg)+'</span>')+'</div>').join(''):'<p class="mut" style="text-align:center">Chưa có cà ký gửi.</p>');}
 ACT.eKgGo=b=>eNew(b.dataset.k);
 /* sửa phiếu mới trong wizard + khóa sửa phiếu cũ */
 const REC_ARR={mua:'purchases',chot:'purchases',ban:'sales',doi:'exchanges',tra:'beanPayments',quy:'cash',nk:'stockIns',kt:'stocktakes',kk:'stocktakes',kho:'adjustments',ug:'advances',kg:'deposits',kgi:'deposits',kgo:'deposits',cq:'cashCounts'};
@@ -2025,7 +2063,7 @@ function eCd(){const st=Store.status();const open=isUnlocked();
   +(sn?EB('ghost','disconnect','Ngắt kết nối máy này'):EB('alt','connectManual','🔗 Kết nối máy'));
  if(isStaff())return h+'<div class="ecard">Các cài đặt khác chỉ dùng trên máy của chủ.</div>';
  if(!hasPin())h+='<div class="warn">⚠ Chưa đặt mã PIN của chủ: ai cũng xóa, sửa được sổ và xem được lãi.'+EB('go','pinSetup','🔐 Đặt mã PIN chủ')+'</div>';
- if(open)h+=EB('alt','backup','💾 Sao lưu ra file')+EB('alt','eUsers','👥 Người dùng & mã máy')+EB('alt','eOpenings','📘 Số dư đầu kỳ')+EB('alt','eAudit','🕘 Lịch sử sửa / xóa')+(hasPin()?EB('alt','pinSetup','🔐 Đổi / gỡ mã PIN')+(Store.getPref('ownerDevice')?EB('ghost','ownerDev','Bỏ "máy của chủ"'):''):'')+EB('ghost','toggleMode','Chế độ đầy đủ (cài đặt đầy đủ, dành cho chủ)');
+ if(open)h+=EB('alt','backup','💾 Sao lưu ra file')+EB('alt','wipeOpen','🧹 Xóa dữ liệu thử')+EB('alt','eUsers','👥 Người dùng & mã máy')+EB('alt','eOpenings','📘 Số dư đầu kỳ')+EB('alt','eAudit','🕘 Lịch sử sửa / xóa')+(hasPin()?EB('alt','pinSetup','🔐 Đổi / gỡ mã PIN')+(Store.getPref('ownerDevice')?EB('ghost','ownerDev','Bỏ "máy của chủ"'):''):'')+EB('ghost','toggleMode','Chế độ đầy đủ (cài đặt đầy đủ, dành cho chủ)');
  else h+=EB('alt','pinPrompt','🔒 Nhập PIN chủ để mở các cài đặt khác');
  return h;}
 /* ################ V2-G: sao kê công nợ từng khách ################ */
@@ -2051,7 +2089,7 @@ function stmtSpec(S,from){const opl={date:from,desc:'Số dư đầu kỳ sao k�
 function stmtSummary(S){const m=S.cur.m;const r=[[m>0?'Ta còn nợ khách':m<0?'Khách còn nợ ta':'Công nợ tiền',m===0?'Không nợ':money(Math.abs(m))]];if(S.show.b)r.push(['Nhân còn nợ khách',fkg(S.cur.b)]);if(S.show.a)r.push(['Khách nợ ứng',money(S.cur.a)]);if(S.show.d)r.push(['Ký gửi (nhân) còn lại',fkg(S.cur.d)]);return r;}
 let ST=null;
 function stmtShow(id,from,to){const c=custById(id);if(!c)return;const ev=stmtEvents(id);ST={id,from:from||(ev.length?ev[0].date:today()),to:to||today()};
- openDlg('<h2>Sao kê công nợ: '+esc(c.name)+'</h2><div class="mut">'+(c.phone?'☎ '+esc(c.phone)+' · ':'')+esc(DB.settings.shopName||'')+'</div><div class="filters" style="margin-top:8px"><label>Từ ngày<input type="date" id="st-from" value="'+esc(ST.from)+'"></label><label>Đến ngày<input type="date" id="st-to" value="'+esc(ST.to)+'"></label></div><div id="stmtBody"></div>'
+ openDlg('<h2>Sao kê công nợ: '+esc(custLabel(c))+'</h2><div class="mut">'+(c.phone?'☎ '+esc(c.phone)+' · ':'')+esc(DB.settings.shopName||'')+'</div><div class="filters" style="margin-top:8px"><label>Từ ngày<input type="date" id="st-from" value="'+esc(ST.from)+'"></label><label>Đến ngày<input type="date" id="st-to" value="'+esc(ST.to)+'"></label></div><div id="stmtBody"></div>'
   +'<div class="btns"><button class="btn btn-p" data-act="stmtPrint">🖨 In</button><button class="btn" data-act="stmtShare" style="background:var(--ok);color:var(--on-ok);border-color:var(--ok)">📤 Gửi Zalo</button><button class="btn" data-act="stmtXls">Xuất Excel</button><button class="btn" data-act="closeDlg">Đóng</button></div>');stmtDraw();}
 function stmtDraw(){const S=stmtBuild(ST.id,ST.from,ST.to);ST.S=S;const sp=stmtSpec(S,ST.from);const sm=stmtSummary(S);
  const e=document.getElementById('stmtBody');if(!e)return;e.innerHTML='<p class="mut" style="margin:4px 0">Dư tiền dương = ta còn nợ khách; âm = khách còn nợ ta.</p>'+renderTable({rows:sp.rows,cols:sp.cols})+'<div class="ecard" style="margin-top:10px">'+sm.map(r=>'<div class="rl"><span>'+esc(r[0])+'</span><b class="big">'+esc(r[1])+'</b></div>').join('')+'</div>';}
@@ -2059,12 +2097,12 @@ document.addEventListener('change',e=>{if(!ST||(e.target.id!=='st-from'&&e.targe
 function stmtModel(){const c=custById(ST.id);const S=ST.S||stmtBuild(ST.id,ST.from,ST.to);const sp=stmtSpec(S,ST.from);const n=sp.cols.length;const w=[];let rest=1;
  sp.cols.forEach((cl,i)=>{const x=i===0?.12:i===1?(n>6?.28:.34):null;w.push(x);if(x)rest-=x;});const free=w.filter(x=>x==null).length;
  const cols=sp.cols.map((cl,i)=>({h:cl.h,num:!!cl.num,w:w[i]==null?rest/free:w[i]}));
- return{title:'SAO KÊ CÔNG NỢ',date:today(),partyLabel:'Khách hàng',party:c.name+(c.phone?' – ĐT '+c.phone:''),period:'Từ ngày '+fmtDate(ST.from)+' đến ngày '+fmtDate(ST.to),file:'SaoKe_'+fold(c.name).replace(/\s+/g,'-')+'_'+ST.to,table:{cols,rows:sp.rows.map(l=>sp.cols.map(cl=>tx(cl.f(l))))},summary:stmtSummary(S)};}
+ return{title:'SAO KÊ CÔNG NỢ',date:today(),partyLabel:'Khách hàng',party:custLabel(c)+(c.phone?' – ĐT '+c.phone:''),period:'Từ ngày '+fmtDate(ST.from)+' đến ngày '+fmtDate(ST.to),file:'SaoKe_'+fold(c.name).replace(/\s+/g,'-')+'_'+ST.to,table:{cols,rows:sp.rows.map(l=>sp.cols.map(cl=>tx(cl.f(l))))},summary:stmtSummary(S)};}
 ACT.stmtOpen=b=>stmtShow(b.dataset.id);
 ACT.stmtShare=()=>{if(ST)shareModel(stmtModel());};
 ACT.stmtXls=()=>{if(!ST)return;const c=custById(ST.id);const S=ST.S||stmtBuild(ST.id,ST.from,ST.to);const sp=stmtSpec(S,ST.from);const sm=stmtSummary(S);exportXls('sao-ke-'+fold(c.name).replace(/\s+/g,'-'),{sections:[{title:'Sao kê công nợ '+c.name+' – từ '+fmtDate(ST.from)+' đến '+fmtDate(ST.to),rows:sp.rows,cols:sp.cols},{title:'Tổng kết',rows:sm,cols:[{h:'Chỉ tiêu',f:r=>r[0]},{h:'Giá trị',f:r=>r[1]}]}]});};
 ACT.stmtPrint=()=>{if(!ST)return;const c=custById(ST.id);const S=ST.S||stmtBuild(ST.id,ST.from,ST.to);const sp=stmtSpec(S,ST.from);const sm=stmtSummary(S);const id=ST.id,from=ST.from,to=ST.to;const m=stmtModel();closeDlg();LASTRC=m;
- printDoc('Sao kê '+c.name,printHead(DB.settings)+'<h2>SAO KÊ CÔNG NỢ</h2><div class="cd">Khách hàng: <b>'+esc(c.name)+'</b>'+(c.phone?' – ĐT '+esc(c.phone):'')+'<br>Từ ngày '+fmtDate(from)+' đến ngày '+fmtDate(to)+'</div>'+renderTable({rows:sp.rows,cols:sp.cols})+'<table class="kv">'+sm.map(r=>'<tr><td>'+esc(r[0])+'</td><td class="num"><b>'+esc(r[1])+'</b></td></tr>').join('')+'</table><p style="font-size:12px">Dư tiền dương = ta còn nợ khách; âm = khách còn nợ ta.</p>',()=>stmtShow(id,from,to));};
+ printDoc('Sao kê '+c.name,printHead(DB.settings)+'<h2>SAO KÊ CÔNG NỢ</h2><div class="cd">Khách hàng: <b>'+esc(custLabel(c))+'</b>'+(c.phone?' – ĐT '+esc(c.phone):'')+'<br>Từ ngày '+fmtDate(from)+' đến ngày '+fmtDate(to)+'</div>'+renderTable({rows:sp.rows,cols:sp.cols})+'<table class="kv">'+sm.map(r=>'<tr><td>'+esc(r[0])+'</td><td class="num"><b>'+esc(r[1])+'</b></td></tr>').join('')+'</table><p style="font-size:12px">Dư tiền dương = ta còn nợ khách; âm = khách còn nợ ta.</p>',()=>stmtShow(id,from,to));};
 /* ===== chuyển dữ liệu cũ: chỉ còn 2 loại cà ===== */
 function migrateTypes(){let ch=false;const T=DB.types;const nm=(id,name)=>{const t=T.find(x=>x.id===id);if(t&&t.name!==name){t.name=name;ch=true;}};
  nm(DB.settings.freshTypeId,'Cà tươi');nm(DB.settings.beanTypeId,'Nhân xô');
@@ -2199,6 +2237,192 @@ ACT.gateGo=async()=>{if(G.busy)return;const raw=trim(getV('gCode'));let url=trim
  if(tok&&role!=='owner'){ui.mode='easy';Store.setPref('mode','easy');Store.setPref('ownerDevice',false);PIN.until=0;Store.setPref('unlockUntil',0);}
  EZ.ev=Store.getUser()?'home':'welcome';EZ.w=null;EZ.sub=null;ui.edit={};closeDlg();chrome();render();window.scrollTo(0,0);
  const un=$('#userName');if(un)un.value=Store.getUser();toast('Đã kết nối'+(nm?': '+nm:'')+'.');Store.syncNow(true);};
+/* ################ V3: mã khách · số phiếu có năm · thông báo · tìm kiếm · dọn ký gửi · xóa dữ liệu thử ################ */
+const RECON={off:false,grace:10*60*1000};
+const NF={c:null};
+const exchById=id=>DB.exchanges.find(x=>x.id===id);
+const sysDelBtn=r=>isStaff()?'':'<button class="btn btn-s btn-d" data-act="delSys" data-id="'+r.id+'">Xóa (chủ)</button>';
+ACT.delSys=b=>needOwner(()=>{const d=findRec('deposits',b.dataset.id);if(!d)return;
+ if(!confirm('Xóa phiếu ký gửi tự sinh '+(d.code||'')+' ('+fkg(d.kg)+' của '+custName(d.customerId)+')?\nNếu phiếu gốc vẫn còn thì số liệu sẽ lệch. Không thể hoàn tác.'))return;
+ auditPush({coll:'deposits',recId:d.id,action:'delete',label:(d.code||'')+' (ký gửi tự sinh, chủ xóa)',changes:[],snapshot:snapshotOf(d)});
+ DB.deposits=DB.deposits.filter(x=>x.id!==d.id);if(save()){toast('Đã xóa phiếu ký gửi.');closeDlg();rerenderNow();}});
+/* --- nền để tính: nhân khách còn nợ kiểu cũ (mở đầu kỳ + phiếu đổi chưa có ký gửi liên kết − nhân đã trả) --- */
+function cvBasis(db){const m={},linked={};const add=(c,v)=>{if(c)m[c]=(m[c]||0)+v;};
+ (db.openings||[]).forEach(o=>{if(o.kind==='beanOwed')add(o.customerId,Number(o.kg)||0);});
+ (db.deposits||[]).forEach(d=>{if(d.source==='exchange'&&d.exchangeId)linked[d.exchangeId]=1;});
+ (db.exchanges||[]).forEach(x=>{if(!linked[x.id])add(x.customerId,Number(x.kgBean)||0);});
+ (db.beanPayments||[]).forEach(b=>add(b.customerId,-(Number(b.kg)||0)));
+ for(const k in m)m[k]=Math.max(0,r2(m[k]));return m;}
+/* tự dọn ký gửi mồ côi (chỉ máy chủ/chủ): ký gửi "từ phiếu đổi" mất phiếu gốc, ký gửi "chuyển từ nợ cũ" vượt số nợ gốc */
+function reconcileDeposits(){if(!DB||isStaff()||Store.busy)return 0;const bid=DB.settings.beanTypeId;let n=0;
+ const ex=new Set(DB.exchanges.map(x=>x.id)),now=Date.now();
+ for(const d of DB.deposits.slice()){if(d.source==='exchange'&&d.exchangeId&&!ex.has(d.exchangeId)){const t=Date.parse(d.updatedAt||d.createdAt||'');if(!t||now-t<RECON.grace)continue;
+  DB.deposits=DB.deposits.filter(x=>x!==d);n++;nfEvent(2,'orph:'+d.id,'Đã tự xóa phiếu ký gửi '+(d.code||'')+' ('+fkg(d.kg)+') của '+custName(d.customerId)+' vì phiếu đổi gốc đã bị xóa.',{t:'cust',id:d.customerId});}}
+ const cvs=DB.deposits.filter(d=>d.source==='convert'&&d.kind!=='out');
+ if(cvs.length){const B=cvBasis(DB);
+  for(const d of cvs){const kg=Number(d.kg)||0,target=Math.max(0,B[d.customerId]||0);if(kg<=target+0.004)continue;
+   const bal=Math.max(0,depTotal(DB,d.typeId||bid,null,d.customerId));const red=Math.min(kg-target,bal,kg);if(red<=0.004)continue;const nk=r2(kg-red);
+   if(nk<=0.004)DB.deposits=DB.deposits.filter(x=>x!==d);else{d.kg=nk;d.gross=nk;}
+   n++;nfEvent(2,'cv:'+d.id+':'+nk,(nk<=0.004?'Đã tự xóa ':'Đã tự giảm ')+'ký gửi "chuyển từ nợ cũ" của '+custName(d.customerId)+(nk<=0.004?' ('+fkg(kg)+')':' từ '+fkg(kg)+' xuống '+fkg(nk))+' vì phiếu đổi gốc đã bị xóa / đã trả nhân.',{t:'cust',id:d.customerId});}}
+ if(n)cache=null;return n;}
+/* mã khách: gán cho khách chưa có mã (theo thứ tự tạo) – chạy được nhiều lần */
+function ensureCodes(){if(!DB||isStaff())return 0;const miss=DB.customers.filter(c=>!c.code);
+ if(!miss.length){if(!DB.settings.custCodesDone){DB.settings.custCodesDone=true;return 1;}return 0;}
+ miss.sort((a,b)=>String(a.createdAt||'').localeCompare(String(b.createdAt||'')));miss.forEach(c=>{c.code=genCode(c.name,c.id);});DB.settings.custCodesDone=true;refreshCustList();return miss.length;}
+/* tạo khách mới: nếu đã có người trùng TÊN (từ cuối) thì hỏi, và bắt buộc nhập đủ họ tên */
+let CF=null;
+function custCreate(name,fields,done){name=trim(name);if(!name)return fail('Vui lòng nhập tên khách.');
+ const same=DB.customers.filter(c=>givenOf(c.name)===givenOf(name));
+ if(!same.length){const c=newCust(Object.assign({},fields,{name}));if(!save())return false;done(c,true);return;}
+ CF={name,fields,done};
+ openDlg('<h2>Đã có khách trùng tên "'+esc(givenOf(name))+'"</h2><p class="mut">Có phải là một trong những người này không?</p>'
+  +same.map(c=>'<button type="button" class="btn" data-act="cfPick" data-id="'+c.id+'" style="display:block;width:100%;text-align:left;margin:6px 0"><b>'+esc(custLabel(c))+'</b>'+(custSub(c)?'<br><small>'+esc(custSub(c))+'</small>':'')+'<br><small style="color:var(--ok)">✓ Chọn người này</small></button>').join('')
+  +'<hr><p class="mut">Nếu là người khác, hãy gõ ĐỦ HỌ TÊN để tạo mã riêng (ví dụ "Trần Văn Hoa").</p><label>Họ tên đầy đủ<input id="cf-name" value="'+esc(name)+'" autocomplete="off"></label><div class="btns"><button type="button" class="btn btn-p" data-act="cfNew">+ Đúng, tạo khách mới</button><button type="button" class="btn" data-act="closeDlg">Hủy</button></div>');}
+ACT.cfPick=b=>{const c=custById(b.dataset.id),f=CF;CF=null;if(!c||!f)return;closeDlg();f.done(c,false);};
+ACT.cfNew=()=>{const f=CF;if(!f)return;const n=trim(getV('cf-name'));if(codeWords(n).length<2)return fail('Hãy gõ đủ họ tên (ít nhất 2 từ) để tạo khách mới, ví dụ "Trần Văn Hoa".');
+ CF=null;const c=newCust(Object.assign({},f.fields,{name:n}));if(!save())return;closeDlg();f.done(c,true);};
+/* ===== 🔔 THÔNG BÁO ===== */
+const REJ_NAME={types:'loại cà',customers:'khách',purchases:'thu mua',exchanges:'đổi cà',beanPayments:'trả nhân',sales:'bán ra',adjustments:'điều chỉnh kho',cash:'sổ quỹ',stockIns:'nhập kho',stocktakes:'kiểm kê',openings:'số dư đầu kỳ',advances:'ứng tiền',deposits:'ký gửi',cashCounts:'chốt quỹ',settings:'cài đặt'};
+function nfEvent(sev,key,text,act){const L=Store.getPref('nfEv')||[];if(L.some(e=>e.key===key&&e.text===text))return;L.unshift({at:new Date().toISOString(),sev,key,text,act:act||null});Store.setPref('nfEv',L.slice(0,50));NF.c=null;}
+function logRej(rj){const L=Store.getPref('rejLog')||[];const at=new Date().toISOString(),by=Store.getUser()||'';rj.forEach(r=>L.unshift({at,by:r.by||by,coll:r.coll,id:r.id,label:r.label||'',reason:r.reason||''}));Store.setPref('rejLog',L.slice(0,50));NF.c=null;}
+function nfList(){if(NF.c)return NF.c;const L=[],owner=!isStaff(),now=new Date().toISOString();const add=(sev,key,text,act,at)=>L.push({sev,key,text,act:act||null,at:at||now});
+ try{if(Store.has()){const old=Store.outbox().filter(o=>{const t=Date.parse(o.deleted?o.at:(o.rec&&(o.rec.updatedAt||o.rec.createdAt)));return t&&Date.now()-t>864e5;});if(old.length)add(1,'ob','Có '+old.length+' thay đổi chưa gửi lên mạng quá 24 giờ. Hãy bật mạng rồi bấm "Xem / Sửa" để đồng bộ.',{t:'sync'});}
+  if(Store.getPref('revoked')||Store.err==='auth')add(1,'auth','Mã của máy này đã bị khóa hoặc sai, máy không đồng bộ được. Hãy báo cho chủ để được cấp mã mới.',{t:'cd'});
+  (Store.getPref('rejLog')||[]).slice(0,10).forEach(e=>add(1,'rej:'+e.at+':'+e.id,'Máy chủ không nhận thay đổi của '+(e.by||'một máy')+' ('+(e.label||REJ_NAME[e.coll]||e.coll)+'): '+(e.reason||'không rõ lý do')+'.',{t:'cd'},e.at));}catch(e){}
+ if(owner){
+  try{const ex=new Set(DB.exchanges.map(x=>x.id)),B=cvBasis(DB);
+   DB.deposits.forEach(d=>{if(d.source==='exchange'&&d.exchangeId&&!ex.has(d.exchangeId))add(0,'orphd:'+d.id,'Phiếu ký gửi '+(d.code||'')+' của '+custName(d.customerId)+' ('+fkg(d.kg)+') không còn phiếu đổi gốc. Máy chủ sẽ tự dọn, hoặc chủ xóa tay.',{t:'rec',coll:'deposits',id:d.id});
+    else if(d.source==='convert'&&d.kind!=='out'){const b=Math.max(0,B[d.customerId]||0);if((Number(d.kg)||0)>b+0.004)add(0,'cvover:'+d.id,'Ký gửi "chuyển từ nợ cũ" của '+custName(d.customerId)+' đang là '+fkg(d.kg)+' nhưng số nợ gốc chỉ còn '+fkg(b)+' (khách đã lấy bớt). Chủ kiểm tra và xóa tay nếu thừa.',{t:'rec',coll:'deposits',id:d.id});}});}catch(e){}
+  try{const PK={mua:'purchases',ban:'sales',tn:'beanPayments',ug:'advances',cq:'cashCounts'};
+   DB.cash.forEach(c=>{if(!c.phieuId)return;const k=PK[c.phieuKind];if(k&&!DB[k].some(r=>r.id===c.phieuId))add(0,'orphc:'+c.id,'Khoản '+(c.dir==='thu'?'thu ':'chi ')+money(c.amount)+' ngày '+fmtDate(c.date)+' ('+(c.note||c.cat)+') không còn phiếu gốc.',{t:'tab',tab:'quy'});});}catch(e){}
+  try{const ref=new Set();['purchases','exchanges','sales','beanPayments','cash','advances','deposits','openings'].forEach(k=>DB[k].forEach(r=>{if(r.customerId)ref.add(r.customerId);}));
+   DB.customers.forEach(c=>{if(ref.has(c.id))return;const s=cs(c.id);if(Math.round(s.debtBuy)||Math.round(s.debtSale)||Math.abs(s.advLeft)>0.5||Math.abs(s.depKg)>0.004)add(0,'nobal:'+c.id,'Khách '+custLabel(c)+' có số dư nhưng không có phiếu nào.',{t:'cust',id:c.id});});}catch(e){}
+  try{const cnt={};['purchases','exchanges','sales','beanPayments','stockIns','advances','deposits','cash'].forEach(k=>DB[k].forEach(r=>{if(r.code&&r.code!=='KG-CV'&&r.code!=='-')cnt[r.code]=(cnt[r.code]||0)+1;}));
+   for(const c in cnt)if(cnt[c]>1)add(0,'dupc:'+c,'Số phiếu '+c+' bị trùng ('+cnt[c]+' phiếu). Hãy mở và kiểm tra lại các phiếu này.',{t:'search',q:c});
+   const cc={};DB.customers.forEach(c=>{if(c.code){const u=String(c.code).toUpperCase();(cc[u]=cc[u]||[]).push(c);}});
+   for(const u in cc)if(cc[u].length>1)add(0,'dupk:'+u,'Mã khách '+u+' bị trùng ('+cc[u].map(c=>c.name).join(', ')+'). Chủ hãy sửa mã của một trong hai người.',{t:'cust',id:cc[u][0].id});}catch(e){}
+  try{const v=stockView();if(v.negKg>0)add(0,'neg','Kho nhân đang âm '+fkg(v.negKg)+'. Có phiếu bán / trả nhiều hơn số nhân đã nhập, hãy kiểm tra lại.',{t:'tab',tab:'ban',sub:'kho'});
+   if(v.wait>0.004)add(1,'wait','Cà đổi chưa chế biến: khách đang ký gửi nhiều hơn nhân thật trong kho '+fkg(v.wait)+'. Cần xát nhân rồi nhập kho.',{t:'tab',tab:'nk'});}catch(e){}
+  try{DB.cashCounts.forEach(c=>{if(c.diff&&!c.posted)add(1,'cq:'+c.id+':'+c.diff,'Chốt quỹ ngày '+fmtDate(c.date)+' lệch '+money(Math.abs(c.diff))+' (chưa ghi nhận vào sổ quỹ).',{t:'cqpost',id:c.id});});}catch(e){}
+  try{const t0=today(),d=new Date(t0+'T00:00:00');d.setDate(1);d.setMonth(d.getMonth()-1);const pm=d.getFullYear()+'-'+pad(d.getMonth()+1);
+   if(monthActivity(DB,pm)&&!DB.stocktakes.some(r=>(r.date||'').slice(0,7)===pm))add(2,'kk:'+pm,'Tháng '+pad(d.getMonth()+1)+'/'+d.getFullYear()+' đã qua mà chưa kiểm kê. Hãy kiểm kê để tính lãi tháng.',{t:'kk'});
+   const yy=t0.slice(0,4);if(t0>=yy+'-12-25'&&!DB.stocktakes.some(r=>(r.date||'')>=yy+'-12-25'))add(2,'dec'+yy,'Sắp hết năm: nhớ kiểm kê kho vào ngày 31/12/'+yy+'.',{t:'kk'});
+   const lb=DB.settings.lastBackup,hasData=DB.purchases.length+DB.exchanges.length+DB.cash.length>0;if(hasData&&(!lb||daysSince(lb)>7))add(2,'bk','Đã hơn 7 ngày chưa sao lưu dữ liệu ra file.',{t:'backup'});
+   if(!hasPin())add(2,'pin','Chưa đặt mã PIN của chủ: ai cũng xóa / sửa được sổ và xem được lãi.',{t:'pin'});
+   const cf=Store.cfg();if(cf.secret&&!cf.token)add(2,'sec','Máy này đang dùng mã chung (kiểu cũ). Nên cấp mã riêng cho từng người và tắt mã chung.',{t:'cd'});
+   (Store.getPref('nfEv')||[]).forEach(e=>add(e.sev,'ev:'+e.key,e.text,e.act,e.at));}catch(e){}}
+ L.sort((a,b)=>a.sev-b.sev||(a.at<b.at?1:a.at>b.at?-1:0));NF.c=L;return L;}
+const nfSeenMap=()=>Store.getPref('nfSeen')||{};
+const nfVis=()=>{const s=nfSeenMap();return nfList().filter(n=>s[n.key]!==n.text);};
+const nfCount=()=>{try{return nfVis().length;}catch(e){return 0;}};
+function bellUpdate(){const e=document.getElementById('bellN');if(!e)return;const n=nfCount();e.textContent=n>99?'99+':String(n);e.style.display=n?'':'none';}
+const NF_SEV=['🔴 Lỗi','🟠 Chú ý','🔵 Nhắc việc'];
+function nfBody(easy){const L=nfVis();
+ return(L.length?L.map(n=>'<div class="nfi s'+n.sev+'"><div class="nft"><b>'+NF_SEV[n.sev]+'</b><span>'+esc(fmtDT(n.at))+'</span></div><div>'+esc(n.text)+'</div><div class="nfb">'
+  +(n.act?(easy?EB('go','nfGo','Xem / Sửa','data-key="'+esc(n.key)+'"'):'<button class="btn btn-s btn-p" data-act="nfGo" data-key="'+esc(n.key)+'">Xem / Sửa</button>'):'')
+  +(easy?EB('ghost','nfSeen','Đã xem','data-key="'+esc(n.key)+'"'):'<button class="btn btn-s" data-act="nfSeen" data-key="'+esc(n.key)+'">Đã xem</button>')+'</div></div>').join('')
+  :'<p class="mut" style="text-align:center">Không có thông báo nào. 👍</p>')+(L.length>1?'<div class="btns" style="margin-top:8px">'+(easy?EB('alt','nfSeenAll','Đã xem tất cả'):'<button class="btn" data-act="nfSeenAll">Đã xem tất cả</button>')+'</div>':'');}
+function eTb(){return'<h2 class="eq">🔔 Thông báo</h2><p class="mut">🔴 lỗi – báo chủ ngay · 🟠 cần chú ý · 🔵 nhắc việc</p>'+nfBody(true);}
+function nfDlg(){openDlg('<div id="nfDlg"><h2>🔔 Thông báo</h2><p class="mut">🔴 lỗi – báo chủ ngay · 🟠 cần chú ý · 🔵 nhắc việc</p>'+nfBody(false)+'<div class="btns"><button class="btn" data-act="closeDlg">Đóng</button></div></div>');}
+function nfRefresh(){NF.c=null;bellUpdate();if(ui.mode==='easy'){if(EZ.ev==='tb'||EZ.ev==='home')eRender(false);}else if(document.getElementById('nfDlg'))nfDlg();}
+ACT.bell=()=>{NF.c=null;if(ui.mode==='easy'){EZ.ev='tb';EZ.sub=null;EZ.w=null;eRender(true);}else nfDlg();};
+ACT.nfSeen=b=>{const n=nfList().find(x=>x.key===b.dataset.key);if(n){const m=nfSeenMap();m[n.key]=n.text;Store.setPref('nfSeen',m);}nfRefresh();};
+ACT.nfSeenAll=()=>{const m=nfSeenMap();nfList().forEach(n=>{m[n.key]=n.text;});Store.setPref('nfSeen',m);nfRefresh();};
+ACT.nfGo=b=>{const n=nfList().find(x=>x.key===b.dataset.key);if(n&&n.act)nfNav(n.act);};
+function openHub(id){if(!custById(id))return fail('Không tìm thấy khách.');closeDlg();if(ui.mode==='easy'){EZ.sel=id;EZ.ev='nodetail';EZ.sub=null;EZ.w=null;eRender(true);}else ACT.detail({dataset:{id}});}
+function nfNav(a){closeDlg();const easy=ui.mode==='easy';
+ const full=(tab,sub)=>{if(easy)needOwner(()=>{ui.mode='full';Store.setPref('mode','full');ui.edit={};go(tab,sub);});else{ui.edit={};go(tab,sub);}};
+ switch(a.t){case'sync':Store.syncNow(true);break;case'cust':openHub(a.id);break;case'rec':recDialog(a.coll,a.id);break;case'search':gsRun(a.q);break;
+  case'cd':if(easy){EZ.ev='cd';EZ.sub=null;EZ.w=null;eRender(true);}else go('cd');break;
+  case'pin':ACT.pinSetup();break;case'backup':ACT.backup();break;
+  case'kk':if(easy)needOwner(()=>eNew('kk'));else go('kt');break;
+  case'cqpost':needOwner(()=>{if(confirm('Ghi nhận chênh lệch chốt quỹ này vào sổ quỹ?')){cqPostNow(a.id);nfRefresh();rerenderNow();}});break;
+  case'tab':full(a.tab,a.sub);break;}}
+/* ===== 🔍 TÌM KIẾM CHUNG ===== */
+const REC_K={purchases:'mua',exchanges:'doi',beanPayments:'tra',sales:'ban',stockIns:'nk',advances:'ug',deposits:'kg',cash:'quy'};
+const REC_T={purchases:'Mua cà',exchanges:'Đổi cà',beanPayments:'Trả nhân',sales:'Bán',stockIns:'Nhập kho',advances:'Ứng tiền',deposits:'Ký gửi',cash:'Thu/Chi'};
+function gsFind(q){q=trim(q);if(!q)return null;const qf=fold(q),qd=qf.replace(/[^a-z0-9]/g,'').toUpperCase(),dg=q.replace(/\D/g,''),toks=qf.split(/\s+/).filter(Boolean);const cust=[];
+ DB.customers.forEach(c=>{const code=codeNorm(c.code),nm=fold(c.name),ad=fold(c.address||''),ph=String(c.phone||'').replace(/\D/g,'');let sc=0;
+  if(qd&&code===qd)sc=100;else if(qd&&code.startsWith(qd))sc=80;else if(qd&&code.includes(qd))sc=60;
+  if(!sc&&dg.length>=3&&ph&&(ph.endsWith(dg)||(dg.length>=4&&ph.includes(dg))))sc=70;
+  if(!sc&&toks.length){const hay=nm+' '+ad+' '+fold(c.code||'');if(toks.every(t=>hay.includes(t)))sc=50;}
+  if(sc)cust.push({c,sc});});
+ cust.sort((a,b)=>b.sc-a.sc||a.c.name.localeCompare(b.c.name,'vi'));
+ const recs=[],isNum=/^\d{1,4}$/.test(q);
+ for(const coll in REC_K)DB[coll].forEach(r=>{const code=r.code;if(!code||code==='KG-CV'||code==='-')return;const cn=codeNorm(code);let ok=false;
+  if(isNum){const tr=(String(code).match(/(\d+)$/)||[])[1]||'';ok=!!tr&&parseInt(tr,10)===parseInt(q,10);}else if(qd.length>=3&&cn.includes(qd)&&(/[A-Z]/.test(qd)||qd.length>=5))ok=true;
+  if(ok)recs.push({coll,r});});
+ recs.sort((a,b)=>(a.r.date<b.r.date?1:a.r.date>b.r.date?-1:0)||((b.r.ts||0)-(a.r.ts||0)));
+ return{cust:cust.slice(0,10),recs:recs.slice(0,10)};}
+function gsBal(c){const s=cs(c.id),p=[];if(Math.round(s.debtBuy)>0)p.push('đại lý nợ tiền '+money(s.debtBuy));if(Math.round(s.debtSale)>0)p.push('khách nợ '+money(s.debtSale));if(s.depKg>0.004)p.push('ký gửi '+fkg(s.depKg));if(s.advLeft>0.5)p.push('nợ ứng '+money(s.advLeft));return p.join(' · ');}
+function gsRecLine(coll,r){const p=[fmtDate(r.date),REC_T[coll]];if(r.customerId)p.push(custName(r.customerId));
+ if(coll==='exchanges')p.push(fkg(r.kgFresh)+' → '+fkg(r.kgBean));else{if(r.kg!=null&&coll!=='cash')p.push(fkg(r.kg));if(r.amount)p.push(money(r.amount));}return p.join(' · ');}
+function gsHTML(q){const R=gsFind(q);if(!R)return'';if(!R.cust.length&&!R.recs.length)return'<p class="mut gsn" style="padding:8px">Không tìm thấy.</p>';
+ return(R.cust.length?'<div class="gsh">Khách hàng</div>'+R.cust.map(o=>{const c=o.c,b=gsBal(c);return'<button type="button" class="gsr" data-act="gsCust" data-id="'+c.id+'"><b>'+esc(custLabel(c))+'</b>'+(custSub(c)?'<small>'+esc(custSub(c))+'</small>':'')+(b?'<small>'+esc(b)+'</small>':'')+'</button>';}).join(''):'')
+  +(R.recs.length?'<div class="gsh">Phiếu</div>'+R.recs.map(o=>'<button type="button" class="gsr" data-act="gsRec" data-coll="'+o.coll+'" data-id="'+o.r.id+'"><b>'+esc(o.r.code)+'</b><small>'+esc(gsRecLine(o.coll,o.r))+'</small></button>').join(''):'');}
+let gsT=null;
+function gsShow(t){const q=t.value;if(t.id==='eGs'){const r=document.getElementById('eGsRes'),ti=document.querySelector('.tiles');if(r)r.innerHTML=q.trim()?gsHTML(q):'';if(ti)ti.style.display=q.trim()?'none':'';return;}
+ const p=document.getElementById('gsPanel');if(!p)return;if(!q.trim()){p.style.display='none';p.innerHTML='';return;}p.innerHTML=gsHTML(q);p.style.display='block';const f=p.querySelector('.gsr');if(f)f.classList.add('on');}
+function gsHide(){const p=document.getElementById('gsPanel');if(p){p.style.display='none';p.innerHTML='';}const g=document.getElementById('gSearch');if(g)g.value='';}
+function gsRun(q){if(ui.mode==='easy'){EZ.ev='home';EZ.sub=null;EZ.w=null;eRender(true);const e=document.getElementById('eGs');if(e){e.value=q;gsShow(e);}}else{const g=document.getElementById('gSearch');if(g){g.value=q;g.focus();gsShow(g);}}}
+document.addEventListener('input',e=>{const t=e.target;if(t&&(t.id==='gSearch'||t.id==='eGs')){clearTimeout(gsT);gsT=setTimeout(()=>gsShow(t),120);}});
+document.addEventListener('click',e=>{if(!e.target.closest('#gsPanel,#gSearch')){const p=document.getElementById('gsPanel');if(p&&p.style.display!=='none')p.style.display='none';}});
+document.addEventListener('focusin',e=>{if(e.target&&e.target.id==='gSearch'&&e.target.value.trim())gsShow(e.target);});
+document.addEventListener('keydown',e=>{
+ if((e.ctrlKey||e.metaKey)&&!e.altKey&&String(e.key).toLowerCase()==='k'){const t=document.getElementById(ui.mode==='easy'?'eGs':'gSearch');if(t){e.preventDefault();t.focus();if(t.select)t.select();}return;}
+ if(e.target&&e.target.id==='gSearch'){const p=document.getElementById('gsPanel');const it=p?Array.from(p.querySelectorAll('.gsr')):[];let i=it.findIndex(x=>x.classList.contains('on'));
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){if(!it.length)return;e.preventDefault();it.forEach(x=>x.classList.remove('on'));i=e.key==='ArrowDown'?Math.min(it.length-1,i+1):Math.max(0,i-1);it[i].classList.add('on');it[i].scrollIntoView({block:'nearest'});}
+  else if(e.key==='Enter'){if(it.length){e.preventDefault();(it[i>=0?i:0]).click();}}
+  else if(e.key==='Escape'){if(p)p.style.display='none';e.target.blur();}}});
+ACT.gsCust=b=>{gsHide();openHub(b.dataset.id);};
+ACT.gsRec=b=>{gsHide();recDialog(b.dataset.coll,b.dataset.id);};
+ACT.hubGo=b=>{const c=custById(b.dataset.id);if(!c)return;closeDlg();ui.edit={};const k=b.dataset.k;go(k);const id=k==='mua'?'mua-cust':k==='doi'?'doi-cust':'kgi-cust';setV(id,custName(c.id));const t=document.getElementById(id);if(t)t.dispatchEvent(new Event('input',{bubbles:true}));};
+/* --- xem / in / Zalo / sửa / xóa một phiếu --- */
+function printRec(k,id){if(k==='ug')printUG(id);else if(k==='kg')printKG(id);else if(k==='mua'||k==='ban')printTrade(k,id);else if(k==='doi')printEx(id);else if(k==='tra')printTra(id);else if(k==='nk')printNK(id);else if(k==='quy')printDebt(id);}
+function recDialog(coll,id){const r=findRec(coll,id);if(!r)return fail('Không tìm thấy phiếu (có thể đã bị xóa).');const k=REC_K[coll];
+ const ln=[['Số phiếu',r.code||'—'],['Ngày',fmtDate(r.date)]];if(r.customerId)ln.push(['Khách',custName(r.customerId)]);if(r.typeId)ln.push(['Loại cà',typeName(r.typeId)]);
+ if(coll==='exchanges')ln.push(['Cà tươi → nhân',fkg(r.kgFresh)+' → '+fkg(r.kgBean)]);else if(r.kg!=null&&coll!=='cash')ln.push(['Khối lượng',fkg(r.kg)]);
+ if(r.amount)ln.push(['Số tiền',money(r.amount)]);if((coll==='purchases'||coll==='sales')&&r.paid!=null)ln.push([coll==='sales'?'Đã thu':'Đã trả',money(r.paid)]);if(r.note)ln.push(['Ghi chú',r.note]);
+ const sys=coll==='deposits'&&(r.source==='exchange'||r.source==='convert'),linked=coll==='cash'&&r.phieuId,easy=ui.mode==='easy';
+ const canPrint=!sys&&!linked&&(k!=='quy'||r.code),editable=!sys&&!linked,easyEd=['mua','doi','tra','quy','nk'].includes(k),canEdit=editable&&(!easy||easyEd||!isStaff());
+ openDlg('<h2>'+REC_T[coll]+' – '+esc(r.code||'')+'</h2><div class="card" style="margin:0 0 10px">'+ln.map(x=>'<div style="display:flex;justify-content:space-between;gap:10px;padding:2px 0"><span class="mut">'+esc(x[0])+'</span><b style="text-align:right">'+esc(x[1])+'</b></div>').join('')+'</div>'
+  +(sys?'<p class="mut">Phiếu ký gửi này do hệ thống tự sinh'+(r.source==='exchange'?' từ phiếu đổi.':' khi chuyển nhân nợ cũ.')+'</p>':'')
+  +'<div class="btns">'+(canPrint?'<button class="btn btn-p" data-act="recPrint" data-k="'+k+'" data-id="'+id+'">🖨 In phiếu</button><button class="btn" data-act="recShare" data-k="'+k+'" data-id="'+id+'">📤 Gửi Zalo</button>':'')
+  +(canEdit?'<button class="btn" data-act="recEdit" data-k="'+k+'" data-id="'+id+'">✎ Sửa</button>':'')+(editable?'<button class="btn btn-d" data-act="recDel" data-k="'+k+'" data-id="'+id+'">🗑 Xóa</button>':'')+(sys?sysDelBtn(r):'')+'<button class="btn" data-act="closeDlg">Đóng</button></div>');}
+ACT.recPrint=b=>{closeDlg();printRec(b.dataset.k,b.dataset.id);};
+ACT.recShare=b=>{DRY=true;DRYOUT=null;try{printRec(b.dataset.k,b.dataset.id);}catch(e){}finally{DRY=false;}const m=DRYOUT;DRYOUT=null;if(m){closeDlg();shareModel(m);}else toast('Không tạo được ảnh phiếu.',true);};
+ACT.recEdit=b=>{closeDlg();const k=b.dataset.k,id=b.dataset.id,easy=ui.mode==='easy';if(easy){if(['mua','doi','tra','quy','nk'].includes(k))ACT.eEdit({dataset:{k,id}});else needOwner(()=>ACT.eEditFull({dataset:{k,id}}));}else ACT.edit({dataset:{k,id}});};
+ACT.recDel=b=>{closeDlg();ACT.del({dataset:{k:b.dataset.k,id:b.dataset.id}});};
+/* ===== 🧹 XÓA DỮ LIỆU THỬ (chủ) ===== */
+const localDate=iso=>{const d=new Date(iso);return isNaN(d)?'':d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());};
+function wipeSel(from,to){const inR=r=>{if(r.date&&r.date>=from&&r.date<=to)return true;const c=r.createdAt?localDate(r.createdAt):'';return!!c&&c>=from&&c<=to;};
+ const S={purchases:DB.purchases.filter(inR),exchanges:DB.exchanges.filter(inR),beanPayments:DB.beanPayments.filter(r=>!r.exchangeId&&inR(r)),deposits:DB.deposits.filter(r=>r.source!=='exchange'&&r.source!=='convert'&&inR(r)),sales:DB.sales.filter(inR),stockIns:DB.stockIns.filter(inR),advances:DB.advances.filter(inR),cash:DB.cash.filter(r=>!r.phieuId&&inR(r)),cashCounts:DB.cashCounts.filter(inR),stocktakes:DB.stocktakes.filter(inR),openings:DB.openings.filter(inR)};
+ const gone=new Set();Object.values(S).forEach(a=>a.forEach(r=>gone.add(r.id)));const exIds=new Set(S.exchanges.map(r=>r.id));
+ DB.beanPayments.forEach(b=>{if(b.exchangeId&&exIds.has(b.exchangeId))gone.add(b.id);});DB.deposits.forEach(d=>{if(d.source==='exchange'&&exIds.has(d.exchangeId))gone.add(d.id);});
+ DB.cash.forEach(c=>{if(c.phieuId&&gone.has(c.phieuId))gone.add(c.id);});
+ const ref=new Set();['purchases','exchanges','sales','beanPayments','cash','advances','deposits','openings'].forEach(k=>DB[k].forEach(r=>{if(r.customerId&&!gone.has(r.id))ref.add(r.customerId);}));
+ const cust=DB.customers.filter(c=>{const d=c.createdAt?localDate(c.createdAt):'';return d&&d>=from&&d<=to&&!ref.has(c.id);});cust.forEach(c=>gone.add(c.id));
+ const n=k=>DB[k].filter(r=>gone.has(r.id)).length;
+ const rows=[['Mua cà',n('purchases')],['Đổi cà / trả nhân',n('exchanges')+n('beanPayments')],['Ký gửi',n('deposits')],['Bán ra',n('sales')],['Nhập kho',n('stockIns')],['Ứng tiền',n('advances')],['Thu / Chi (kể cả ghi kèm phiếu)',n('cash')],['Chốt quỹ',n('cashCounts')],['Kiểm kê',n('stocktakes')],['Số dư đầu kỳ',n('openings')],['Khách mới tạo (không còn phiếu)',cust.length]];
+ return{gone,rows,total:rows.reduce((s,r)=>s+r[1],0)};}
+function wipeRange(){if(getV('wp-mode')==='range')return{from:getV('wp-from')||'0000-01-01',to:getV('wp-to')||'9999-12-31'};const t=today();return{from:t,to:t};}
+function wipePrev(){const rg=document.getElementById('wp-prev');if(!rg)return;const range=getV('wp-mode')==='range';document.getElementById('wp-dates').style.display=range?'':'none';
+ const w=wipeRange(),R=wipeSel(w.from,w.to);rg.innerHTML='<table class="tbl" style="width:100%"><tbody>'+R.rows.map(r=>'<tr><td>'+esc(r[0])+'</td><td style="text-align:right"><b>'+r[1]+'</b></td></tr>').join('')+'</tbody></table><p><b>Tổng: '+R.total+' mục sẽ bị xóa.</b></p>';
+ document.getElementById('wp-go').disabled=!(R.total>0&&trim(getV('wp-ok')).toUpperCase()==='XOA');}
+function wipeDlg(){const t=today();openDlg('<h2>🧹 Xóa dữ liệu thử</h2><p class="mut">Xóa các phiếu nhập thử để sổ sạch. Việc xóa được đồng bộ sang các máy khác và ghi vào Lịch sử sửa/xóa. Cài đặt, PIN, người dùng, kết nối không bị đụng tới.</p>'
+ +'<div class="grid"><label>Phạm vi<select id="wp-mode"><option value="today">Hôm nay ('+fmtDate(t)+')</option><option value="range">Từ ngày – đến ngày</option></select></label></div><div class="grid" id="wp-dates" style="display:none"><label>Từ ngày<input type="date" id="wp-from" value="'+t+'"></label><label>Đến ngày<input type="date" id="wp-to" value="'+t+'"></label></div>'
+ +'<p class="mut" style="margin-bottom:2px">Tính theo ngày của phiếu (hoặc ngày tạo phiếu nằm trong khoảng). Sẽ xóa:</p><div id="wp-prev"></div>'
+ +'<label style="display:flex;gap:8px;align-items:center;margin:8px 0"><input type="checkbox" id="wp-seq" style="width:auto"> Đặt lại số phiếu về 0001 cho các loại không còn phiếu nào trong năm</label>'
+ +'<label>Gõ <b>XOA</b> để xác nhận<input id="wp-ok" autocomplete="off" placeholder="XOA"></label><div class="btns"><button class="btn btn-d" id="wp-go" data-act="wipeGo" disabled>🧹 Xóa</button><button class="btn" data-act="closeDlg">Hủy</button></div>');wipePrev();}
+ACT.wipeOpen=()=>needOwner(wipeDlg);
+document.addEventListener('input',e=>{if(e.target&&e.target.id&&e.target.id.indexOf('wp-')===0)wipePrev();});document.addEventListener('change',e=>{if(e.target&&e.target.id&&e.target.id.indexOf('wp-')===0)wipePrev();});
+ACT.wipeGo=()=>needOwner(()=>{const rg=wipeRange(),R=wipeSel(rg.from,rg.to);if(!(R.total>0)||trim(getV('wp-ok')).toUpperCase()!=='XOA')return;const rs=document.getElementById('wp-seq').checked;
+ const sum=R.rows.filter(r=>r[1]).map(r=>r[0]+' '+r[1]).join(', ');
+ for(const k of ['purchases','exchanges','beanPayments','deposits','sales','stockIns','advances','cash','cashCounts','stocktakes','openings','customers'])DB[k]=DB[k].filter(r=>!R.gone.has(r.id));
+ if(rs){const seq=DB.settings.seq,codes=[];['purchases','exchanges','beanPayments','sales','stockIns','advances','deposits','cash'].forEach(k=>DB[k].forEach(r=>{if(r.code)codes.push(String(r.code));}));
+  Object.keys(seq).forEach(key=>{if(/^[A-Z]{2}\d\d$/.test(key)&&seq[key]>0&&!codes.some(c=>c.indexOf(key+'-')===0))seq[key]=0;});}
+ auditPush({coll:'settings',recId:'wipe',action:'delete',label:'Xóa dữ liệu thử '+(rg.from===rg.to?fmtDate(rg.from):fmtDate(rg.from)+' – '+fmtDate(rg.to))+': '+sum,changes:[]});
+ if(!save())return;closeDlg();refreshCustList();toast('Đã xóa dữ liệu thử ('+R.total+' mục).');rerenderNow();});
 /* ===== chuyển MỘT LẦN: nhân còn nợ khách đổi (kiểu cũ) → ký gửi. Chỉ chạy trên máy chủ/owner; id cố định cv-<khách> nên 2 máy không nhân đôi ===== */
 function migrateOwedToDeposit(){if(!DB||DB.settings.owedToDepositDone||isStaff())return 0;
  const LO=legacyOwedMap(DB),bid=DB.settings.beanTypeId;let n=0;
@@ -2209,6 +2433,7 @@ function migrateOwedToDeposit(){if(!DB||DB.settings.owedToDepositDone||isStaff()
 load();
 if(normalizeDB.migrated){normalizeDB.migrated=false;save();}
 migrateTypes();
+try{if(!isStaff()){const a=ensureCodes(),b=reconcileDeposits();if(a||b)save();}}catch(e){}
 {const n=migrateOwedToDeposit();if(n>0)setTimeout(()=>toast('Đã chuyển nhân còn nợ của '+n+' khách sang Ký gửi.'),700);}
 $('#userName').value=Store.getUser();
 $('#userName').addEventListener('input',e=>{if(!Store.srvName())Store.setUser(trim(e.target.value));});

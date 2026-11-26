@@ -22,7 +22,7 @@ var DEF = {
     ['Bì mặc định (kg/bao)', function (r) { return r.defaultTare; }], ['Tỷ lệ đổi mặc định', function (r) { return r.defaultRatio; }], ['Quỹ đầu kỳ (đ)', function (r) { return r.openingCash; }]] },
   types: { tab: 'Loại cà phê', cols: [['Tên loại', function (r) { return r.name; }], ['Ghi chú', function (r) { return r.note; }]] },
   customers: { tab: 'Khách hàng', cols: [
-    ['Tên', function (r) { return r.name; }], ['Số điện thoại', function (r) { return r.phone; }], ['Địa chỉ', function (r) { return r.address; }],
+    ['Tên', function (r) { return (r.code ? r.code + ' – ' : '') + (r.name || ''); }], ['Số điện thoại', function (r) { return r.phone; }], ['Địa chỉ', function (r) { return r.address; }],
     ['Nhóm', function (r) { return r.group; }], ['Ghi chú', function (r) { return r.note; }]] },
   purchases: { tab: 'Thu mua', cols: [
     ['Số phiếu', function (r) { return r.code; }], ['Ngày', function (r) { return d_(r.date); }, true], ['Người bán', function (r, n) { return n.cust(r.customerId); }],
