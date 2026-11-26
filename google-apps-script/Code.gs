@@ -295,10 +295,13 @@ function doPost(e) {
       if (!it.deleted && (!it.rec || !it.rec.id)) return;
       if (it.deleted && !it.id) return;
       var pid = it.deleted ? it.id : it.rec.id;
-      if (DEF[it.coll]) (byColl[it.coll] = byColl[it.coll] || []).push(it);
+      if (typeof it.coll === 'string' && Object.prototype.hasOwnProperty.call(DEF, it.coll)) (byColl[it.coll] = byColl[it.coll] || []).push(it);
       else if (staff && it.coll === 'users') {
         ctx.rejected.push({ coll: 'users', id: pid, reason: 'Nhân viên không được sửa danh sách người dùng', label: '' });
         ctx.extra.push({ coll: 'users', id: pid, deleted: true, at: serverTime });
+      } else if (it.coll !== 'users') {
+        // tên bảng lạ: bỏ qua mục này (báo lỗi riêng), không làm hỏng cả yêu cầu
+        ctx.failed.push({ coll: String(it.coll).substr(0, 40), id: String(pid), error: 'Loại dữ liệu không hợp lệ, đã bỏ qua' });
       }
     });
     try {
@@ -349,6 +352,16 @@ function doPost(e) {
       if (seen[k]) { changes = changes.filter(function (x) { return x.coll + ':' + x.id !== k; }); }
       changes.push(c);
     });
+    // Nhân viên KHÔNG được nhận mã băm PIN của chủ (settings.ownerPin): bỏ khỏi mọi bản cài đặt gửi về máy nhân viên
+    if (staff) {
+      changes = changes.map(function (c) {
+        if (c && c.coll === 'settings' && c.rec && typeof c.rec === 'object' && c.rec.ownerPin !== undefined) {
+          var cp = {}; for (var k in c.rec) { if (k !== 'ownerPin') cp[k] = c.rec[k]; }
+          var o = {}; for (var k2 in c) o[k2] = c[k2]; o.rec = cp; return o;
+        }
+        return c;
+      });
+    }
     // stale = mục bị bỏ qua vì bản trên máy chủ mới hơn (máy khách lệch giờ / sửa chồng); failed = mục lỗi riêng lẻ, không chặn các mục khác. Cả hai là trường TÙY CHỌN (máy cũ bỏ qua được).
     return json_({ ok: true, serverTime: serverTime, changes: changes, rejected: ctx.rejected, stale: ctx.stale, failed: ctx.failed, user: { name: user.name, role: user.role }, ms: Date.now() - t0 });
   } catch (err) {
@@ -374,6 +387,11 @@ function staffCheck_(coll, it, st, ctx, serverTime) {
   var no = function (why) { return { ok: false, reason: why, label: label }; };
   if (it.deleted) return no('Nhân viên không được xóa – báo chủ');
   if (!STAFF_CREATE[coll]) return no('Nhân viên không được ghi vào mục này');
+  if (rec && typeof rec === 'object') {
+    var bn = badNumber_(rec);
+    if (bn) return no('Số liệu không hợp lệ (số âm hoặc không phải số), không lưu');
+    if (LOCK_COLLS[coll] && typeof rec.date === 'string' && rec.date <= lockDate_(ctx)) return no('Tháng này đã chốt sổ, báo chủ để sửa');
+  }
   if (!st.exists) { // tạo mới: máy chủ tự ghi tên người nhập
     rec.createdBy = name;
     if (coll === 'auditLog') rec.by = name;
@@ -396,6 +414,39 @@ function staffCheck_(coll, it, st, ctx, serverTime) {
   if (cur.createdBy !== name) return no('Nhân viên chỉ được sửa phiếu do chính mình nhập');
   rec.createdBy = cur.createdBy; rec.updatedBy = name;
   return { ok: true, rec: rec };
+}
+
+// Số liệu của nhân viên phải hợp lệ: kg / giá / tiền không âm, không phải chữ
+var NUM_FIELDS = ['kg', 'price', 'amount', 'paid'];
+function badNumber_(rec) {
+  for (var i = 0; i < NUM_FIELDS.length; i++) {
+    var v = rec[NUM_FIELDS[i]];
+    if (v === undefined || v === null || v === '') continue;
+    if (typeof v !== 'number' && typeof v !== 'string') return NUM_FIELDS[i];
+    var n = Number(v);
+    if (!isFinite(n) || n < 0) return NUM_FIELDS[i];
+  }
+  return '';
+}
+// Ngày chốt sổ = ngày kiểm kê MỚI NHẤT có nhập nhân đếm thực tế (bỏ qua kiểm kê ngày tương lai). Chỉ đọc 1 lần mỗi yêu cầu.
+var LOCK_COLLS = { purchases: 1, exchanges: 1, beanPayments: 1, sales: 1, stockIns: 1, advances: 1, deposits: 1, cash: 1, cashCounts: 1 };
+function lockDate_(ctx) {
+  if (ctx.lockD !== undefined) return ctx.lockD;
+  var d = '';
+  var sh = sheetFor_('stocktakes'), last = sh.getLastRow();
+  if (last >= 2) {
+    var n = PREFIX.length + DEF.stocktakes.cols.length + 2;
+    sh.getRange(2, 1, last - 1, n).getValues().forEach(function (r) {
+      if (!r[0] || r[2] === 'ĐÃ XÓA') return;
+      var rec = null;
+      try { rec = JSON.parse(r[n - 1]); } catch (x) { return; }
+      if (!rec || rec.beanCountKg === null || rec.beanCountKg === undefined || rec.beanCountKg === '' || !isFinite(Number(rec.beanCountKg))) return;
+      var dt = String(rec.date || '');
+      if (/^\d{4}-\d\d-\d\d$/.test(dt) && dt <= ctx.today && dt > d) d = dt;
+    });
+  }
+  ctx.lockD = d;
+  return d;
 }
 
 function upsert_(coll, items, serverTime, N, ctx) {
@@ -428,6 +479,9 @@ function upsert_(coll, items, serverTime, N, ctx) {
     var id = it.deleted ? it.id : it.rec.id;
     var ts = it.deleted ? (it.at || '') : (it.rec.updatedAt || '');
     var cur = null, extraPush = false;
+    // giờ do máy khách gửi lên không được ở tương lai quá 10 phút (tránh khóa bản sửa của chủ): quá hạn thì dùng giờ máy chủ
+    var futLimit = Date.parse(serverTime) + 600000;
+    if (ts && Date.parse(ts) > futLimit) { ts = serverTime; if (it.deleted) it.at = serverTime; else it.rec.updatedAt = serverTime; }
     if (ctx.staff && coll === 'settings') { // nhân viên chỉ được góp bộ đếm số phiếu (seq): lấy số lớn hơn
       if (it.deleted) { reject(id, 'Nhân viên không được xóa – báo chủ', '', curOf(id)); return; }
       if (!rowOf[id] || delOf[id]) return;
@@ -435,6 +489,7 @@ function upsert_(coll, items, serverTime, N, ctx) {
       if (!cs) return;
       var seq = (cs.seq && typeof cs.seq === 'object') ? cs.seq : {}, inc = it.rec.seq, chg = false;
       if (inc && typeof inc === 'object') {
+        for (var k0 in inc) { var v1 = Number(inc[k0]); if (isFinite(v1) && v1 - (Number(seq[k0]) || 0) > 1000) { reject(id, 'Bộ đếm số phiếu tăng bất thường, không lưu', '', cs); return; } }
         for (var k in inc) { var v = Number(inc[k]); if (isFinite(v) && !(Number(seq[k]) >= v)) { seq[k] = v; chg = true; } }
       }
       if (chg) { cs.seq = seq; cs.updatedAt = serverTime; cs.updatedBy = ctx.user.name; put(id, buildRow_(def, id, serverTime, cs, serverTime, N), serverTime); }
