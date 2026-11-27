@@ -947,7 +947,7 @@ AFTER.doi=()=>{if(ui.sub.doi==='tra')return;const id=ui.edit.doi;const r=id&&fin
  if(r){setV('doi-date',r.date);setV('doi-cust',custName(r.customerId));setV('doi-own',r.ratioOwn||'');setV('doi-note',r.note);fillW('doi',{tare:r.tare,tareTotal:r.tareTotal,gross:r.gross,bags:r.bags,kg:r.kgFresh});$('#doi-title').textContent='Sửa phiếu đổi '+r.code;$('#doi-cancel').style.display='';}
  else{setV('doi-date',dfltDate());setV('doi-cust','');setV('doi-own','');setV('doi-note','');resetW('doi');$('#doi-title').textContent='Phiếu đổi cà mới';}LIVE['f-doi']();};
 function saveEx(print){const date=getV('doi-date');if(!date)return fail('Vui lòng chọn ngày.');const name=trim(getV('doi-cust'));if(!name)return fail('Vui lòng nhập hoặc chọn khách hàng.');
- const w=readW('doi');if(!checkW(w,'KL cà tươi'))return false;
+ const w=readW('doi');if(!checkW(w,'KL cà tươi'))return false;if(!unusualOk(w.net,0,0))return false;
  const ownS=getV('doi-own').trim();if(ownS!==''&&!(pNum(ownS)>0))return fail('Tỷ lệ riêng phải là số lớn hơn 0 (hoặc để trống).');
  if(ownS!==''&&!(pNum(ownS)>=1&&pNum(ownS)<=20))return fail('Tỷ lệ đổi phải từ 1 đến 20 (kg tươi cho 1 kg nhân). Ví dụ 4,6. Hãy kiểm tra lại dấu phẩy.');
  const ri=exRatioInfo();if(!(ri.ratio>0))return fail('Chưa có tỷ lệ đổi mặc định hợp lệ, vào Cài đặt để nhập.');
@@ -1658,7 +1658,7 @@ const WRITE={
   Object.assign(r,{date:d.date,customerId:d.custId,typeId:d.typeId,bags:d.total!=null?[]:d.bags.slice(),kg:c.net,tareTotal:r2(d.tareTotal||0),gross:eGross(d),price:d.price,amount:c.amount,paid:c.paid,advanceDeduct:c.adv,note:d.note||''});
   if(r.depositSettle===undefined)r.depositSettle=false;
   if(r.tare===undefined)r.tare=0;syncTrade('mua',r);return save()?r:null;},
- doi(w){const d=w.d,net=eNet(d);if(!d.custId||!(net>0)||!(d.ratio>0))throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');if(!(d.ratio>=1&&d.ratio<=20))throw new Error('Tỷ lệ đổi phải từ 1 đến 20 (kg tươi cho 1 kg nhân).');const bean=calcBean(net,d.ratio);
+ doi(w){const d=w.d,net=eNet(d);if(!d.custId||!(net>0)||!(d.ratio>0))throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');if(!(d.ratio>=1&&d.ratio<=20))throw new Error('Tỷ lệ đổi phải từ 1 đến 20 (kg tươi cho 1 kg nhân).');if(!unusualOk(net,0,0))return null;const bean=calcBean(net,d.ratio);
   let r=w.eid&&findRec('exchanges',w.eid);if(r&&!exGuard(r,bean,d.custId))throw new Error('Không sửa được: nhân ký gửi của phiếu này đã được dùng.');const isNew=!r;if(!r){r={id:uid(),code:nextCode('PD',d.date),ts:nextTs(),paidNow:0};DB.exchanges.push(r);}
   Object.assign(r,{date:d.date,customerId:d.custId,bags:d.total!=null?[]:d.bags.slice(),tareTotal:r2(d.tareTotal||0),gross:eGross(d),kgFresh:net,ratioOwn:d.ratioOwn||null,ratio:d.ratio,kgBean:bean,note:d.note||''});
   if(r.tare===undefined)r.tare=0;syncExchange(r,isNew);return save()?r:null;},
@@ -2025,7 +2025,7 @@ AFTER.nk=()=>{const id=ui.edit.nk;const r=id&&findRec('stockIns',id);
  if(r){setV('nk-date',r.date);setV('nk-method',r.method);setV('nk-note',r.note||'');fillW('nk',r);$('#nk-title').textContent='Sửa phiếu nhập kho '+r.code;$('#nk-cancel').style.display='';}
  else{setV('nk-date',today());setV('nk-method','phoi');setV('nk-note','');resetW('nk');$('#nk-title').textContent='Phiếu nhập kho mới';}LIVE['f-nk']();};
 function saveNK(print){const date=getV('nk-date');if(!date)return fail('Vui lòng chọn ngày.');const method=getV('nk-method');if(!METHODS.some(m=>m[0]===method))return fail('Vui lòng chọn cách làm.');
- const w=readW('nk');if(!checkW(w,'KL nhân xô'))return false;
+ const w=readW('nk');if(!checkW(w,'KL nhân xô'))return false;if(!unusualOk(w.net,0,0))return false;
  const eid=ui.edit.nk;let r=eid&&findRec('stockIns',eid);if(!r){r={id:uid(),code:nextCode('NK',date),ts:nextTs()};DB.stockIns.push(r);}
  Object.assign(r,{date,method,bags:w.bags,gross:w.gross,tareTotal:w.tareTotal,kg:w.net,note:trim(getV('nk-note'))});
  if(!save())return false;ui.edit={};toast('Đã lưu '+r.code+'.');render();if(print)printNK(r.id);return true;}
@@ -2390,7 +2390,7 @@ AFTER.ug=()=>{const id=ui.edit.ug;const r=id&&findRec('advances',id);
  if(r){setV('ug-date',r.date);setV('ug-cust',custName(r.customerId));setV('ug-kind',r.kind);setV('ug-item',r.item||'');setV('ug-amt',mfmt(r.amount));setV('ug-note',r.note||'');$('#ug-title').textContent='Sửa phiếu ứng '+r.code;$('#ug-cancel').style.display='';}
  else{setV('ug-date',dfltDate());setV('ug-cust','');setV('ug-kind','cash');setV('ug-item','');setV('ug-amt','');setV('ug-note','');$('#ug-title').textContent='Phiếu ứng tiền mới';}LIVE['f-ug']();};
 function saveUG(print){const date=getV('ug-date');if(!date)return fail('Vui lòng chọn ngày.');const name=trim(getV('ug-cust'));if(!name)return fail('Vui lòng chọn nông dân.');const kind=getV('ug-kind');const item=trim(getV('ug-item'));if(kind==='goods'&&!item)return fail('Vui lòng ghi hàng hóa ứng.');
- const amount=pMoney(getV('ug-amt'));if(!(amount>0))return fail('Số tiền phải lớn hơn 0.');const cust=ensureCust(name,'Nông dân');const eid=ui.edit.ug;let r=eid&&findRec('advances',eid);if(!r){r={id:uid(),code:nextCode('UT',date),ts:nextTs()};DB.advances.push(r);}
+ const amount=pMoney(getV('ug-amt'));if(!(amount>0))return fail('Số tiền phải lớn hơn 0.');if(!unusualOk(0,0,amount))return false;const cust=ensureCust(name,'Nông dân');const eid=ui.edit.ug;let r=eid&&findRec('advances',eid);if(!r){r={id:uid(),code:nextCode('UT',date),ts:nextTs()};DB.advances.push(r);}
  Object.assign(r,{date,customerId:cust.id,kind,item:kind==='goods'?item:'',amount,note:trim(getV('ug-note'))});syncAdvance(r);if(!save())return false;ui.edit={};setLastDate(date);toast('Đã lưu '+r.code+'.');render();if(print)printUG(r.id);return true;}
 SUBMIT['f-ug']=()=>saveUG(false);ACT.ugPrint=()=>saveUG(true);
 ACT.payAdv=b=>{const c=custById(b.dataset.id),s=cs(c.id);ui.edit={};ui.prefill={dir:'thu',cat:CAT_THUUNG,name:custLabel(c),amount:s.advLeft,note:'Thu hồi tiền ứng'};go('quy');};
@@ -2415,6 +2415,7 @@ AFTER.kg=()=>{const id=ui.edit.kg;const r=id&&findRec('deposits',id);const pf=ui
 function saveKG(print,opt){const date=getV('kgi-date');if(!date)return fail('Vui lòng chọn ngày.');const name=trim(getV('kgi-cust'));if(!name)return fail('Vui lòng chọn khách.');const w=readW('kgi');if(!checkW(w,'KL ký gửi'))return false;const kind=getV('kgi-kind'),typeId=getV('kgi-type');if(!typeId)return fail('Vui lòng chọn loại cà.');
  const eid=ui.edit.kg;const c0=findCust(name);
  if(opt&&opt.kg!=null){w.net=opt.kg;w.bags=[];w.gross=opt.kg;w.tareTotal=0;}
+ if(!unusualOk(w.net,0,0))return false;
  if(kind==='out'){const bal=c0?depLeftFor(c0.id,typeId,eid):0;if(w.net>bal+0.001)return fail('Trả lại '+fkg(w.net)+' nhiều hơn số đang ký gửi ('+fkg(bal)+').');{const dbk=depDateBlock(c0&&c0.id,typeId,date);if(dbk)return fail(dbk);}
   if(typeId===DB.settings.beanTypeId&&!(opt&&opt.force)){const P=beanAvail(eid);if(w.net>P+0.001){ui.shK={name,typeId,R:w.net,P,print};openDlg('<h2>⚠ Nhân trong kho chỉ còn '+fkg(P)+', không đủ '+fkg(w.net)+'</h2><p class="mut">Khách muốn lấy lại '+fkg(w.net)+' nhưng nhân thật trong kho chưa đủ.</p><div class="btns" style="flex-direction:column;align-items:stretch">'+(P>0?'<button class="btn btn-p" data-act="shkPart">🫘 Trả trước '+fkg(P)+' (phần còn lại vẫn ký gửi)</button>':'<button class="btn" disabled>🫘 Trả trước 0 kg</button>')+(eid?'':'<button class="btn" data-act="shkCash">💵 Quy '+fkg(r2(w.net-P))+' còn thiếu ra tiền (Chốt giá)</button>')+(isStaff()?'':'<button class="btn" data-act="shkForce">✓ Vẫn trả đủ '+fkg(w.net)+' (nhân có thật nhưng chưa ghi Nhập kho) – chỉ chủ</button>')+'<button class="btn" data-act="shkNo">Quay lại sửa số kg</button></div>');return false;}}}
  const cust=ensureCust(name,'Nông dân');let r=eid&&findRec('deposits',eid);if(!r){r={id:uid(),code:nextCode('KG',date),ts:nextTs()};DB.deposits.push(r);}
