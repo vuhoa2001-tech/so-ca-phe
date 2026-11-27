@@ -138,6 +138,13 @@ var TZ = 'Asia/Ho_Chi_Minh';
 // Nhân viên chỉ được TẠO MỚI các loại này (không có: settings, types, adjustments, stocktakes, openings)
 var STAFF_CREATE = { purchases: 1, exchanges: 1, beanPayments: 1, sales: 1, stockIns: 1, deposits: 1, advances: 1, cash: 1, customers: 1, cashCounts: 1, auditLog: 1 };
 
+var STAFF_MAX_BACK_DAYS = 60;
+function validDate_(d) {
+  if (typeof d !== 'string' || !/^\d{4}-\d\d-\d\d$/.test(d)) return false;
+  var t = new Date(d + 'T00:00:00Z');
+  return !isNaN(t.getTime()) && t.toISOString().substr(0, 10) === d;
+}
+function addDays_(d, n) { var t = new Date(d + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + n); return t.toISOString().substr(0, 10); }
 function today_() { return Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd'); }
 function normCode_(t) { return String(t || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
 function hash_(t) {
@@ -391,6 +398,11 @@ function staffCheck_(coll, it, st, ctx, serverTime) {
     var bn = badNumber_(rec);
     if (bn) return no('Số liệu không hợp lệ (số âm hoặc không phải số), không lưu');
     if (LOCK_COLLS[coll] && typeof rec.date === 'string' && rec.date <= lockDate_(ctx)) return no('Tháng này đã chốt sổ, báo chủ để sửa');
+    if (LOCK_COLLS[coll] && !st.exists) { // phiếu mới của nhân viên: ngày phải hợp lệ, không ở tương lai, không quá cũ
+      if (!validDate_(rec.date)) return no('Ngày của phiếu không hợp lệ, không lưu');
+      if (rec.date > addDays_(ctx.today, 1)) return no('Ngày của phiếu ở tương lai, không lưu');
+      if (rec.date < addDays_(ctx.today, -STAFF_MAX_BACK_DAYS)) return no('Ngày của phiếu cũ hơn ' + STAFF_MAX_BACK_DAYS + ' ngày, báo chủ để nhập');
+    }
   }
   if (!st.exists) { // tạo mới: máy chủ tự ghi tên người nhập
     rec.createdBy = name;
