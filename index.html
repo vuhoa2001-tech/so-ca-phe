@@ -2598,7 +2598,7 @@ function connectLink(url,code){const loc=/^(localhost|127\.0\.0\.1)$/.test(locat
 function canAdmin(){return!isStaff()&&Store.has()&&(Store.cfg().token?Store.role()==='owner':true);}
 function fmtDT(iso){if(!iso)return'—';const d=new Date(iso);if(isNaN(d))return'—';return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes());}
 function storageLine(){const u=Store.usage(),c=u.pct>=80?'var(--bad,#c0392b)':u.pct>=60?'#b7791f':'inherit';return'<p style="margin:8px 0 0;color:'+c+'">Bộ nhớ trên máy: đã dùng <b>'+u.pct+'%</b> (khoảng '+u.mb+' MB / 5 MB)</p>';}
-function syncMsLine(){try{const m=Store.sy().ms;if(typeof m!=='number'||!isFinite(m))return'';const c=m>8000?'#b7791f':'inherit';return'<p style="margin:8px 0 0;color:'+c+'">Lần đồng bộ gần nhất: <b>'+(Math.round(m/100)/10)+' giây</b></p>';}catch(e){return'';}}
+function syncMsLine(){try{const m=Store.sy().ms;if(typeof m!=='number'||!isFinite(m))return'';const c=m>8000?'#b7791f':'inherit';const lo=Store.sy().lastOk;return'<p style="margin:8px 0 0;color:'+c+'">Lần đồng bộ thành công gần nhất: <b>'+(lo?esc(fmtDT(lo)):'chưa có')+'</b> (mất '+String(Math.round(m/100)/10).replace('.',',')+' giây)</p>';}catch(e){return'';}}
 function syncCard(){return syncCard0().replace(/<\/div>$/,syncMsLine()+storageLine()+'</div>');}
 function syncCard0(){const sn=Store.srvName();
  if(sn)return'<div class="card"><h2>Kết nối máy</h2><p>Đăng nhập: <b>'+esc(sn)+'</b> ('+roleVN(Store.role())+'). Tên người nhập do máy chủ cấp, không sửa được. Trạng thái: <b>'+esc(Store.status().t)+'</b></p><div class="btns"><button class="btn btn-p" data-act="syncNow">Đồng bộ ngay</button><button class="btn btn-d" data-act="disconnect">Ngắt kết nối máy này</button></div></div>';
