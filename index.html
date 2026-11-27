@@ -602,7 +602,9 @@ function unusualOk(kg,price,amt){const m=[];if(kg>100000)m.push('khối lượng
  if(!m.length)return true;try{return confirm('Số liệu có vẻ bất thường: '+m.join('; ')+'.\n\nBạn có chắc đã gõ đúng không? Bấm OK để vẫn lưu, Hủy để sửa lại.');}catch(e){return true;}}
 /* trả nợ / thu nợ nhiều hơn số đang nợ: hỏi lại (phần dư làm công nợ âm) */
 function overpayOk(amount,before,dir){if(!(amount>before+0.5))return true;try{return confirm((dir==='chi'?'Số trả ':'Số thu ')+money(amount)+' lớn hơn số đang nợ '+money(before)+' (dư '+money(amount-before)+').\n\nPhần dư sẽ làm công nợ của khách thành số âm. Bấm OK để vẫn lưu, Hủy để sửa lại.');}catch(e){return true;}}
-function setLastDate(d){ui.lastDate=d;ui.lastDay=today();}
+/* phiếu ghi ngày ở tương lai: hỏi lại; không lấy ngày tương lai làm ngày mặc định cho phiếu sau */
+function futureOk(d){if(!(d>today()))return true;try{return confirm('Ngày '+fmtDate(d)+' ở TƯƠNG LAI (hôm nay là '+fmtDate(today())+').\n\nBạn có chắc đã chọn đúng ngày không? Bấm OK để vẫn lưu, Hủy để sửa lại.');}catch(e){return true;}}
+function setLastDate(d){if(d>today())return;ui.lastDate=d;ui.lastDay=today();}
 function dfltDate(){const t=today();return ui.lastDate&&ui.lastDay===t?ui.lastDate:t;}
 const fmtDate=iso=>iso&&/^\d{4}-\d\d-\d\d/.test(iso)?iso.slice(8,10)+'/'+iso.slice(5,7)+'/'+iso.slice(0,4):(iso||'');
 const trim=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
@@ -801,7 +803,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
 function onInput(e){const t=e.target;if(t.dataset&&t.dataset.flt){const[a,k]=t.dataset.flt.split('.');ui.f[a][k]=t.type==='checkbox'?t.checked:t.value;refreshList(t.dataset.list||a);return;}
  const f=t.closest&&t.closest('form[data-live]');if(f&&LIVE[f.id])LIVE[f.id](t);}
 document.addEventListener('input',onInput);document.addEventListener('change',onInput);
-document.addEventListener('submit',e=>{e.preventDefault();const f=e.target;if(SUBMIT[f.id]){if(moneyBad(f))return;try{SUBMIT[f.id]();}catch(err){fail(String(err&&err.message||err));}}});
+document.addEventListener('submit',e=>{e.preventDefault();const f=e.target;if(SUBMIT[f.id]){if(moneyBad(f))return;{const di=f.querySelector('input[type=date][id$="-date"]');if(di&&di.value&&!futureOk(di.value))return;}try{SUBMIT[f.id]();}catch(err){fail(String(err&&err.message||err));}}});
 document.addEventListener('focusout',e=>{const t=e.target;if(t.classList&&t.classList.contains('money')){if(t.value.trim()===''||isNaN(pMoney(t.value))){t.style.borderColor=t.value.trim()===''?'':'var(--bad)';return;}t.style.borderColor='';t.value=fnum(pMoney(t.value));}});
 
 /* ===== weighing block ===== */
@@ -1679,6 +1681,7 @@ const WRITE={
   if(debtCat){if(!r.code)r.code=nextCode(d.dir==='chi'?'PC':'PT',d.date);r.debtBefore=before;}
   return save()?r:null;}};
 function eSave(print){const w=EZ.w;if(!w||w.saving)return;w.saving=true;document.querySelectorAll('[data-act=eSave],[data-act=eSavePrint]').forEach(b=>b.disabled=true);let rec;
+ if(w.d&&w.kind!=='kk'&&w.d.date&&!futureOk(w.d.date)){w.saving=false;eRender(false);return;}
  try{rec=WRITE[w.kind](w);}catch(e){w.saving=false;eRender(false);fail(String(e.message||e));return;}
  if(!rec){w.saving=false;eRender(false);return;}
  setLastDate(rec.date);EZ.done={kind:w.kind,id:rec.id,custId:rec.customerId,code:rec.code||'',edited:!!w.eid,debt:w.kind==='quy'&&!!rec.code&&!!rec.customerId};EZ.ev='done';EZ.w=null;eRender(true);if(print)ePrint(EZ.done.kind,rec.id);}
