@@ -2373,7 +2373,7 @@ ACT.odAdd=b=>{odSync();ui.od.rows.push({kind:b.dataset.k,customer:'',amount:null
 ACT.odDel=b=>{odSync();ui.od.rows.splice(Number(b.dataset.i),1);render();};
 ACT.odReset=()=>{ui.od=null;render();};
 SUBMIT['f-od']=()=>{odSync();const date=ui.od.date;if(ui.od.rows.some(r=>typeof r.kg==='number'&&isNaN(r.kg)))return fail('Số kg không hợp lệ, chỉ gõ số, ví dụ 1500 hoặc 1500,5');if(!/^\d{4}-\d\d-\d\d$/.test(date))return fail('Vui lòng chọn ngày bắt đầu sổ.');const list=[];
- for(const rw of ui.od.rows){const k=OPK[rw.kind];const hasNum=k.f.some(f=>Number(rw[f])>0);if(!hasNum&&!trim(rw.customer))continue;
+ for(const rw of ui.od.rows){const k=OPK[rw.kind];const hasNum=k.f.some(f=>Number(rw[f])>0);if(!hasNum&&!trim(rw.customer)){if(k.f.some(f=>rw[f]!=null&&rw[f]!==''))return fail('"'+k.t+'": số phải lớn hơn 0 (hoặc bấm ✕ để xóa dòng này).');continue;}
   if(k.cust&&!trim(rw.customer))return fail('"'+k.t+'": thiếu tên khách ở một dòng.');
   if(k.f.includes('amount')&&!(Number(rw.amount)>0))return fail('"'+k.t+'": số tiền phải lớn hơn 0.');
   if(k.f.includes('kg')&&!(Number(rw.kg)>0))return fail('"'+k.t+'": KL phải lớn hơn 0.');
