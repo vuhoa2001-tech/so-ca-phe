@@ -72,6 +72,8 @@ with QA(port=8910, prefix='rglow') as qa:
         m = qa.new_device('m', mobile=True); qa.connect(m, 'staff')
         hs = m.evaluate("()=>[...document.querySelectorAll('[data-act=syncNow]')].filter(b=>b.offsetParent).map(b=>b.getBoundingClientRect().height)")
         rec('BUG-108', bool(hs) and min(hs) >= 44, f'sync buttons heights: {hs}')
+        mh = m.evaluate("()=>{const e=document.getElementById('syncPill');return e&&document.body.classList.contains('easy')?parseFloat(getComputedStyle(e).minHeight):null}")
+        rec('BUG-108', mh is not None and mh >= 44, f'easy-mode #syncPill min-height (entry screens): {mh}')
 bad = [b for b, v in RES.items() if not v]
 print('LOW:', 'PASS' if not bad else 'FAIL ' + ' '.join(sorted(bad)))
 sys.exit(1 if bad else 0)
