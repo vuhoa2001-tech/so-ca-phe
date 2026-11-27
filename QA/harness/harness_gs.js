@@ -1,7 +1,7 @@
 /* Chạy CHÍNH Code.gs (không phải bản port) với Google Sheet giả */
 function mkServerGS(){
  const S={reads:{},props:{},noProps:false,sheets:{},calls:0,lastT:Date.now(),busyNext:false,failNext:false,dropResponseNext:false,pre:null};
- const mkSheet=(name)=>{const sh={name,data:[[]],_frozen:0};
+ const mkSheet=(name)=>{const sh={name,data:[[]],_frozen:0,fmt:{}};
   const ensure=(r,c)=>{while(sh.data.length<r)sh.data.push([]);for(let i=0;i<r;i++){while(sh.data[i].length<c)sh.data[i].push('');}};
   sh.getLastRow=()=>{let l=0;sh.data.forEach((row,i)=>{if(row.some(v=>v!==''&&v!==undefined))l=i+1;});return l;};
   sh.getMaxRows=()=>Math.max(sh.data.length,1000);
@@ -9,9 +9,9 @@ function mkServerGS(){
   sh.getRange=(r,c,nr,nc)=>{nr=nr||1;nc=nc||1;const rg={
     getValues(){S.reads[sh.name]=(S.reads[sh.name]||0)+1;ensure(r+nr-1,c+nc-1);const o=[];for(let i=0;i<nr;i++){o.push(sh.data[r-1+i].slice(c-1,c-1+nc));}return JSON.parse(JSON.stringify(o));},
     getValue(){return rg.getValues()[0][0];},
-    setValues(v){if(S.failWrite&&S.failWrite(v))throw new Error('Exception: Your input contains more than the maximum of 50000 characters in a single cell.');ensure(r+nr-1,c+nc-1);for(let i=0;i<nr;i++)for(let j=0;j<nc;j++)sh.data[r-1+i][c-1+j]=v[i][j];return rg;},
+    setValues(v){if(S.failWrite&&S.failWrite(v))throw new Error('Exception: Your input contains more than the maximum of 50000 characters in a single cell.');ensure(r+nr-1,c+nc-1);for(let i=0;i<nr;i++)for(let j=0;j<nc;j++){let x=v[i][j];/* như Google Sheets thật: ô không định dạng chữ mà nhận chuỗi toàn chữ số thì thành SỐ (mất số 0 đầu) */if(typeof x==='string'&&/^\d+$/.test(x)&&sh.fmt[(r+i)+','+(c+j)]!=='@')x=Number(x);sh.data[r-1+i][c-1+j]=x;}return rg;},
     setValue(v){return rg.setValues([[v]]);},
-    setNumberFormat(){return rg;},setFontWeight(){return rg;},setBackground(){return rg;}};return rg;};
+    setNumberFormat(f){for(let i=0;i<nr;i++)for(let j=0;j<nc;j++)sh.fmt[(r+i)+','+(c+j)]=f;return rg;},setFontWeight(){return rg;},setBackground(){return rg;}};return rg;};
   return sh;};
  const ss={getSheetByName:n=>S.sheets[n]||null,insertSheet:n=>(S.sheets[n]=mkSheet(n)),getId:()=>'x'};
  const fakeHash=(s)=>{const out=[];let h=7;for(let k=0;k<32;k++){for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i)+k)|0;out.push((h&255)>127?(h&255)-256:(h&255));}return out;};

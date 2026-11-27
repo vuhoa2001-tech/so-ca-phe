@@ -18,11 +18,11 @@ function d_(iso) { return iso && /^\d{4}-\d\d-\d\d/.test(iso) ? iso.substr(8, 2)
 // Mô tả các trang tính: tên tab + các cột dễ đọc (tiêu đề, hàm lấy giá trị)
 var DEF = {
   settings: { tab: 'Cài đặt', cols: [
-    ['Tên cơ sở', function (r) { return r.shopName; }], ['Địa chỉ', function (r) { return r.address; }], ['Số điện thoại', function (r) { return r.phone; }],
+    ['Tên cơ sở', function (r) { return r.shopName; }], ['Địa chỉ', function (r) { return r.address; }], ['Số điện thoại', function (r) { return r.phone; }, true],
     ['Bì mặc định (kg/bao)', function (r) { return r.defaultTare; }], ['Tỷ lệ đổi mặc định', function (r) { return r.defaultRatio; }], ['Quỹ đầu kỳ (đ)', function (r) { return r.openingCash; }]] },
   types: { tab: 'Loại cà phê', cols: [['Tên loại', function (r) { return r.name; }], ['Ghi chú', function (r) { return r.note; }]] },
   customers: { tab: 'Khách hàng', cols: [
-    ['Tên', function (r) { return (r.code ? r.code + ' – ' : '') + (r.name || ''); }], ['Số điện thoại', function (r) { return r.phone; }], ['Địa chỉ', function (r) { return r.address; }],
+    ['Tên', function (r) { return (r.code ? r.code + ' – ' : '') + (r.name || ''); }], ['Số điện thoại', function (r) { return r.phone; }, true], ['Địa chỉ', function (r) { return r.address; }],
     ['Nhóm', function (r) { return r.group; }], ['Ghi chú', function (r) { return r.note; }]] },
   purchases: { tab: 'Thu mua', cols: [
     ['Số phiếu', function (r) { return r.code; }], ['Ngày', function (r) { return d_(r.date); }, true], ['Người bán', function (r, n) { return n.cust(r.customerId); }],
@@ -285,6 +285,7 @@ function doPost(e) {
     var user = authUser_(body);
     if (!user) return json_({ ok: false, error: 'auth' });
     if (body.action) return json_(admin_(body, user));
+    try { suaCotSoDienThoai_(); } catch (x) { }
     var serverTime = new Date().toISOString();
     var since = body.since || '';
     var staff = user.role !== 'owner';
@@ -377,6 +378,28 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+// Một lần duy nhất: cột "Số điện thoại" cũ chưa để dạng chữ nên Google đã đổi 0345... thành số 345...
+// Đặt cột về dạng chữ và ghi lại số điện thoại đúng từ cột "Dữ liệu JSON".
+function suaCotSoDienThoai_() {
+  var P = PropertiesService.getScriptProperties();
+  if (P.getProperty('fix_phone_v1')) return;
+  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(DEF.customers.tab);
+  if (sh && sh.getLastRow() >= 2) {
+    var n = sh.getLastRow() - 1, col = PREFIX.length + 2, ncol = PREFIX.length + DEF.customers.cols.length + 2;
+    var js = sh.getRange(2, ncol, n, 1).getValues();
+    var vals = js.map(function (r) {
+      var o = null; try { o = JSON.parse(r[0]); } catch (x) { }
+      var v = o && o.phone != null ? String(o.phone) : '';
+      if (/^[=+\-@]/.test(v)) v = "'" + v;
+      return [v];
+    });
+    var rg = sh.getRange(2, col, n, 1);
+    rg.setNumberFormat('@');
+    rg.setValues(vals);
+  }
+  P.setProperty('fix_phone_v1', '1');
 }
 
 function buildRow_(def, id, ts, r, serverTime, N) {
