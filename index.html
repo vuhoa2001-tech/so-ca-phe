@@ -2129,7 +2129,7 @@ function chartsExtraHTML(){if(!isUnlocked())return'<div class="card"><div class=
 
 /* ===== EASY MODE: Nhập kho + Kiểm kê ===== */
 Object.assign(STEPQ,{date:()=>EZ.w.kind==='kk'?'Kiểm kê ngày nào?':'Nhập kho ngày nào?',method:()=>'Nhập kho bằng cách nào?',kkkind:()=>'Kiểm kê loại nào?',kkfresh:()=>'Cà tươi còn lại bao nhiêu?',kkbean:()=>'Nhân đếm thực tế (không bắt buộc)',bags:()=>EZ.w.kind==='doi'?'Cân cà tươi':EZ.w.kind==='nk'?'Cân nhân xô':'Cân cà'});
-EBODY.date=()=>{const d=EZ.w.d;const q=EZ.w.kind==='kk'?[[lastDayOfMonth(today()),'Cuối tháng'],[today(),'Hôm nay']]:[[today(),'Hôm nay'],[addDay(today(),-1),'Hôm qua']];
+EBODY.date=()=>{const d=EZ.w.d;const q=EZ.w.kind==='kk'?(lastDayOfMonth(today())>today()?[[addDay(today().slice(0,8)+'01',-1),'Cuối tháng trước'],[today(),'Hôm nay']]:[[today(),'Cuối tháng (hôm nay)']]):[[today(),'Hôm nay'],[addDay(today(),-1),'Hôm qua']];
  return{html:'<input type="date" id="eDate" class="einput" value="'+esc(d.date)+'"><div class="row2">'+q.map(x=>EB('alt','eDateQ',x[1]+'<small>'+fmtDate(x[0])+'</small>','data-d="'+x[0]+'"')).join('')+'</div>'};};
 ACT.eDateQ=b=>setV('eDate',b.dataset.d);
 COMMIT.date=()=>{const w=EZ.w,v=getV('eDate');if(!/^\d{4}-\d\d-\d\d$/.test(v))return fail('Hãy chọn ngày.');
