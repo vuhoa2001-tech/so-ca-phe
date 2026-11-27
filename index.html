@@ -1238,7 +1238,12 @@ SUBMIT['f-cd']=()=>{const tare=DB.settings.defaultTare,ratio=pNum(getV('cd-ratio
 ACT.restore=()=>{const f=$('#restoreFile');f.value='';f.click();};
 document.addEventListener('change',e=>{if(e.target.id!=='restoreFile'||!e.target.files[0])return;const fr=new FileReader();fr.onload=()=>{let o;try{o=JSON.parse(String(fr.result).replace(/^\uFEFF/,''));}catch(x){return fail('File không phải JSON hợp lệ.');}
  const err=validateBackup(o);if(err)return fail('File sao lưu không hợp lệ: '+err);const n=normalizeDB(o);
- if(!confirm('KHÔI PHỤC sẽ THAY THẾ toàn bộ dữ liệu hiện tại bằng file này:\n- '+n.customers.length+' khách hàng\n- '+n.purchases.length+' phiếu thu mua, '+n.exchanges.length+' phiếu đổi, '+n.sales.length+' phiếu bán\n- '+n.cash.length+' khoản thu/chi\n\nTiếp tục?'))return;
+ /* mục nhập lúc mất mạng chưa gửi lên máy chủ: không có ở đâu khác ngoài máy này → giữ lại và gộp vào dữ liệu khôi phục (BUG-207) */
+ const ub=Store.userOutbox().length,keep=Store.outbox().filter(x=>x.coll!=='settings');
+ if(!confirm('KHÔI PHỤC sẽ THAY THẾ toàn bộ dữ liệu hiện tại bằng file này:\n- '+n.customers.length+' khách hàng\n- '+n.purchases.length+' phiếu thu mua, '+n.exchanges.length+' phiếu đổi, '+n.sales.length+' phiếu bán\n- '+n.cash.length+' khoản thu/chi'+(ub?'\n\n⚠ Máy này còn '+ub+' mục chưa gửi lên mạng (nhập lúc mất mạng). Các mục này sẽ được GIỮ LẠI và gộp vào dữ liệu khôi phục.':'')+'\n\nTiếp tục?'))return;
+ if(keep.length){for(const x of keep){if(!Array.isArray(n[x.coll]))continue;if(x.deleted){n[x.coll]=n[x.coll].filter(r=>r.id!==x.id);if(!n.deleted.some(d=>d.coll===x.coll&&d.id===x.id))n.deleted.push({coll:x.coll,id:x.id,at:x.at,by:x.by||''});}
+   else{const i=n[x.coll].findIndex(r=>r.id===x.rec.id);const c=JSON.parse(JSON.stringify(x.rec));if(i>=0)n[x.coll][i]=c;else n[x.coll].push(c);}}
+  const sq=DB.settings.seq||{};for(const k in sq)if(!(n.settings.seq[k]>=sq[k]))n.settings.seq[k]=sq[k];}
  DB=n;Store.rebase(DB);DB.settings.updatedAt=Store.nowIso();Store.resetSy(true);if(!save())return;ui.edit={};toast('Đã khôi phục dữ liệu.');go('tq');};fr.onerror=()=>fail('Không đọc được file.');fr.readAsText(e.target.files[0],'utf-8');});
 function validateBackup(o){if(!o||typeof o!=='object'||Array.isArray(o))return'không phải đối tượng dữ liệu.';if(typeof o.version!=='number')return'thiếu trường version.';if(o.version>1)return'phiên bản dữ liệu mới hơn ('+o.version+').';
  if(!o.settings||typeof o.settings!=='object')return'thiếu cài đặt (settings).';
