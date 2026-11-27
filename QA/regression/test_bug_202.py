@@ -19,4 +19,13 @@ with QA(port=8904, prefix='rg202') as qa:
     conf(p, False)
     r = p.evaluate("(c)=>WRITE.doi({k:'doi',d:{date:today(),custId:c,total:1000000000,bags:[],tareTotal:0,ratio:4.5}})", cid)
     C.ok(r is None and bool(confmsgs(p)), f'easy-mode exchange 1e9 kg asks (result={r})')
+    # round-1 retest finding: easy-mode wizards for stock-in, deposit, advance
+    tid = p.evaluate("()=>DB.settings.beanTypeId||DB.types[0].id")
+    for k, d in [('nk', {'method': 'phoi', 'total': 10000000, 'bags': [], 'tareTotal': 0}),
+                 ('kgi', {'custId': cid, 'typeId': tid, 'total': 10000000, 'bags': [], 'tareTotal': 0}),
+                 ('ug', {'custId': cid, 'amount': 20000000000, 'ukind': 'cash'})]:
+        conf(p, False); n0 = p.evaluate("()=>DB.stockIns.length+DB.deposits.length+DB.advances.length")
+        r = p.evaluate("([k,d])=>WRITE[k]({kind:k,d:Object.assign({date:today()},d)})", [k, d])
+        n1 = p.evaluate("()=>DB.stockIns.length+DB.deposits.length+DB.advances.length")
+        C.ok(r is None and bool(confmsgs(p)) and n1 == n0, f'easy-mode {k} unusual number asks, Cancel not saved (asked={bool(confmsgs(p))}, saved={n1 - n0})')
 C.done()
