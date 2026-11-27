@@ -2804,7 +2804,7 @@ function nfList(){if(NF.c)return NF.c;const L=[],owner=!isStaff(),now=new Date()
    if(!hasPin())add(2,'pin','Chưa đặt mã PIN của chủ: ai cũng xóa / sửa được sổ và xem được lãi.',{t:'pin'});
    const cf=Store.cfg();if(cf.secret&&!cf.token)add(2,'sec','Máy này đang dùng mã chung (kiểu cũ). Nên cấp mã riêng cho từng người và tắt mã chung.',{t:'cd'});
    (Store.getPref('nfEv')||[]).forEach(e=>add(e.sev,'ev:'+e.key,e.text,e.act,e.at,e.act2));}catch(e){}}
- else{try{const v=stockView();if(v.negKg>0)add(0,'neg','Kho nhân đang âm '+fkg(v.negKg)+'. Có phiếu bán / trả nhiều hơn số nhân đã nhập, hãy kiểm tra lại.',null);}catch(e){}
+ else if(!Store.cfg().token){ /* nhân viên: kho âm và nhắc sao lưu là việc của chủ; chỉ nhắc sao lưu khi máy chưa kết nối (không có bản trên Google) */
   try{const lb=DB.settings.lastBackup,hasData=DB.purchases.length+DB.exchanges.length+DB.cash.length>0;if(hasData&&(!lb||daysSince(lb)>7))add(2,'bk','Đã hơn 7 ngày chưa sao lưu dữ liệu ra file.',{t:'backup'});}catch(e){}}
  L.sort((a,b)=>a.sev-b.sev||(a.at<b.at?1:a.at>b.at?-1:0));NF.c=L;return L;}
 const nfSeenMap=()=>Store.getPref('nfSeen')||{};
