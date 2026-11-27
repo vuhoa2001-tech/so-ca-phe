@@ -380,7 +380,8 @@ function doPost(e) {
 
 function buildRow_(def, id, ts, r, serverTime, N) {
   var row = [id, ts, '', r.createdBy || ''];
-  def.cols.forEach(function (c) { var v; try { v = c[1](r, N); } catch (x) { v = ''; } row.push(v === undefined || v === null ? '' : v); });
+  // chữ bắt đầu bằng = + - @ (tên, SĐT, ghi chú...) phải hiện đúng là chữ, không để Google Sheets hiểu thành công thức
+  def.cols.forEach(function (c) { var v; try { v = c[1](r, N); } catch (x) { v = ''; } if (typeof v === 'string' && /^[=+\-@]/.test(v)) v = "'" + v; row.push(v === undefined || v === null ? '' : v); });
   var js = JSON.stringify(r);
   if (js.length > 49000) throw new Error('Phiếu quá lớn (' + js.length + ' ký tự, ô Google Sheet chỉ chứa tối đa 50.000)');
   row.push(serverTime, js);
