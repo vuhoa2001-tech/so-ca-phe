@@ -136,7 +136,8 @@ var USER_HEAD = ['Mã người dùng', 'Tên', 'Vai trò', 'Mã băm', 'Đang ho
 var CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 31 ký tự, không có 0 O 1 I L
 var TZ = 'Asia/Ho_Chi_Minh';
 // Nhân viên chỉ được TẠO MỚI các loại này (không có: settings, types, adjustments, stocktakes, openings)
-var STAFF_CREATE = { purchases: 1, exchanges: 1, beanPayments: 1, sales: 1, stockIns: 1, deposits: 1, advances: 1, cash: 1, customers: 1, cashCounts: 1, auditLog: 1 };
+// nhân viên không có màn Bán ra → không được tạo phiếu bán (BUG-105)
+var STAFF_CREATE = { purchases: 1, exchanges: 1, beanPayments: 1, stockIns: 1, deposits: 1, advances: 1, cash: 1, customers: 1, cashCounts: 1, auditLog: 1 };
 
 var STAFF_MAX_BACK_DAYS = 60;
 function validDate_(d) {
