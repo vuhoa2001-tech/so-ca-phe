@@ -33,6 +33,14 @@
 --chip-ok:#FFD97A;--chip-wait:#ffb066;--chip-bad:#ff8a8d;--ico-bad:rgba(255,107,111,.16);--chl:#f4f2fb}
 :root{--card:var(--panel);--ink:var(--text);--brown:var(--text);--accent2:var(--accent);--head:var(--chip)}
 *{box-sizing:border-box}
+/* thanh cuộn mảnh, gần như trong suốt; rõ hơn khi rê chuột */
+@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--text) 18%,transparent) transparent}
+*:hover{scrollbar-color:color-mix(in srgb,var(--text) 35%,transparent) transparent}}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
+::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--text) 18%,transparent);border-radius:6px}
+:hover::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--text) 35%,transparent)}
+::-webkit-scrollbar-button{display:none;width:0;height:0}
 html{font-size:16px}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.45}
 button,input,select,textarea{font-family:var(--font)}
