@@ -1247,7 +1247,7 @@ document.addEventListener('change',e=>{if(e.target.id!=='restoreFile'||!e.target
    else{const i=n[x.coll].findIndex(r=>r.id===x.rec.id);const c=JSON.parse(JSON.stringify(x.rec));if(i>=0)n[x.coll][i]=c;else n[x.coll].push(c);}}
   const sq=DB.settings.seq||{};for(const k in sq)if(!(n.settings.seq[k]>=sq[k]))n.settings.seq[k]=sq[k];}
  DB=n;Store.rebase(DB);DB.settings.updatedAt=Store.nowIso();Store.resetSy(true);if(!save())return;ui.edit={};toast('Đã khôi phục dữ liệu.');go('tq');};fr.onerror=()=>fail('Không đọc được file.');fr.readAsText(e.target.files[0],'utf-8');});
-function validateBackup(o){if(!o||typeof o!=='object'||Array.isArray(o))return'không phải đối tượng dữ liệu.';if(typeof o.version!=='number')return'thiếu trường version.';if(o.version>1)return'phiên bản dữ liệu mới hơn ('+o.version+').';
+function validateBackup(o){if(!o||typeof o!=='object'||Array.isArray(o))return'không phải đối tượng dữ liệu.';if(typeof o.version!=='number')return'thiếu trường version.';if(o.version>1)return'phiên bản dữ liệu mới hơn ('+o.version+').';if(!ARR_KEYS.some(k=>Array.isArray(o[k])&&o[k].length))return'file không có dữ liệu sổ sách nào (không có khách, phiếu hay sổ quỹ).';
  if(!o.settings||typeof o.settings!=='object')return'thiếu cài đặt (settings).';
  const need={purchases:['id','date','customerId','typeId','kg','price','amount','paid'],sales:['id','date','customerId','typeId','kg','price','amount','paid'],exchanges:['id','date','customerId','kgFresh','ratio','kgBean'],beanPayments:['id','date','customerId','kg'],cash:['id','date','dir','amount'],adjustments:['id','date','kind','typeId','kg'],customers:['id','name'],types:['id','name']};
  const num=new Set(['kg','price','amount','paid','kgFresh','ratio','kgBean']);
