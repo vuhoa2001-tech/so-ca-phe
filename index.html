@@ -2318,8 +2318,13 @@ function printKG(id){const r=findRec('deposits',id);if(!r)return;const tt=tareTo
  rows.push([r.kind==='out'?'KL trả lại':'KL ký gửi (tịnh)',fkg(r.kg)],['Ký gửi còn lại: '+typeName(r.typeId),fkg(depTotal(DB,r.typeId,null,r.customerId))]);
  printDoc(r.code,receipt({title:r.kind==='out'?'PHIẾU TRẢ CÀ KÝ GỬI':'PHIẾU NHẬN KÝ GỬI',code:r.code,date:r.date,partyLabel:'Khách ký gửi',party:custName(r.customerId),bags:r.bags||[],tare:null,rows,note:r.note}));}
 function cashBookAt(date,exceptId){let b=openCash(DB);DB.cash.forEach(e=>{if(e.date<=date&&!(exceptId&&e.phieuId===exceptId))b+=e.dir==='thu'?e.amount:-e.amount;});return b;}
-function cqApply(o,eid){let r=eid&&findRec('cashCounts',eid);if(!r)r=DB.cashCounts.find(c=>c.date===o.date);if(r)removeLinked(r.id);else{r={id:uid(),ts:nextTs()};DB.cashCounts.push(r);}
- const book=cashBookAt(o.date);Object.assign(r,{date:o.date,counted:o.counted,book,diff:o.counted-book,note:o.note||'',posted:false});return save()?r:null;}
+/* chốt quỹ lại trong cùng ngày: so với sổ KHÔNG tính khoản chênh lệch của chính lần chốt đó; nếu lần trước đã ghi nhận thì ghi nhận lại theo số mới (không xóa im lặng) */
+function cqSameDay(date,eid){const r=(eid&&findRec('cashCounts',eid))||DB.cashCounts.find(c=>c.date===date);return r?r.id:null;}
+function cqPreviewBook(date,eid){return cashBookAt(date,cqSameDay(date,eid));}
+function cqApply(o,eid){let r=eid&&findRec('cashCounts',eid);if(!r)r=DB.cashCounts.find(c=>c.date===o.date);const wasP=!!(r&&r.posted);if(r)removeLinked(r.id);else{r={id:uid(),ts:nextTs()};DB.cashCounts.push(r);}
+ const book=cashBookAt(o.date,r.id);Object.assign(r,{date:o.date,counted:o.counted,book,diff:o.counted-book,note:o.note||'',posted:false});
+ if(wasP&&r.diff){addCash({date:r.date,dir:r.diff<0?'chi':'thu',cat:r.diff<0?CAT_CL_THIEU:CAT_CL_THUA,amount:Math.abs(r.diff),note:'Chênh lệch chốt quỹ '+fmtDate(r.date),phieuId:r.id,phieuKind:'cq'});r.posted=true;}
+ return save()?r:null;}
 function cqPostNow(id){const r=findRec('cashCounts',id);if(!r||r.posted||!r.diff)return;removeLinked(r.id);
  addCash({date:r.date,dir:r.diff<0?'chi':'thu',cat:r.diff<0?CAT_CL_THIEU:CAT_CL_THUA,amount:Math.abs(r.diff),note:'Chênh lệch chốt quỹ '+fmtDate(r.date),phieuId:r.id,phieuKind:'cq'});r.posted=true;if(save())toast('Đã ghi nhận chênh lệch vào sổ quỹ.');}
 ACT.cqPost=b=>needOwner(()=>{cqPostNow(b.dataset.id);rerenderNow();});
@@ -2473,7 +2478,7 @@ function denomHTML(){const c=EZ.sub.counts;return'<h2 class="eq">Đếm theo m�
  if(w.kind==='ug')h+=rl('Nông dân',esc(custName(d.custId)))+rl('Hình thức',d.ukind==='goods'?'Hàng hóa':'Tiền mặt')+(d.ukind==='goods'?rl('Hàng',esc(d.item)):'')+rl(d.ukind==='goods'?'Trị giá':'Số tiền ứng','<span class="big">'+money(d.amount)+'</span>')+rl('Nợ ứng sau phiếu',money(cs(d.custId).advLeft+d.amount-(w.eid?((findRec('advances',w.eid)||{}).amount||0):0)));
  else if(w.kind==='kgi')h+=rl('Khách',esc(custName(d.custId)))+rl('Loại cà',esc(typeName(d.typeId)))+(d.total==null?rl('Số bao',d.bags.length):'')+rl('Tổng cả bì',fkg(eGross(d)))+rl('Trừ bì',fkg(d.tareTotal||0))+rl('KL ký gửi','<span class="big">'+fkg(eNet(d))+'</span>');
  else if(w.kind==='kgo')h+=rl('Khách',esc(custName(d.custId)))+rl('Loại cà',esc(typeName(d.typeId)))+rl('Trả lại','<span class="big">'+fkg(d.kg)+'</span>')+rl('Còn ký gửi sau khi trả',fkg(r2(dBal()-d.kg)));
- else{const book=cashBookAt(d.date,w.eid?w.eid:null),diff=d.counted-book;h+=rl('Sổ sách',money(book))+rl('Đếm được','<span class="big">'+money(d.counted)+'</span>')+'<div class="rl"><span>Chênh lệch</span><b class="big" style="color:'+(diff<0?'var(--bad)':diff>0?'var(--warn)':'var(--ok)')+'">'+(diff===0?'✓ Khớp':diff<0?'Thiếu '+money(-diff):'Thừa '+money(diff))+'</b></div>';}
+ else{const book=cqPreviewBook(d.date,w.eid||null),diff=d.counted-book;h+=rl('Sổ sách',money(book))+rl('Đếm được','<span class="big">'+money(d.counted)+'</span>')+'<div class="rl"><span>Chênh lệch</span><b class="big" style="color:'+(diff<0?'var(--bad)':diff>0?'var(--warn)':'var(--ok)')+'">'+(diff===0?'✓ Khớp':diff<0?'Thiếu '+money(-diff):'Thừa '+money(diff))+'</b></div>';}
  h+=rl('Ngày',fmtDate(d.date))+'</div>';return{html:h+(w.kind==='cq'?'':EB('ok2','eSavePrint','✓ Lưu và In',w.saving?'disabled':'')),nonext:true};};}
 /* ghi sổ */
 WRITE.ug=w=>{const d=w.d;if(!d.custId||!(d.amount>0)||!d.ukind)throw new Error('Thiếu thông tin, hãy quay lại kiểm tra.');let r=w.eid&&findRec('advances',w.eid);if(!r){r={id:uid(),code:nextCode('UT',d.date),ts:nextTs()};DB.advances.push(r);}
