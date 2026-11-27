@@ -2618,7 +2618,7 @@ ACT.connectManual=()=>openDlg('<h2>🔗 Kết nối máy</h2><p class="mut">Nh�
 ACT.cmGo=()=>{const u=trim(getV('cm-url')),t=fmtTok(getV('cm-token'));if(!okUrl(u))return fail(URL_MSG);if(t.replace(/-/g,'').length<8)return fail('Hãy nhập mã riêng.');connectAsk(u,t);};
 ACT.disconnect=()=>{const run=()=>{Store.setPref('syncToken','');Store.setPref('syncSecret','');Store.setPref('srvUser',null);Store.setPref('revoked','');Store.setPref('authFails',0);Store.err='';Store.resetSy();ND.users=null;PIN.until=0;chrome();render();toast('Đã ngắt kết nối máy này.');};
  if(hasPin())openPin(run);else if(confirm('Ngắt kết nối máy này? Dữ liệu trên máy vẫn còn nhưng không đồng bộ nữa.'))run();};
-function checkConnectHash(){const m=/^#ket-noi=([A-Za-z0-9_-]+)$/.exec(location.hash||'');if(!m)return;let o=null;try{o=b64uDec(m[1]);}catch(e){}
+function checkConnectHash(){const m=/^#ket-noi=([A-Za-z0-9_-]+)$/.exec(location.hash||'');if(!m){if(/^#ket-noi=/.test(location.hash||'')){try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}toast('Link kết nối không hợp lệ.',true);}return;}let o=null;try{o=b64uDec(m[1]);}catch(e){}
  try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
  if(!o||!o.u||!o.t||!okUrl(String(o.u))){toast('Link kết nối không hợp lệ.',true);return;}
  connectAsk(String(o.u),fmtTok(o.t));}
