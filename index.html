@@ -414,7 +414,7 @@ body.easy:not(.hasnav) main{padding-bottom:24px}
 .ehm-logo{width:48px;height:48px;border-radius:14px;background:var(--logo-bg);box-shadow:var(--sh);display:grid;place-items:center;flex:none}
 .ehm-logo img{width:38px;height:38px;object-fit:contain}
 .ehm-hi{flex:1;min-width:0}.ehm-hi b{display:block;font-size:21px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ehm-hi span{font-size:15px;color:var(--muted)}
+.ehm-hi span{font-size:15px;color:var(--muted)}.ehm-hi .ehm-al{display:block;font-size:14px;margin-top:1px}.ehm-al strong{color:var(--text);font-weight:700}.al-note{font-size:14px;font-weight:600;color:var(--muted);margin-left:6px}
 .ibtn{position:relative;width:48px;height:48px;border-radius:50%;border:0;background:var(--panel);box-shadow:var(--sh);color:var(--text);display:grid;place-items:center;cursor:pointer;flex:none;font-size:20px;padding:0}
 .ibtn svg{width:24px;height:24px}
 .ibtn.sm{width:44px;height:44px}
@@ -760,7 +760,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&POV)closePrint();})
 function printHead(s){return'<div class="hd"><img class="lg" src="'+esc(new URL('logo-128.png',location.href).href)+'" alt=""><div><h1>'+esc(s.shopName)+'</h1><div class="sub">'+esc(s.address)+(s.phone?' – ĐT: '+esc(s.phone):'')+'</div></div></div>';}
 function receipt(o){const s=DB.settings;LASTRC=o;const kv=o.rows.map(r=>'<tr><td>'+esc(r[0])+'</td><td class="num"><b>'+esc(r[1])+'</b></td></tr>').join('');
  const bags=o.bags&&o.bags.length?'<div class="bags"><b>Cân từng bao ('+o.bags.length+' bao'+(o.tare!=null?', bì '+nfK.format(o.tare)+' kg/bao':'')+'):</b><br>'+o.bags.map((b,i)=>(i+1)+'. '+nfK.format(b)).join(' &nbsp; ')+'</div>':'';
- return'<div class="rc">'+printHead(s)+'<h2>'+esc(o.title)+'</h2><div class="cd">Số: <b>'+esc(o.code)+'</b> &nbsp; Ngày: <b>'+fmtDate(o.date)+'</b></div>'
+ return'<div class="rc">'+printHead(s)+'<h2>'+esc(o.title)+'</h2><div class="cd">Số: <b>'+esc(o.code)+'</b> &nbsp; Ngày: <b>'+fmtDate(o.date)+'</b>'+(lunar(o.date)?' (ÂL '+lunarDM(o.date)+')':'')+'</div>'
  +'<div>'+esc(o.partyLabel)+': <b>'+esc(o.party)+'</b></div>'+bags+'<table class="kv">'+kv+'</table>'+(o.note?'<div>Ghi chú: '+esc(o.note)+'</div>':'')
  +'<div class="sg"><div><b>'+esc((o.sig||['Người giao','Người nhận'])[0])+'</b><br><i>(ký, ghi rõ họ tên)</i></div><div><b>'+esc((o.sig||['Người giao','Người nhận'])[1])+'</b><br><i>(ký, ghi rõ họ tên)</i></div></div></div>';}
 
@@ -1084,7 +1084,7 @@ VIEWS.tq=()=>{const S=stats(),td=today();const hasData=DB.purchases.length+DB.ex
  +'<div class="kpi"><div class="t">Khách đang ký gửi</div><div class="v">'+(Object.keys(S.dep).filter(t=>S.dep[t]>0.004).map(t=>fkg(S.dep[t])+' '+esc(typeName(t))).join(' · ')||'0 kg')+'</div></div>'
  +lastCountKpi()
  +'<div class="kpi"><div class="t">Tồn kho</div><ul>'+stockLinesHTML()+'</ul></div></div>';
- const tdy='<div class="card"><h2>Hôm nay ('+fmtDate(td)+')</h2><div class="kpis" style="margin:0"><div class="kpi"><div class="t">Thu mua</div><div class="v">'+mp.length+' lượt · '+fkg(sm(mp,r=>r.kg))+'</div><div class="t">'+money(sm(mp,r=>r.amount))+'</div></div>'
+ const tdy='<div class="card"><h2>Hôm nay ('+fmtDate(td)+' · '+lunarStr(td)+')'+(lunarNote(td)?' <span class="al-note">🌙 '+lunarNote(td)+'</span>':'')+'</h2><div class="kpis" style="margin:0"><div class="kpi"><div class="t">Thu mua</div><div class="v">'+mp.length+' lượt · '+fkg(sm(mp,r=>r.kg))+'</div><div class="t">'+money(sm(mp,r=>r.amount))+'</div></div>'
  +'<div class="kpi"><div class="t">Đổi cà</div><div class="v">'+fkg(sm(ex,r=>r.kgFresh))+' tươi</div><div class="t">'+ex.length+' lượt · nhân vào ký gửi '+fkg(sm(ex,r=>r.kgBean))+'</div></div>'
  +'<div class="kpi"><div class="t">Bán ra</div><div class="v">'+fkg(sm(sl,r=>r.kg))+'</div><div class="t">'+money(sm(sl,r=>r.amount))+'</div></div>'
  +'<div class="kpi green"><div class="t">Thu tiền</div><div class="v">'+money(sm(ca.filter(e=>e.dir==='thu'),e=>e.amount))+'</div></div>'
@@ -1470,6 +1470,31 @@ function eWelcome(){return'<div class="ecard" style="text-align:center"><div cla
 ACT.eWelcomeOk=()=>{const n=trim(getV('eWelcomeName'));if(!n)return fail('Vui lòng gõ tên của bạn.');Store.setUser(n);$('#userName').value=n;EZ.ev='home';eRender(true);};
 function eHero(){return'<div class="ehero"><span class="logo"><img src="logo-128.png" alt="HOAVU"></span><b>HOAVU</b></div>';}
 const WDN=['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
+/* ===== LỊCH ÂM (thuật toán Hồ Ngọc Đức, giờ Việt Nam +7) ===== */
+function lJd(d,m,y){const a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3;return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045;}
+function lNewMoon(k){const T=k/1236.85,T2=T*T,T3=T2*T,dr=Math.PI/180;let J=2415020.75933+29.53058868*k+0.0001178*T2-0.000000155*T3;J+=0.00033*Math.sin((166.56+132.87*T-0.009173*T2)*dr);
+ const M=359.2242+29.10535608*k-0.0000333*T2-0.00000347*T3,Mp=306.0253+385.81691806*k+0.0107306*T2+0.00001236*T3,F=21.2964+390.67050646*k-0.0016528*T2-0.00000239*T3,sn=x=>Math.sin(x*dr);
+ const C=(0.1734-0.000393*T)*sn(M)+0.0021*sn(2*M)-0.4068*sn(Mp)+0.0161*sn(2*Mp)-0.0004*sn(3*Mp)+0.0104*sn(2*F)-0.0051*sn(M+Mp)-0.0074*sn(M-Mp)+0.0004*sn(2*F+M)-0.0004*sn(2*F-M)-0.0006*sn(2*F+Mp)+0.0010*sn(2*F-Mp)+0.0005*sn(2*Mp+M);
+ const dt=T<-11?0.001+0.000839*T+0.0002261*T2-0.00000845*T3-0.000000081*T*T3:-0.000278+0.000265*T+0.000262*T2;return J+C-dt;}
+function lNM(k){return Math.floor(lNewMoon(k)+0.5+7/24);}
+function lSun(jdn){const T=(jdn-2451545.5-7/24)/36525,T2=T*T,dr=Math.PI/180,M=357.52910+35999.05030*T-0.0001559*T2-0.00000048*T*T2,L0=280.46645+36000.76983*T+0.0003032*T2;
+ const DL=(1.914600-0.004817*T-0.000014*T2)*Math.sin(dr*M)+(0.019993-0.000101*T)*Math.sin(dr*2*M)+0.000290*Math.sin(dr*3*M);let L=(L0+DL)*dr;L-=Math.PI*2*Math.floor(L/(Math.PI*2));return Math.floor(L/Math.PI*6);}
+function lM11(y){const k=Math.floor((lJd(31,12,y)-2415021)/29.530588853);let nm=lNM(k);if(lSun(nm)>=9)nm=lNM(k-1);return nm;}
+function lLeapOff(a11){const k=Math.floor((a11-2415021.076998695)/29.530588853+0.5);let last,i=1,arc=lSun(lNM(k+i));do{last=arc;i++;arc=lSun(lNM(k+i));}while(arc!==last&&i<14);return i-1;}
+function lunar(iso){const[y,m,d]=String(iso).split('-').map(Number);if(!y||!m||!d)return null;const dn=lJd(d,m,y),k=Math.floor((dn-2415021.076998695)/29.530588853);let ms=lNM(k+1);if(ms>dn)ms=lNM(k);
+ let a11=lM11(y),b11=a11,ly;if(a11>=ms){ly=y;a11=lM11(y-1);}else{ly=y+1;b11=lM11(y+1);}
+ const ld=dn-ms+1,diff=Math.floor((ms-a11)/29);let leap=false,lm=diff+11;if(b11-a11>365){const lo=lLeapOff(a11);if(diff>=lo){lm=diff+10;if(diff===lo)leap=true;}}
+ if(lm>12)lm-=12;if(lm>=11&&diff<4)ly-=1;return{d:ld,m:lm,y:ly,leap};}
+const L_CAN=['Canh','Tân','Nhâm','Quý','Giáp','Ất','Bính','Đinh','Mậu','Kỷ'],L_CHI=['Thân','Dậu','Tuất','Hợi','Tý','Sửu','Dần','Mão','Thìn','Tỵ','Ngọ','Mùi'];
+function lunarDM(iso){const l=lunar(iso);return l?l.d+'/'+l.m+(l.leap?' nhuận':''):'';}
+function lunarStr(iso){const l=lunar(iso);return l?'Âm lịch '+lunarDM(iso)+' '+L_CAN[l.y%10]+' '+L_CHI[l.y%12]:'';}
+function lAdd(iso,n){const t=new Date(iso+'T00:00:00Z');t.setUTCDate(t.getUTCDate()+n);return t.toISOString().slice(0,10);}
+/* nhắc nhẹ: mùng 1, rằm, Tết (trong 30 ngày tới) */
+function lunarNote(iso){const l=lunar(iso);if(!l)return'';
+ if(l.m===1&&!l.leap&&l.d<=3)return'Mùng '+l.d+' Tết';
+ for(let i=1;i<=30;i++){const x=lunar(lAdd(iso,i));if(x.m===1&&x.d===1&&!x.leap)return i===1?'Mai là Tết':'Còn '+i+' ngày đến Tết';}
+ if(l.d===1)return'Hôm nay mùng 1';if(l.d===15)return'Hôm nay rằm';
+ const t=lunar(lAdd(iso,1));if(t.d===1)return'Mai là mùng 1';if(t.d===15)return'Mai là rằm';return'';}
 const eShort=n=>Math.abs(n)>=1e6?(Math.round(n/1e5)/10).toLocaleString('vi-VN')+' tr':money(n);
 const ALK={neg:'Kho âm',wait:'Kho chờ chế biến',bk:'chưa sao lưu',ob:'chưa gửi lên mạng',auth:'máy bị khóa',rej:'máy chủ không nhận phiếu',cq:'chốt quỹ lệch',kk:'cần kiểm kê',dec:'cần kiểm kê',pin:'chưa đặt PIN',sto:'bộ nhớ đầy',slow:'đồng bộ chậm'};
 function eAlertSum(){const seen=[];nfVis().forEach(n=>{const k=String(n.key).split(':')[0].replace(/^dec\d+$/,'dec');const l=ALK[k];if(l&&seen.indexOf(l)<0)seen.push(l);});if(!seen.length)return'Bấm để xem chi tiết';return seen.slice(0,2).join(' · ')+(seen.length>2?' · …':'');}
@@ -1477,7 +1502,7 @@ const eTile=k=>'<button class="tile" data-act="eStart" data-k="'+k+'"><span clas
 function eHome(){const td=today(),mp=DB.purchases.filter(r=>r.date===td);const S=stats(),n=nfCount(),un=trim(Store.getUser()||''),st=Store.status();
  const dp=r2(Object.values(S.dep).filter(v=>v>0.004).reduce((a,b)=>a+b,0));const lock=hasPin()&&isUnlocked()&&!Store.getPref('ownerDevice');
  const dd=new Date(td+'T00:00:00');
- return'<div class="ehm-top"><span class="ehm-logo"><img src="logo-128.png" alt="HOAVU"></span><div class="ehm-hi"><b>Chào '+esc(un||'bạn')+' 👋</b><span>'+WDN[dd.getDay()]+', '+fmtDate(td)+'</span></div>'
+ return'<div class="ehm-top"><span class="ehm-logo"><img src="logo-128.png" alt="HOAVU"></span><div class="ehm-hi"><b>Chào '+esc(un||'bạn')+' 👋</b><span>'+WDN[dd.getDay()]+', '+fmtDate(td)+'</span><span class="ehm-al">🌙 '+lunarStr(td)+(lunarNote(td)?' · <strong>'+lunarNote(td)+'</strong>':'')+'</span></div>'
  +'<button class="ibtn" data-act="eGsOpen" aria-label="Tìm kiếm">'+ICON.search+'</button>'
  +'<button class="ibtn" data-act="bell" aria-label="Thông báo">'+ICON.tb+(n?'<i class="ibd">'+(n>99?'99+':n)+'</i>':'')+'</button></div>'
  +'<div class="ehm-row"><button class="pill2 schip '+st.c+'" data-act="syncNow">'+esc(st.t)+'</button><span class="sp"></span>'+(lock?'<button class="ibtn sm" data-act="lockNow" aria-label="Khóa lại">🔒</button>':'')+'<button class="ibtn sm thbtn" data-act="toggleTheme" aria-label="Đổi giao diện sáng/tối">'+(Store.getTheme()==='dark'?'☀':'🌙')+'</button></div>'
