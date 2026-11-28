@@ -262,7 +262,7 @@ body.easy .pgsec{display:none}
  body:not(.easy) .pghead{display:flex;align-items:center;gap:16px;margin-bottom:14px}
  .pghead .logo.big{background:var(--logo-bg);border:1px solid var(--line);border-radius:16px;padding:4px;display:grid;place-items:center}
  .pghead .logo.big img{width:72px;height:72px}
- .pghead h1{margin:0;font-size:34px;line-height:1.1;letter-spacing:.03em}
+ .pghead h1{margin:0;font-size:34px;line-height:1.1;letter-spacing:.03em}.pgdate{font-size:15px;font-weight:600;color:var(--text);margin-top:3px}.pgdate strong{color:#b45309}
  .pgsub{color:var(--muted);font-size:15px}
  .pgr{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}
 }
@@ -1813,7 +1813,8 @@ ACT.navGrp=b=>{const c=Object.assign({},Store.getPref('navGrp')||{});c[b.dataset
 ACT.brandGo=()=>{if(ui.mode==='easy')ACT.eHome();else{ui.edit={};go('tq');}};
 let lastView=new Date();
 function pgHead(){lastView=new Date();const nm=Object.fromEntries(TABS)[ui.tab]||'';const shop=(DB.settings.shopName||'').trim();
- return'<div class="pghead"><span class="logo big"><img src="logo-128.png" alt="HOAVU"></span><div class="pgt"><h1>HOAVU</h1><div class="pgsub">'+esc(shop?shop+' · Sổ cà phê':'Sổ cà phê')+'</div></div><div class="pgr"><span>Số liệu lúc '+pad(lastView.getHours())+':'+pad(lastView.getMinutes())+'</span><button class="btn btn-s" data-act="pgReload">Tải lại</button></div></div><div class="pgsec"><span>'+esc(nm)+'</span></div>';}
+ return'<div class="pghead"><span class="logo big"><img src="logo-128.png" alt="HOAVU"></span><div class="pgt"><h1>HOAVU</h1><div class="pgsub">'+esc(shop?shop+' · Sổ cà phê':'Sổ cà phê')+'</div>'+pgDate()+'</div><div class="pgr"><span>Số liệu lúc '+pad(lastView.getHours())+':'+pad(lastView.getMinutes())+'</span><button class="btn btn-s" data-act="pgReload">Tải lại</button></div></div><div class="pgsec"><span>'+esc(nm)+'</span></div>';}
+function pgDate(){const td=today(),n=lunarNote(td);return'<div class="pgdate">'+WDN[new Date(td+'T00:00:00').getDay()]+', '+fmtDate(td)+' · 🌙 '+lunarStr(td)+(n?' · <strong>'+n+'</strong>':'')+'</div>';}
 ACT.pgReload=()=>{Store.syncNow(false);render();};
 
 /* ----- charts ----- */
